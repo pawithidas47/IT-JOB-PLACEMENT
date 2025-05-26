@@ -1,9 +1,7 @@
 <template>
   <div>
     <!-- Navbar -->
-    <nav
-      class="navbar navbar-expand-lg navbar-light bg-white border-bottom px-4 py-2"
-    >
+    <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom px-4 py-2">
       <div class="container-fluid">
         <span class="fw-bold text-warning">IT job placement @Mor-Nor</span>
         <ul class="navbar-nav ms-auto">
@@ -14,9 +12,7 @@
             <router-link to="/login" class="nav-link">เข้าสู่ระบบ</router-link>
           </li>
           <li class="nav-item">
-            <router-link to="/register/employer" class="nav-link"
-              >สำหรับผู้ว่าจ้าง</router-link
-            >
+            <router-link to="/register/employer" class="nav-link">สำหรับผู้ว่าจ้าง</router-link>
           </li>
         </ul>
       </div>
@@ -28,23 +24,21 @@
         <!-- Sidebar Filter -->
         <div class="col-md-3">
           <div class="p-3 shadow-sm rounded border">
-            <h5 class="mb-3">ค่าที่ต้องการค้นหา</h5>
+            <h5 class="mb-3">ค้นหางาน</h5>
             <div class="mb-2">
               <label class="form-label">ชื่องาน</label>
               <input
                 v-model="filter.title"
                 type="text"
                 class="form-control"
-                placeholder="🔍"
+                placeholder="🔍 ค้นหางาน"
               />
             </div>
             <div class="mb-2">
               <label class="form-label">ประเภทงาน</label>
               <select v-model="filter.type" class="form-select">
                 <option value="">ทั้งหมด</option>
-                <option value="ออกแบบและมัลติมีเดีย">
-                  ออกแบบและมัลติมีเดีย
-                </option>
+                <option value="ออกแบบและมัลติมีเดีย">ออกแบบและมัลติมีเดีย</option>
                 <option value="การตลาดดิจิทัล">การตลาดดิจิทัล</option>
                 <option value="พัฒนาเว็บไซต์">พัฒนาเว็บไซต์</option>
               </select>
@@ -113,11 +107,12 @@ export default {
         type: "",
         salary: "",
       },
-      jobs: [],
+      jobs: [],  // ข้อมูลที่จะแสดงในหน้าหลัก
     };
   },
   computed: {
     filteredJobs() {
+      // กรองข้อมูลจาก jobs ตามที่กรองจาก filter
       return this.jobs.filter((job) => {
         const titleMatch = job.j_title.includes(this.filter.title);
         const typeMatch =
@@ -125,17 +120,25 @@ export default {
         const salaryMatch =
           this.filter.salary === "" ||
           job.j_salary >= parseInt(this.filter.salary);
-        return titleMatch && typeMatch && salaryMatch;
+        return titleMatch && typeMatch && salaryMatch && job.j_status === 'open';
       });
     },
   },
   mounted() {
-    axios.get("http://localhost:3001/api/jobs").then((res) => {
-      this.jobs = res.data;
-    });
+    // ดึงข้อมูลงานทั้งหมดจาก backend (เมื่อเข้าหน้า Home)
+    axios.get("http://localhost:3001/api/jobs")
+      .then((res) => {
+        this.jobs = res.data;  // เก็บข้อมูลใน jobs
+        console.log("Fetched jobs:", this.jobs); // เพิ่ม log เพื่อตรวจสอบข้อมูลที่ดึงมา
+      })
+      .catch((err) => {
+        console.error("❌ ดึงข้อมูลงานล้มเหลว:", err);
+      });
   },
   methods: {
-    searchJobs() {},
+    searchJobs() {
+      // หา jobs ตามที่กรอกใน filter
+    },
     formatDate(d) {
       const date = new Date(d);
       return date.toLocaleDateString("th-TH", {
@@ -151,5 +154,14 @@ export default {
 <style scoped>
 .text-orange {
   color: #ff6600;
+}
+
+.nav-tabs .nav-link.active {
+  border-color: #ff6600;
+}
+
+.navbar .nav-link.active {
+  font-weight: bold;
+  border-bottom: 3px solid #ff6600;
 }
 </style>

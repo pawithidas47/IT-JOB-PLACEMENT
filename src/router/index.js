@@ -8,6 +8,7 @@ import RegisterEmployer from "@/views/employer/Register.vue";
 import DashboardEmployer from "@/views/employer/Dashboard.vue";
 import PostJob from "@/views/employer/PostJob.vue";
 import EditJob from "@/views/employer/EditJob.vue";
+import JobDetail from "@/views/JobDetail.vue";
 
 const routes = [
   { path: "/", component: HomePage },
@@ -21,6 +22,7 @@ const routes = [
     name: "PostJob",
     component: PostJob,
   },
+  { path: "/jobs/:id", component: JobDetail, name: "JobDetail" },
   { path: "/employer/edit-job/:id", component: EditJob, name: "EditJob" },
   // เพิ่ม /login อีกครั้งถ้ามี login รวม (หรือแยกก็ได้)
 ];

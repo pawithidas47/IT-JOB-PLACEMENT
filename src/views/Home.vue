@@ -20,7 +20,7 @@
             <div>
               <label class="form-label mb-1 fw-semibold text-dark">คำที่ต้องการค้นหา</label>
               <div class="position-relative">
-                <input v-model="filter.title" @input="searchJobs" type="text" class="form-control ps-4" placeholder="เช่น งานออกแบบ" style="border-radius: 10px; height: 38px; font-size: 14px;" />
+                <input v-model="filter.title" @input="searchJobs" type="text" class="form-control ps-4" placeholder="  เช่น งานออกแบบ" style="border-radius: 10px; height: 38px; font-size: 14px;" />
                 <span class="position-absolute top-50 start-0 translate-middle-y ms-2 text-muted">
                   <i class="bi bi-search"></i>
                 </span>
@@ -81,6 +81,7 @@
               </select>
             </div>
             <!-- ปุ่มค้นหา -->
+                <!-- ปุ่มค้นหา -->
             <div class="text-center">
               <button class="btn text-white fw-bold" style="width: 100%; background: linear-gradient(135deg,#ff6600,#e55d00); border-radius: 10px; height: 40px; font-size: 14px; box-shadow: 0 2px 10px rgba(255, 102, 0, 0.3);" type="submit">
                 ค้นหา
@@ -104,6 +105,11 @@
               <p class="mb-1 text-muted"><i class="bi bi-tags-fill me-1"></i> ประเภทงาน: {{ job.j_type }}</p>
               <p class="mb-1 text-muted"><i class="bi bi-cash-coin me-1"></i> ค่าจ้าง: {{ job.j_salary.toLocaleString() }} บาท</p>
               <p class="mb-1 text-muted"><i class="bi bi-person-badge me-1"></i> ผู้ว่าจ้าง: {{ job.employer_type || 'ไม่ระบุ' }}</p>
+              <p class="mb-1 text-muted">
+  <i class="bi bi-clock me-1"></i>
+  โพสต์เมื่อ: {{ new Date(job.j_posted_at).toLocaleDateString('th-TH') }}
+</p>
+
               <p class="mb-1 text-muted"><i class="bi bi-calendar-event me-1"></i> หมดเขต: {{ new Date(job.j_appdeadline).toLocaleDateString('th-TH') }}</p>
               <p class="mb-1 text-muted" v-if="job.j_description.includes('#')">
                 <i class="bi bi-hash me-1"></i>
@@ -111,9 +117,9 @@
               </p>
               <div class="d-flex justify-content-between mt-3">
                 <router-link :to="`/jobs/${job.job_id}`" class="btn btn-sm btn-outline-primary rounded-pill px-3">ดูรายละเอียด</router-link>
-                <div>
-                  <button class="btn btn-sm btn-outline-secondary rounded-pill me-1"><i class="bi bi-share"></i></button>
-                  <button class="btn btn-sm btn-outline-secondary rounded-pill"><i class="bi bi-bookmark"></i></button>
+                <div v-if="isLoggedIn">
+                  <button class="btn btn-sm btn-outline-secondary rounded-pill me-1" @click="shareJob(job)"><i class="bi bi-share"></i></button>
+                  <button class="btn btn-sm btn-outline-secondary rounded-pill" @click="bookmarkJob(job)"><i class="bi bi-bookmark"></i></button>
                 </div>
               </div>
             </div>
@@ -129,6 +135,7 @@ export default {
   name: "JobHomePage",
   data() {
     return {
+      isLoggedIn: localStorage.getItem("authToken") !== null,
       filter: {
         title: "",
         type: "",
@@ -159,8 +166,6 @@ export default {
   },
   methods: {
     searchJobs() {
-      // eslint-disable-next-line no-unused-vars
-      const now = new Date();
       this.filtered = this.jobs
         .filter((job) => {
           const titleMatch = job.j_title?.toLowerCase().includes(this.filter.title.toLowerCase());
@@ -176,6 +181,23 @@ export default {
           return 0;
         });
     },
+    shareJob(job) {
+      const shareText = `ดูงาน "${job.j_title}" ที่ IT job placement @Mor-Nor\n${window.location.origin}/jobs/${job.job_id}`;
+      if (navigator.share) {
+        navigator.share({
+          title: job.j_title,
+          text: shareText,
+          url: `${window.location.origin}/jobs/${job.job_id}`
+        }).catch(err => console.warn("❌ แชร์ไม่สำเร็จ:", err));
+      } else {
+        navigator.clipboard.writeText(shareText).then(() => {
+          alert("📋 คัดลอกลิงก์งานไปยังคลิปบอร์ดแล้ว!");
+        });
+      }
+    },
+    bookmarkJob(job) {
+      alert(`🔖 บันทึกงาน: ${job.j_title}`);
+    }
   },
 };
 </script>

@@ -14,36 +14,22 @@
     <div class="container-fluid px-4 py-4">
       <div class="main-layout align-items-start">
         <!-- Sidebar Filter -->
-        <aside class="filter-panel shadow-popup text-start bg-white"
-          style="padding: 24px; border-radius: 12px; width: 260px; box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);">
+        <aside class="filter-panel shadow-popup text-start bg-white" style="padding: 24px; border-radius: 12px; width: 260px; box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);">
           <form class="d-flex flex-column gap-3" @submit.prevent="searchJobs">
             <!-- คำค้น -->
             <div>
               <label class="form-label mb-1 fw-semibold text-dark">คำที่ต้องการค้นหา</label>
               <div class="position-relative">
-                <input
-                  v-model="filter.title"
-                  @input="searchJobs"
-                  type="text"
-                  class="form-control ps-4"
-                  placeholder="เช่น นักพัฒนา"
-                  style="border-radius: 10px; height: 38px; font-size: 14px;"
-                />
+                <input v-model="filter.title" @input="searchJobs" type="text" class="form-control ps-4" placeholder="เช่น งานออกแบบ" style="border-radius: 10px; height: 38px; font-size: 14px;" />
                 <span class="position-absolute top-50 start-0 translate-middle-y ms-2 text-muted">
                   <i class="bi bi-search"></i>
                 </span>
               </div>
             </div>
-
             <!-- ประเภทงาน -->
             <div>
               <label class="form-label mb-1 fw-semibold text-dark">ประเภทงาน</label>
-              <select
-                v-model="filter.type"
-                @change="searchJobs"
-                class="form-select"
-                style="border-radius: 10px; height: 38px; font-size: 14px;"
-              >
+              <select v-model="filter.type" @change="searchJobs" class="form-select" style="border-radius: 10px; height: 38px; font-size: 14px;">
                 <option value="">ทั้งหมด</option>
                 <option value="ออกแบบและมัลติมีเดีย">ออกแบบและมัลติมีเดีย</option>
                 <option value="การตลาดดิจิทัล">การตลาดดิจิทัล</option>
@@ -58,16 +44,10 @@
                 <option value="ที่ปรึกษาด้านเทคโนโลยี">ที่ปรึกษาด้านเทคโนโลยี</option>
               </select>
             </div>
-
             <!-- ราคาค่าจ้าง -->
             <div>
               <label class="form-label mb-1 fw-semibold text-dark">ช่วงค่าตอบแทน (บาท)</label>
-              <select
-                v-model="filter.salary"
-                @change="searchJobs"
-                class="form-select mb-2"
-                style="border-radius: 10px; height: 38px; font-size: 14px;"
-              >
+              <select v-model="filter.salary" @change="searchJobs" class="form-select mb-2" style="border-radius: 10px; height: 38px; font-size: 14px;">
                 <option value="">ทั้งหมด</option>
                 <option value="500">ไม่เกิน 500</option>
                 <option value="1500">501 - 1,500</option>
@@ -75,21 +55,34 @@
                 <option value="5000">มากกว่า 3,000</option>
               </select>
             </div>
-
+            <!-- สถานะผู้ว่าจ้าง -->
+            <div>
+              <label class="form-label mb-1 fw-semibold text-dark">ประเภทผู้ว่าจ้าง</label>
+              <select v-model="filter.employerType" @change="searchJobs" class="form-select mb-2" style="border-radius: 10px; height: 38px; font-size: 14px;">
+                <option value="">ทั้งหมด</option>
+                <option value="บริษัท">บริษัท</option>
+    <option value="ร้านค้า">ร้านค้า</option>
+    <option value="หน่วยงานภาครัฐ">หน่วยงานภาครัฐ</option>
+    <option value="องค์กรไม่แสวงหากำไร">องค์กรไม่แสวงหากำไร</option>
+    <option value="บุคคลทั่วไป">บุคคลทั่วไป</option>
+    <option value="นักศึกษา">นักศึกษา</option>
+    <option value="สตาร์ทอัป">สตาร์ทอัป</option>
+    <option value="ฟรีแลนซ์">ฟรีแลนซ์</option>
+              </select>
+            </div>
+            <!-- เรียงลำดับ -->
+            <div>
+              <label class="form-label mb-1 fw-semibold text-dark">เรียงลำดับ</label>
+              <select v-model="filter.sort" @change="searchJobs" class="form-select mb-2" style="border-radius: 10px; height: 38px; font-size: 14px;">
+                <option value="">ไม่เรียง</option>
+                <option value="latest">วันที่โพสต์ล่าสุด</option>
+                <option value="salary">ค่าจ้างสูงสุด</option>
+                <option value="deadline">หมดเขตเร็วที่สุด</option>
+              </select>
+            </div>
             <!-- ปุ่มค้นหา -->
             <div class="text-center">
-              <button
-                class="btn text-white fw-bold"
-                style="
-                  width: 100%;
-                  background: linear-gradient(135deg,#ff6600,#e55d00);
-                  border-radius: 10px;
-                  height: 40px;
-                  font-size: 14px;
-                  box-shadow: 0 2px 10px rgba(255, 102, 0, 0.3);
-                "
-                type="submit"
-              >
+              <button class="btn text-white fw-bold" style="width: 100%; background: linear-gradient(135deg,#ff6600,#e55d00); border-radius: 10px; height: 40px; font-size: 14px; box-shadow: 0 2px 10px rgba(255, 102, 0, 0.3);" type="submit">
                 ค้นหา
               </button>
             </div>
@@ -110,10 +103,18 @@
               </h6>
               <p class="mb-1 text-muted"><i class="bi bi-tags-fill me-1"></i> ประเภทงาน: {{ job.j_type }}</p>
               <p class="mb-1 text-muted"><i class="bi bi-cash-coin me-1"></i> ค่าจ้าง: {{ job.j_salary.toLocaleString() }} บาท</p>
-              <p class="mb-1 text-muted"><i class="bi bi-globe me-1"></i> รูปแบบ: ออนไลน์</p>
-              <p class="mb-3 text-muted"><i class="bi bi-person-badge me-1"></i> ผู้ว่าจ้าง: ไม่ระบุ</p>
-              <div class="text-end">
+              <p class="mb-1 text-muted"><i class="bi bi-person-badge me-1"></i> ผู้ว่าจ้าง: {{ job.employer_type || 'ไม่ระบุ' }}</p>
+              <p class="mb-1 text-muted"><i class="bi bi-calendar-event me-1"></i> หมดเขต: {{ new Date(job.j_appdeadline).toLocaleDateString('th-TH') }}</p>
+              <p class="mb-1 text-muted" v-if="job.j_description.includes('#')">
+                <i class="bi bi-hash me-1"></i>
+                <span v-for="tag in job.j_description.match(/#\w+/g)" :key="tag" class="badge bg-light text-secondary me-1">{{ tag }}</span>
+              </p>
+              <div class="d-flex justify-content-between mt-3">
                 <router-link :to="`/jobs/${job.job_id}`" class="btn btn-sm btn-outline-primary rounded-pill px-3">ดูรายละเอียด</router-link>
+                <div>
+                  <button class="btn btn-sm btn-outline-secondary rounded-pill me-1"><i class="bi bi-share"></i></button>
+                  <button class="btn btn-sm btn-outline-secondary rounded-pill"><i class="bi bi-bookmark"></i></button>
+                </div>
               </div>
             </div>
           </div>
@@ -132,6 +133,8 @@ export default {
         title: "",
         type: "",
         salary: "",
+        employerType: "",
+        sort: "",
       },
       jobs: [],
       filtered: [],
@@ -156,16 +159,27 @@ export default {
   },
   methods: {
     searchJobs() {
-      this.filtered = this.jobs.filter((job) => {
-        const titleMatch = job.j_title.toLowerCase().includes(this.filter.title.toLowerCase());
-        const typeMatch = this.filter.type === "" || job.j_type === this.filter.type;
-        const salaryMatch = this.filter.salary === "" || job.j_salary >= parseInt(this.filter.salary);
-        return titleMatch && typeMatch && salaryMatch && job.j_status === 'open';
-      });
+      // eslint-disable-next-line no-unused-vars
+      const now = new Date();
+      this.filtered = this.jobs
+        .filter((job) => {
+          const titleMatch = job.j_title?.toLowerCase().includes(this.filter.title.toLowerCase());
+          const typeMatch = this.filter.type === "" || job.j_type === this.filter.type;
+          const salaryMatch = this.filter.salary === "" || job.j_salary >= parseInt(this.filter.salary);
+          const employerMatch = this.filter.employerType === "" || job.employer_type === this.filter.employerType;
+          return titleMatch && typeMatch && salaryMatch && employerMatch && job.j_status === 'open';
+        })
+        .sort((a, b) => {
+          if (this.filter.sort === "latest") return new Date(b.j_posted_at) - new Date(a.j_posted_at);
+          if (this.filter.sort === "salary") return b.j_salary - a.j_salary;
+          if (this.filter.sort === "deadline") return new Date(a.j_appdeadline) - new Date(b.j_appdeadline);
+          return 0;
+        });
     },
   },
 };
 </script>
+
 
 <style scoped>
 .nav-wrapper {
@@ -178,7 +192,7 @@ export default {
 }
 
 .brand-title {
-  font-size: 1.8rem;
+  font-size: 1.5rem;
   font-weight: bold;
   color: #ff6600;
 }

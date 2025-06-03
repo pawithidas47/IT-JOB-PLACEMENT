@@ -31,15 +31,24 @@ exports.postJob = (req, res) => {
 
 // ✅ GET /api/jobs - ดึงข้อมูลงานทั้งหมด
 exports.getJobs = (req, res) => {
-  const q = "SELECT * FROM jobs";  // คำสั่ง SQL สำหรับดึงข้อมูลงานทั้งหมด
+  const q = `
+SELECT jobs.*, employers.e_type AS employer_type
+FROM jobs
+JOIN employers ON jobs.employer_id = employers.employer_id;
+`;
+
   db.query(q, (err, results) => {
     if (err) {
       console.error("❌ Get Jobs Error:", err);
       return res.status(500).json({ message: "ดึงข้อมูลงานล้มเหลว" });
     }
-    res.json(results);  // ส่งข้อมูลงานทั้งหมดกลับไปที่ frontend
+    console.log("✅ Jobs Response:", results); // ตรวจสอบว่ามี employer_type หรือไม่
+    res.json(results); // ❗ อย่าใช้ res.json(results[0]) เด็ดขาด
   });
 };
+
+
+
 
 // ✅ GET /api/jobs/employer/:id - ดึงงานของผู้ว่าจ้าง
 exports.getJobsByEmployer = (req, res) => {

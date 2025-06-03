@@ -25,15 +25,21 @@
           <input v-model="form.lastname" class="form-control" required />
         </div>
       </div>
-      <div class="mb-3">
-        <label>ประเภทผู้ว่าจ้าง</label>
-        <select v-model="form.type" class="form-control" required>
-          <option value="">กรุณาเลือกประเภท</option>
-          <option value="บริษัท">บริษัท</option>
-          <option value="คณะ/หน่วยงานในมหาวิทยาลัย">คณะ/หน่วยงาน</option>
-          <option value="องค์กรภายนอก">องค์กรภายนอก</option>
-        </select>
-      </div>
+     <div class="mb-3">
+  <label>ประเภทผู้ว่าจ้าง</label>
+  <select v-model="form.type" class="form-control" required>
+    <option value="">กรุณาเลือกประเภท</option>
+    <option value="บริษัท">บริษัท</option>
+    <option value="ร้านค้า">ร้านค้า</option>
+    <option value="หน่วยงานภาครัฐ">หน่วยงานภาครัฐ</option>
+    <option value="องค์กรไม่แสวงหากำไร">องค์กรไม่แสวงหากำไร</option>
+    <option value="บุคคลทั่วไป">บุคคลทั่วไป</option>
+    <option value="นักศึกษา">นักศึกษา</option>
+    <option value="สตาร์ทอัป">สตาร์ทอัป</option>
+    <option value="ฟรีแลนซ์">ฟรีแลนซ์</option>
+  </select>
+</div>
+
       <div class="mb-3">
         <label>เบอร์โทรศัพท์</label>
         <input v-model="form.phone" class="form-control" required />

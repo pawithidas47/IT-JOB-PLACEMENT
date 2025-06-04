@@ -3,28 +3,50 @@ import { createRouter, createWebHistory } from "vue-router";
 import HomePage from "@/views/Home.vue";
 import Login from "@/views/Login.vue";
 import RegisterApplicant from "@/views/applicant/Register.vue";
-import DashboardApplicant from "@/views/applicant/Dashboard.vue";
 import RegisterEmployer from "@/views/employer/Register.vue";
 import DashboardEmployer from "@/views/employer/Dashboard.vue";
 import PostJob from "@/views/employer/PostJob.vue";
 import EditJob from "@/views/employer/EditJob.vue";
-import JobDetail from "@/views/JobDetail.vue";
 
 const routes = [
   { path: "/", component: HomePage },
   { path: "/login", component: Login },
   { path: "/register/applicant", component: RegisterApplicant },
   { path: "/register/employer", component: RegisterEmployer },
-  { path: "/applicant/dashboard", component: DashboardApplicant },
   { path: "/employer/dashboard", component: DashboardEmployer },
   {
     path: "/employer/post-job",
     name: "PostJob",
     component: PostJob,
   },
-  { path: "/jobs/:id", component: JobDetail, name: "JobDetail" },
-  { path: "/employer/edit-job/:id", component: EditJob, name: "EditJob" },
-  // เพิ่ม /login อีกครั้งถ้ามี login รวม (หรือแยกก็ได้)
+  {
+    path: "/employer/edit-job/:id",
+    name: "EditJob",
+    component: EditJob,
+  },
+  {
+    path: "/applicant/jobs",
+    name: "ApplicantJobs",
+    component: () => import("@/views/applicant/Jobs.vue"),
+  },
+  {
+    path: "/applicant/applications",
+    component: () => import("@/views/applicant/JobApplications.vue"),
+  },
+  {
+    path: "/applicant/profile",
+    component: () => import("@/views/applicant/UserProfile.vue"),
+  },
+  {
+    path: "/jobs/:id",
+    name: "JobDetail",
+    component: () => import("@/views/applicant/JobDetailPage.vue"),
+  },
+  {
+  path: '/applicant/savedjobs',
+  component: () => import('@/views/applicant/SavedJobs.vue'),
+},
+
 ];
 
 const router = createRouter({

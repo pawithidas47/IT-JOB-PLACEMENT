@@ -1,73 +1,99 @@
 <template>
-  <div class="container mt-5">
-    <h2>สมัครสมาชิกผู้ว่าจ้าง</h2>
-    <form @submit.prevent="submitForm">
-      <div class="mb-3">
-        <label>ชื่อผู้ใช้งาน</label>
-        <input v-model="form.username" class="form-control" required />
-      </div>
-      <div class="mb-3">
-        <label>รหัสผ่าน</label>
-        <input
-          type="password"
-          v-model="form.password"
-          class="form-control"
-          required
-        />
-      </div>
-      <div class="row mb-3">
-        <div class="col">
-          <label>ชื่อ</label>
-          <input v-model="form.firstname" class="form-control" required />
+  <div>
+    <NavbarHome />
+    <div
+      class="d-flex justify-content-center align-items-center py-5 px-3"
+      style="background-color: #f7f8fa; min-height: calc(100vh - 80px);"
+    >
+      <div class="card p-5 shadow-lg border-0 rounded-4 w-100" style="max-width: 540px;">
+        <div class="text-center mb-4">
+          <h4 class="fw-bold mb-0 text-orange">สมัครสมาชิกผู้ว่าจ้าง</h4>
+          
         </div>
-        <div class="col">
-          <label>นามสกุล</label>
-          <input v-model="form.lastname" class="form-control" required />
-        </div>
-      </div>
-     <div class="mb-3">
-  <label>ประเภทผู้ว่าจ้าง</label>
-  <select v-model="form.type" class="form-control" required>
-    <option value="">กรุณาเลือกประเภท</option>
-    <option value="บริษัท">บริษัท</option>
-    <option value="ร้านค้า">ร้านค้า</option>
-    <option value="หน่วยงานภาครัฐ">หน่วยงานภาครัฐ</option>
-    <option value="องค์กรไม่แสวงหากำไร">องค์กรไม่แสวงหากำไร</option>
-    <option value="บุคคลทั่วไป">บุคคลทั่วไป</option>
-    <option value="นักศึกษา">นักศึกษา</option>
-    <option value="สตาร์ทอัป">สตาร์ทอัป</option>
-    <option value="ฟรีแลนซ์">ฟรีแลนซ์</option>
-  </select>
-</div>
 
-      <div class="mb-3">
-        <label>เบอร์โทรศัพท์</label>
-        <input v-model="form.phone" class="form-control" required />
+        <form @submit.prevent="submitForm" novalidate class="needs-validation">
+          <div class="mb-3">
+            <label class="form-label">ชื่อผู้ใช้งาน<span class="text-danger"> *</span></label>
+            <input v-model.trim="form.username" class="form-control rounded-3" required placeholder="ชื่อผู้ใช้" />
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">รหัสผ่าน<span class="text-danger"> *</span></label>
+            <input type="password" v-model.trim="form.password" class="form-control rounded-3" placeholder="รหัสผ่าน" required />
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">ยืนยันรหัสผ่าน<span class="text-danger"> *</span></label>
+            <input type="password" v-model.trim="form.confirm_password" class="form-control rounded-3" placeholder="กรอกรหัสผ่านอีกครั้ง" required />
+          </div>
+
+          <div class="row mb-3">
+            <div class="col">
+              <label class="form-label">ชื่อ<span class="text-danger"> *</span></label>
+              <input v-model.trim="form.firstname" class="form-control rounded-3" placeholder="ชื่อจริง" required />
+            </div>
+            <div class="col">
+              <label class="form-label">นามสกุล<span class="text-danger"> *</span></label>
+              <input v-model.trim="form.lastname" class="form-control rounded-3" placeholder="นามสกุล" required />
+            </div>
+          </div>
+
+    <div class="mb-3">
+            <label class="form-label">ประเภทผู้ว่าจ้าง<span class="text-danger"> *</span></label>
+            <select v-model="form.type" class="form-select rounded-3 text-start" required>
+              <option disabled value="" style="text-align: center;">--------------- กรุณาเลือกประเภท ---------------</option>
+              <option value="บริษัท">บริษัท</option>
+              <option value="ร้านค้า">ร้านค้า</option>
+              <option value="หน่วยงานภาครัฐ">หน่วยงานภาครัฐ</option>
+              <option value="องค์กรไม่แสวงหากำไร">องค์กรไม่แสวงหากำไร</option>
+              <option value="บุคคลทั่วไป">บุคคลทั่วไป</option>
+              <option value="นักศึกษา">นักศึกษา</option>
+              <option value="สตาร์ทอัป">สตาร์ทอัป</option>
+              <option value="ฟรีแลนซ์">ฟรีแลนซ์</option>
+            </select>
+          </div>
+
+
+
+          <div class="mb-3">
+            <label class="form-label">เบอร์โทรศัพท์<span class="text-danger"> *</span></label>
+            <input v-model.trim="form.phone" class="form-control rounded-3" placeholder="0812345678" required />
+          </div>
+
+          <div class="mb-4">
+            <label class="form-label">อีเมล<span class="text-danger"> *</span></label>
+            <input type="email" v-model.trim="form.email" class="form-control rounded-3" placeholder="example@email.com" required />
+          </div>
+
+          <button type="submit" class="btn btn-orange w-100 fw-bold py-2 rounded-3 fs-6">
+            สมัครสมาชิก
+          </button>
+
+          <p class="text-center mt-3 mb-0">
+            เป็นสมาชิกอยู่แล้ว?
+            <router-link to="/login" class="fw-bold text-decoration-none" style="color: #ff6600;">
+              เข้าสู่ระบบ
+            </router-link>
+          </p>
+        </form>
       </div>
-      <div class="mb-3">
-        <label>อีเมล</label>
-        <input
-          type="email"
-          v-model="form.email"
-          class="form-control"
-          required
-        />
-      </div>
-      <button class="btn btn-warning w-100 text-white">สมัครสมาชิก</button>
-    </form>
+    </div>
   </div>
 </template>
 
 <script>
 import axios from "axios";
+import NavbarHome from "@/components/NavbarHome.vue";
 
 export default {
   name: "RegisterEmployer",
+  components: { NavbarHome },
   data() {
     return {
       form: {
         username: "",
         password: "",
+        confirm_password: "",
         firstname: "",
         lastname: "",
         type: "",
@@ -78,15 +104,25 @@ export default {
   },
   methods: {
     submitForm() {
+      const { username, password, confirm_password, firstname, lastname, type, phone, email } = this.form;
+      if (!username || !password || !confirm_password || !firstname || !lastname || !type || !phone || !email) {
+        alert("❌ กรุณากรอกข้อมูลให้ครบทุกช่อง");
+        return;
+      }
+      if (password !== confirm_password) {
+        alert("❌ รหัสผ่านไม่ตรงกัน");
+        return;
+      }
+
       axios
         .post("http://localhost:3001/api/auth/register/employer", {
-          e_username: this.form.username,
-          e_password: this.form.password,
-          e_firstname: this.form.firstname,
-          e_lastname: this.form.lastname,
-          e_type: this.form.type,
-          e_phone: this.form.phone,
-          e_email: this.form.email,
+          e_username: username,
+          e_password: password,
+          e_firstname: firstname,
+          e_lastname: lastname,
+          e_type: type,
+          e_phone: phone,
+          e_email: email,
         })
         .then(() => {
           alert("✅ สมัครสมาชิกผู้ว่าจ้างสำเร็จ");
@@ -100,3 +136,23 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+.btn-orange {
+  background-color: #ff6600;
+  border: none;
+  color: white;
+  transition: 0.2s ease-in-out;
+}
+
+.btn-orange:hover {
+  background-color: #e65c00;
+  color: white;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(255, 102, 0, 0.25);
+}
+
+input::placeholder {
+  color: #cacaca;
+}
+</style>

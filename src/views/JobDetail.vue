@@ -1,74 +1,125 @@
 <template>
   <div>
-    <!-- Navbar -->
-    <div class="nav-wrapper">
-      <span class="brand-title">IT job placement @Mor-Nor</span>
-      <div class="nav-top-right">
-        <router-link to="/" class="top-link" exact-active-class="active-link">หางาน</router-link>
-        <router-link to="/login" class="top-link" exact-active-class="active-link">เข้าสู่ระบบ</router-link>
-        <router-link to="/register/employer" class="top-link" exact-active-class="active-link">สำหรับผู้ว่าจ้าง</router-link>
-      </div>
-    </div>
+    <!-- ✅ ใช้ NavbarHome.vue แทน Navbar เดิม -->
+    <NavbarHome />
 
     <!-- Job Detail -->
-    <div class="container mt-5 d-flex flex-column align-items-center justify-content-center text-center">
-      <div class="card shadow-sm p-5 border-0 rounded-4" style="max-width: 720px; width: 100%;">
-        <h3 class="mb-4 text-orange fw-bold"><i class="bi bi-briefcase-fill me-2"></i>{{ job.j_title }}</h3>
+    <div class="container mt-5 d-flex flex-column align-items-center justify-content-center text-center position-relative">
+      <div
+        class="card px-5 py-3 border-0 rounded-4"
+        style="box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1); max-width: 720px; width: 100%;"
+      >
+        <h3 class="mb-4 text-orange fw-bold">
+          <i class="bi bi-briefcase-fill me-2"></i>{{ job.j_title }}
+        </h3>
 
-        <div class="mb-3 text-start">
-          <i class="bi bi-tags-fill me-2 text-muted"></i>
-          <span class="fw-semibold">ประเภทงาน:</span> {{ job.j_type }}
-        </div>
-        <div class="mb-3 text-start">
-          <i class="bi bi-card-text me-2 text-muted"></i>
-          <span class="fw-semibold">รายละเอียดงาน:</span>
-          <div class="bg-light p-3 mt-1 rounded" style="white-space: pre-wrap">{{ job.j_description }}</div>
-        </div>
-        <div class="mb-3 text-start">
-          <i class="bi bi-cash-coin me-2 text-muted"></i>
-          <span class="fw-semibold">ค่าจ้าง:</span> {{ formatSalary(job.j_salary) }} บาท
-        </div>
-        <div class="mb-4 text-start">
-          <i class="bi bi-calendar-event me-2 text-muted"></i>
-          <span class="fw-semibold">วันหมดเขต:</span> {{ formatDate(job.j_appdeadline) }}
+        <div class="text-start">
+          <div class="mb-3">
+            <i class="bi bi-tags-fill me-2 text-muted"></i>
+            <span class="fw-semibold">ประเภทงาน:</span> {{ job.j_type }}
+          </div>
+          <div class="mb-3">
+            <i class="bi bi-cash-coin me-2 text-muted"></i>
+            <span class="fw-semibold">ค่าจ้าง:</span> {{ formatSalary(job.j_salary) }} บาท
+          </div>
+          <div class="mb-3">
+            <i class="bi bi-calendar-event me-2 text-muted"></i>
+            <span class="fw-semibold">วันหมดเขต:</span> {{ formatDate(job.j_appdeadline) }}
+          </div>
+          <div class="mb-4">
+            <i class="bi bi-card-text me-2 text-muted"></i>
+            <span class="fw-semibold">รายละเอียดงาน:</span>
+            <div
+              class="bg-light p-3 mt-2 rounded text-muted"
+              style="white-space: pre-wrap; line-height: 1.6;"
+            >
+              {{ job.j_description }}
+            </div>
+          </div>
         </div>
 
-        <!-- Button Area -->
-        <div class="mt-5 text-center">
-          <router-link
-            v-if="!isLoggedIn"
-            to="/login"
-            class="btn text-white fw-bold d-inline-flex align-items-center justify-content-center"
-            style="background: linear-gradient(135deg,#ff6600,#e55d00); border-radius: 12px; height: 48px; font-size: 16px; padding: 0 24px; box-shadow: 0 2px 10px rgba(255, 102, 0, 0.3); min-width: 280px;"
-          >
-            <i class="bi bi-person-plus me-2"></i>
-            เข้าสู่ระบบก่อนสมัครงาน
-          </router-link>
-
-          <button
-            v-else
-            class="btn text-white fw-bold d-inline-flex align-items-center justify-content-center"
-            style="background: linear-gradient(135deg,#ff6600,#e55d00); border-radius: 12px; height: 48px; font-size: 16px; padding: 0 24px; box-shadow: 0 2px 10px rgba(255, 102, 0, 0.3); min-width: 280px;"
-            @click="applyJob"
-          >
-            <i class="bi bi-check2-circle me-2"></i>
-            สมัครงาน
-          </button>
+        <!-- Apply and Action Buttons Column -->
+        <div class="mt-4 d-flex flex-column align-items-center gap-2">
+          <div class="w-100 d-flex justify-content-center">
+            <button
+              v-if="!isLoggedIn"
+              class="btn text-white fw-bold d-inline-flex align-items-center justify-content-center"
+              style="background: linear-gradient(135deg,#ff6600,#e55d00); border-radius: 12px; height: 48px; font-size: 16px; padding: 0 24px; box-shadow: 0 2px 10px rgba(255, 102, 0, 0.3); width: 100%;"
+              @click="showLoginPopup = true"
+            >
+              สมัครงาน
+            </button>
+            <button
+              v-else
+              class="btn text-white fw-bold d-inline-flex align-items-center justify-content-center"
+              style="background: linear-gradient(135deg,#ff6600,#e55d00); border-radius: 12px; height: 48px; font-size: 16px; padding: 0 24px; box-shadow: 0 2px 10px rgba(255, 102, 0, 0.3); min-width: 200px; max-width: 220px;"
+              @click="applyJob"
+            >
+              <i class="bi bi-check2-circle me-2"></i>
+              สมัครงาน
+            </button>
+          </div>
+          <div class="d-flex justify-content-end w-100 gap-2 text-end">
+            <button class="btn btn-outline-secondary rounded-pill px-3" @click="saveJob">
+              <i class="bi bi-bookmark me-1"></i> บันทึกงาน
+            </button>
+            <button class="btn btn-outline-secondary rounded-pill px-3" @click="shareJob">
+              <i class="bi bi-share me-1"></i> แชร์
+            </button>
+          </div>
         </div>
       </div>
     </div>
+
+    <!-- Popups (เหมือนเดิม) -->
+    <div v-if="showPopup" class="popup-overlay">
+      <div class="popup-content text-center">
+        <p class="mb-4 fw-bold">กรุณาเข้าสู่ระบบ<br />เพื่อบันทึกงานที่สนใจ</p>
+        <div class="d-flex justify-content-center gap-3">
+          <button class="btn btn-outline-secondary px-4" @click="closePopup">ยกเลิก</button>
+          <router-link to="/login" class="btn px-4" style="background-color: #ff6600; color: white;">เข้าสู่ระบบ</router-link>
+        </div>
+      </div>
+    </div>
+
+    <div v-if="sharePopup" class="popup-overlay">
+      <div class="popup-content">
+        <p class="mb-3 fw-bold text-center">
+          📋 คัดลอกลิงก์งานเรียบร้อยแล้ว คุณสามารถนำไปแชร์ต่อได้เลย!
+        </p>
+        <div class="d-flex justify-content-end">
+          <button class="btn btn-outline-secondary" @click="sharePopup = false">ปิด</button>
+        </div>
+      </div>
+    </div>
+
+    <div v-if="showLoginPopup" class="popup-overlay">
+      <div class="popup-content text-center">
+        <p class="mb-4 fw-bold">กรุณาเข้าสู่ระบบ<br />เพื่อสมัครงาน</p>
+        <div class="d-flex justify-content-center gap-3">
+          <button class="btn btn-outline-secondary px-4" @click="showLoginPopup = false">ยกเลิก</button>
+          <router-link to="/login" class="btn px-4" style="background-color: #ff6600; color: white;">เข้าสู่ระบบ</router-link>
+        </div>
+      </div>
+    </div>
+    
   </div>
 </template>
 
 <script>
 import axios from "axios";
+import NavbarHome from "@/components/NavbarHome.vue";
 
 export default {
   name: "JobDetail",
+  components: { NavbarHome },
   data() {
     return {
       job: {},
       isLoggedIn: false,
+      showPopup: false,
+      sharePopup: false,
+      showLoginPopup: false,
     };
   },
   mounted() {
@@ -120,59 +171,69 @@ export default {
         alert("📨 สมัครงานสำเร็จ!");
       } catch (err) {
         console.error("❌ สมัครงานไม่สำเร็จ:", err);
-        alert("เกิดข้อผิดพลาดในการสมัครงาน กรุณาลองใหม่");
+        alert("เกิดข้อผลในการสมัครงาน กรุณาลองใหม่");
       }
+    },
+    saveJob() {
+      if (!this.isLoggedIn) {
+        this.showPopup = true;
+        return;
+      }
+      alert("✅ บันทึกงานเรียบร้อย");
+    },
+    shareJob() {
+      const shareUrl = this.shareUrl;
+      if (navigator.share) {
+        navigator
+          .share({
+            title: this.job.j_title,
+            text: `ดูงานนี้ได้ที่: ${shareUrl}`,
+            url: shareUrl,
+          })
+          .catch(() => alert("ไม่สามารถแชร์ได้ในอุปกรณ์นี้"));
+      } else if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard
+          .writeText(shareUrl)
+          .then(() => {
+            this.sharePopup = true;
+          })
+          .catch(() => {
+            alert("ไม่สามารถคัดลอกลิงก์ได้");
+          });
+      } else {
+        alert("เบราว์เซอร์ของคุณไม่รองรับการแชร์หรือคัดลอกลิงก์");
+      }
+    },
+    closePopup() {
+      this.showPopup = false;
     },
   },
 };
 </script>
 
 <style scoped>
-.nav-wrapper {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 16px 24px;
-  background-color: #fff;
-  border-bottom: 4px solid #ff6600;
-}
-
-.brand-title {
-  font-size: 1.5rem;
-  font-weight: bold;
-  color: #ff6600;
-}
-
-.nav-top-right {
-  display: flex;
-  gap: 20px;
-}
-
-.top-link {
-  text-decoration: none;
-  color: #333;
-  font-weight: 500;
-  position: relative;
-}
-
-.top-link::after {
-  content: "";
-  position: absolute;
-  bottom: -4px;
-  left: 50%;
-  transform: translateX(-50%);
-  height: 3px;
-  width: 0%;
-  background-color: #ff6600;
-  transition: width 0.3s;
-}
-
-.top-link:hover::after,
-.active-link::after {
-  width: 60%;
-}
-
 .text-orange {
   color: #ff6600;
+}
+
+.popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1050;
+}
+
+.popup-content {
+  background: white;
+  padding: 24px;
+  border-radius: 16px;
+  width: 300px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
 }
 </style>

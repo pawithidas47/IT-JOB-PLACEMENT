@@ -1,72 +1,87 @@
 <template>
-  <div class="container mt-5" style="max-width: 500px">
-    <div class="d-flex mb-4">
-      <button
-        class="btn"
-        :class="
-          role === 'applicant'
-            ? 'btn-warning text-white'
-            : 'btn-outline-secondary'
-        "
-        @click="role = 'applicant'"
-      >
-        สำหรับผู้สมัครงาน
-      </button>
-      <button
-        class="btn ms-2"
-        :class="
-          role === 'employer'
-            ? 'btn-warning text-white'
-            : 'btn-outline-secondary'
-        "
-        @click="role = 'employer'"
-      >
-        สำหรับผู้ว่าจ้าง
-      </button>
-    </div>
+  <div>
+    <NavbarHome />
 
-    <div class="card shadow p-4">
-      <h2 class="text-center mb-4">เข้าสู่ระบบ</h2>
-      <form @submit.prevent="handleLogin">
-        <div class="mb-3">
-          <label class="form-label">ชื่อผู้ใช้งาน</label>
-          <input v-model="username" class="form-control" required />
+    <div
+      class="d-flex justify-content-center align-items-center py-5"
+      style="background-color: #f7f8fa; min-height: calc(100vh - 80px);"
+    >
+      <div class="card p-4 shadow-sm border-0 rounded-4" style="max-width: 420px; width: 100%;">
+        <!-- 🔶 ปุ่มเลือกบทบาทพร้อม slide indicator -->
+        <div class="role-toggle-wrapper position-relative">
+          <div
+            class="slider-bg"
+            :class="{ right: role === 'employer' }"
+          ></div>
+
+          <button
+            class="role-tab z-1"
+            :class="{ active: role === 'applicant' }"
+            @click="role = 'applicant'"
+          >
+            ผู้สมัครงาน
+          </button>
+          <button
+            class="role-tab z-1"
+            :class="{ active: role === 'employer' }"
+            @click="role = 'employer'"
+          >
+            ผู้ว่าจ้าง
+          </button>
         </div>
-        <div class="mb-3">
-          <label class="form-label">รหัสผ่าน</label>
-          <input
-            :type="showPassword ? 'text' : 'password'"
-            v-model="password"
-            class="form-control"
-            required
-          />
-          <div class="form-check mt-1">
+
+        <h5 class="text-center fw-bold mb-4 mt-4">เข้าสู่ระบบ</h5>
+
+        <form @submit.prevent="handleLogin">
+          <div class="mb-3">
+            <label class="form-label">ชื่อผู้ใช้งาน</label>
             <input
-              type="checkbox"
-              v-model="showPassword"
-              class="form-check-input"
-              id="showPassword"
+              v-model="username"
+              type="text"
+              class="form-control rounded-3"
+              placeholder="เช่น mornor01"
+              required
             />
-            <label for="showPassword" class="form-check-label"
-              >Show password</label
-            >
           </div>
-        </div>
-        <button class="btn btn-warning w-100 text-white">Login</button>
-        <p class="mt-3 text-center">
-          ยังไม่มีบัญชี?
-          <router-link :to="registerLink">สมัครสมาชิก</router-link>
-        </p>
-      </form>
+
+          <div class="mb-3">
+            <label class="form-label">รหัสผ่าน</label>
+            <input
+              :type="showPassword ? 'text' : 'password'"
+              v-model="password"
+              class="form-control rounded-3"
+              placeholder="กรอกรหัสผ่าน"
+              required
+            />
+            <div class="form-check mt-2">
+              <input type="checkbox" v-model="showPassword" class="form-check-input" id="showPassword" />
+              <label for="showPassword" class="form-check-label">แสดงรหัสผ่าน</label>
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-orange w-100 py-2 fw-bold rounded-3 mt-2">
+            เข้าสู่ระบบ
+          </button>
+
+          <p class="text-center mt-3">
+            ยังไม่มีบัญชี?
+            <router-link :to="registerLink" class="text-orange fw-bold text-decoration-none">
+              สมัครสมาชิก
+            </router-link>
+          </p>
+        </form>
+      </div>
     </div>
   </div>
 </template>
 
 <script>
 import axios from "axios";
+import NavbarHome from "@/components/NavbarHome.vue";
 
 export default {
   name: "LoginPage",
+  components: { NavbarHome },
   data() {
     return {
       username: "",
@@ -90,27 +105,94 @@ export default {
           password: this.password,
           role: this.role,
         })
-        .then((res) => {
-          alert("✅ เข้าสู่ระบบสำเร็จ");
-          const user = res.data.user;
-          localStorage.setItem("user", JSON.stringify(user));
-          if (this.role === "applicant") {
-            this.$router.push("/applicant/dashboard");
-          } else {
-            this.$router.push("/employer/dashboard");
-          }
-        })
-        .catch(() => {
-          alert("❌ ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง");
-        });
+      .then((res) => {
+  console.log("🎯 User data:", res.data.user);
+
+  const user = res.data.user;
+
+  // ถ้าไม่มี name ให้ใช้ username แทน
+  if (!user.name) {
+    user.name = this.username;
+  }
+
+  localStorage.setItem("user", JSON.stringify(user));
+  alert("✅ เข้าสู่ระบบสำเร็จ");
+
+  this.$router.push(
+    this.role === "applicant"
+      ? "/applicant/jobs"
+      : "/employer/dashboard"
+  );
+})
+
     },
   },
 };
 </script>
 
 <style scoped>
-.btn-warning {
+/* 🔶 ปุ่มแท็บแบบสไลด์ */
+.role-toggle-wrapper {
+  background: #f3f3f3;
+  border-radius: 16px;
+  display: flex;
+  position: relative;
+  height: 44px;
+  overflow: hidden;
+}
+
+.role-tab {
+  flex: 1;
+  z-index: 1;
+  border: none;
+  background: transparent;
+  font-weight: 500;
+  font-size: 0.95rem;
+  color: #555;
+  transition: color 0.2s ease;
+}
+
+.role-tab.active {
+  color: white;
+  font-weight: 600;
+}
+
+.slider-bg {
+  position: absolute;
+  width: 50%;
+  height: 100%;
+  background-color: #ff6600;
+  border-radius: 16px;
+  transition: transform 0.3s ease;
+  z-index: 0;
+  top: 0;
+  left: 0;
+}
+
+.slider-bg.right {
+  transform: translateX(100%);
+}
+
+/* 🔶 ปุ่มเข้าสู่ระบบ */
+.btn-orange {
   background-color: #ff6600;
   border: none;
+  transition: 0.2s ease-in-out;
+  color: white;
+}
+
+.btn-orange:hover {
+  background-color: #e65c00;
+  color: white;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(255, 102, 0, 0.25);
+}
+
+.text-orange {
+  color: #ff6600;
+}
+
+input::placeholder {
+  color: #bbb;
 }
 </style>

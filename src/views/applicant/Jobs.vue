@@ -94,9 +94,43 @@
 
       <div class="vertical-divider"></div>
 
-      <!-- Job Results -->
-      <section class="job-results w-100">
-        <h5 class="mb-2 text-orange">พบ {{ filteredJobs.length }} งาน</h5>
+    <!-- Job Results -->
+        <section class="job-results">
+          <h5 class="mb-2 text-orange">พบ {{ filteredJobs.length }} งาน</h5>
+
+          <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+            <p class="mb-0 text-muted">
+              ผลการค้นหา:
+            <template
+              v-if="!filter.title && !filter.type && !filter.salaryMin && !filter.salaryMax && !filter.employerType">
+              ทั้งหมด
+            </template>
+            <template v-else>
+              <span v-if="filter.title"> | คำค้น: "{{ filter.title }}"</span>
+              <span v-if="filter.type"> | ประเภทงาน: {{ filter.type }}</span>
+              <span v-if="filter.salaryMin || filter.salaryMax">
+                | ค่าจ้าง:
+                {{ filter.salaryMin ? Number(filter.salaryMin).toLocaleString() : 'ต่ำสุด' }} -
+                {{ filter.salaryMax ? Number(filter.salaryMax).toLocaleString() : 'สูงสุด' }}
+              </span>
+              <span v-if="filter.employerType"> | ผู้ว่าจ้าง: {{ filter.employerType }}</span>
+            </template>
+          </p>
+
+          <div class="d-flex align-items-center gap-2 mt-2 mt-md-0">
+            <label class="form-label fw-semibold mb-0" style="white-space: nowrap;">เรียงตาม:</label>
+            <select v-model="filter.sort" @change="searchJobs" class="form-select"
+              style="border-radius: 10px; height: 38px; font-size: 14px; min-width: 160px;">
+              <option value="">ไม่เรียง</option>
+              <option value="latest">วันที่โพสต์ล่าสุด</option>
+              <option value="salary">ค่าจ้างสูงสุด</option>
+              <option value="deadline">หมดเขตเร็วที่สุด</option>
+            </select>
+          </div>
+        </div>
+
+
+
 
         <div class="job-grid">
           <div class="job-card p-4 bg-white border rounded-3 shadow-sm position-relative" v-for="job in filteredJobs"
@@ -133,7 +167,7 @@
       </section>
     </div>
   </div>
-  
+
 </template>
 
 <script>

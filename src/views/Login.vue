@@ -78,6 +78,7 @@
 <script>
 import axios from "axios";
 import NavbarHome from "@/components/NavbarHome.vue";
+import Swal from "sweetalert2";
 
 export default {
   name: "LoginPage",
@@ -105,27 +106,45 @@ export default {
           password: this.password,
           role: this.role,
         })
-      .then((res) => {
-  console.log("🎯 User data:", res.data.user);
+        .then((res) => {
+          const user = res.data.user;
+          if (!user.name) user.name = this.username;
 
-  const user = res.data.user;
+          localStorage.setItem("user", JSON.stringify(user));
 
-  // ถ้าไม่มี name ให้ใช้ username แทน
-  if (!user.name) {
-    user.name = this.username;
-  }
-
-  localStorage.setItem("user", JSON.stringify(res.data.user));
-
-  alert("✅ เข้าสู่ระบบสำเร็จ");
-
-  this.$router.push(
-    this.role === "applicant"
-      ? "/applicant/jobs"
-      : "/employer/dashboard"
-  );
-})
-
+          Swal.fire({
+            title: '✅ เข้าสู่ระบบสำเร็จ!',
+            text: 'ยินดีต้อนรับเข้าสู่ระบบ',
+            icon: 'success',
+            iconColor: '#10b981',
+            showConfirmButton: false,
+            timer: 2000,
+            timerProgressBar: true,
+            background: '#ffffff',
+            color: '#333',
+            customClass: {
+              popup: 'rounded-4 animated-popup shadow',
+              title: 'fw-bold fs-5',
+              htmlContainer: 'fs-6',
+            },
+            willClose: () => {
+              this.$router.push(
+                this.role === "applicant"
+                  ? "/applicant/jobs"
+                  : "/employer/dashboard"
+              );
+            }
+          });
+        })
+        .catch((err) => {
+          console.error("❌ Login failed:", err);
+          Swal.fire({
+            icon: 'error',
+            title: 'เข้าสู่ระบบไม่สำเร็จ',
+            text: 'กรุณาตรวจสอบชื่อผู้ใช้หรือรหัสผ่าน',
+            confirmButtonColor: '#ff6600'
+          });
+        });
     },
   },
 };
@@ -195,5 +214,20 @@ export default {
 
 input::placeholder {
   color: #bbb;
+}
+
+/* 🔶 Animation */
+.swal2-popup.animated-popup {
+  animation: popScale 0.4s ease-out;
+}
+@keyframes popScale {
+  0% {
+    transform: scale(0.85);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 </style>

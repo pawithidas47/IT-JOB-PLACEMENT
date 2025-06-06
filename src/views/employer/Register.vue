@@ -8,11 +8,9 @@
       <div class="card p-5 shadow-lg border-0 rounded-4 w-100" style="max-width: 540px;">
         <div class="text-center mb-4">
           <h4 class="fw-bold mb-0 text-orange">สมัครสมาชิกผู้ว่าจ้าง</h4>
-          
         </div>
 
-        <form @submit="submitForm" class="needs-validation">
-
+        <form @submit.prevent="submitForm" class="needs-validation">
           <div class="mb-3">
             <label class="form-label">ชื่อผู้ใช้งาน<span class="text-danger"> *</span></label>
             <input v-model.trim="form.username" class="form-control rounded-3" required placeholder="ชื่อผู้ใช้" />
@@ -39,7 +37,7 @@
             </div>
           </div>
 
-    <div class="mb-3">
+          <div class="mb-3">
             <label class="form-label">ประเภทผู้ว่าจ้าง<span class="text-danger"> *</span></label>
             <select v-model="form.type" class="form-select rounded-3 text-start" required>
               <option disabled value="" style="text-align: center;">--------------- กรุณาเลือกประเภท ---------------</option>
@@ -53,8 +51,6 @@
               <option value="ฟรีแลนซ์">ฟรีแลนซ์</option>
             </select>
           </div>
-
-
 
           <div class="mb-3">
             <label class="form-label">เบอร์โทรศัพท์<span class="text-danger"> *</span></label>
@@ -85,6 +81,7 @@
 <script>
 import axios from "axios";
 import NavbarHome from "@/components/NavbarHome.vue";
+import Swal from "sweetalert2";
 
 export default {
   name: "RegisterEmployer",
@@ -106,12 +103,24 @@ export default {
   methods: {
     submitForm() {
       const { username, password, confirm_password, firstname, lastname, type, phone, email } = this.form;
+
       if (!username || !password || !confirm_password || !firstname || !lastname || !type || !phone || !email) {
-        alert("❌ กรุณากรอกข้อมูลให้ครบทุกช่อง");
+        Swal.fire({
+          icon: 'error',
+          title: 'กรอกข้อมูลไม่ครบ',
+          text: 'กรุณากรอกข้อมูลให้ครบทุกช่อง',
+          confirmButtonColor: '#ff6600'
+        });
         return;
       }
+
       if (password !== confirm_password) {
-        alert("❌ รหัสผ่านไม่ตรงกัน");
+        Swal.fire({
+          icon: 'error',
+          title: 'รหัสผ่านไม่ตรงกัน',
+          text: 'โปรดตรวจสอบรหัสผ่านอีกครั้ง',
+          confirmButtonColor: '#ff6600'
+        });
         return;
       }
 
@@ -126,12 +135,34 @@ export default {
           e_email: email,
         })
         .then(() => {
-          alert("✅ สมัครสมาชิกผู้ว่าจ้างสำเร็จ");
-          this.$router.push("/employer/dashboard");
+          Swal.fire({
+            title: '✅ สมัครสมาชิกสำเร็จ!',
+            text: 'ยินดีต้อนรับผู้ว่าจ้างเข้าสู่ระบบ',
+            icon: 'success',
+            iconColor: '#10b981',
+            showConfirmButton: false,
+            timer: 2000,
+            timerProgressBar: true,
+            background: '#ffffff',
+            color: '#333',
+            customClass: {
+              popup: 'rounded-4 animated-popup shadow',
+              title: 'fw-bold fs-5',
+              htmlContainer: 'fs-6',
+            },
+            willClose: () => {
+              this.$router.push("/login");
+            }
+          });
         })
         .catch((err) => {
           console.error("❌ สมัครผู้ว่าจ้างไม่สำเร็จ:", err);
-          alert("สมัครไม่สำเร็จ กรุณาตรวจสอบข้อมูลอีกครั้ง");
+          Swal.fire({
+            icon: 'error',
+            title: 'สมัครไม่สำเร็จ',
+            text: 'กรุณาตรวจสอบข้อมูลอีกครั้ง',
+            confirmButtonColor: '#ff6600'
+          });
         });
     },
   },
@@ -155,5 +186,20 @@ export default {
 
 input::placeholder {
   color: #cacaca;
+}
+
+/* Animation */
+.swal2-popup.animated-popup {
+  animation: popScale 0.4s ease-out;
+}
+@keyframes popScale {
+  0% {
+    transform: scale(0.85);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 </style>

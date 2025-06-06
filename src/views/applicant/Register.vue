@@ -1,6 +1,7 @@
 <template>
   <div>
     <NavbarHome />
+    
     <div class="d-flex justify-content-center align-items-center py-5 px-3"
       style="background-color: #f7f8fa; min-height: calc(100vh - 80px);">
       <div class="card p-5 shadow-lg border-0 rounded-4 w-100" style="max-width: 540px;">
@@ -9,7 +10,7 @@
 
         </div>
 
-        <form @submit="submitForm" class="needs-validation">
+        <form @submit.prevent="submitForm" class="needs-validation">
 
           <div class="mb-3">
             <label class="form-label">ชื่อผู้ใช้งาน<span class="text-danger"> *</span></label>
@@ -115,6 +116,7 @@
 <script>
 import axios from "axios";
 import NavbarHome from "@/components/NavbarHome.vue";
+import Swal from 'sweetalert2';
 
 export default {
   name: "RegisterApplicant",
@@ -137,28 +139,60 @@ export default {
     };
   },
   methods: {
-    submitForm() {
-      const f = this.form;
-      if (!f.a_username || !f.a_password || !f.confirm_password || !f.a_firstname || !f.a_lastname || !f.a_studentid || !f.a_faculty || !f.a_birthdate || !f.a_gender || !f.a_email || !f.a_phone) {
-        alert("❌ กรุณากรอกข้อมูลให้ครบทุกช่อง");
-        return;
-      }
-      if (f.a_password !== f.confirm_password) {
-        alert("❌ รหัสผ่านไม่ตรงกัน");
-        return;
-      }
-      axios
-        .post("http://localhost:3001/api/auth/register/applicant", f)
-        .then(() => {
-          alert("✅ สมัครสมาชิกสำเร็จ");
-          this.$router.push("/applicant/jobs");
-        })
-        .catch((err) => {
-          console.error("❌ สมัครไม่สำเร็จ:", err);
-          alert("เกิดข้อผิดพลาด กรุณาตรวจสอบข้อมูลอีกครั้ง");
-        });
-    },
+   submitForm() {
+  const f = this.form;
+  if (!f.a_username || !f.a_password || !f.confirm_password || !f.a_firstname || !f.a_lastname || !f.a_studentid || !f.a_faculty || !f.a_birthdate || !f.a_gender || !f.a_email || !f.a_phone) {
+    Swal.fire({
+      icon: 'error',
+      title: 'เกิดข้อผิดพลาด',
+      text: 'กรุณากรอกข้อมูลให้ครบทุกช่อง',
+    });
+    return;
+  }
+  if (f.a_password !== f.confirm_password) {
+    Swal.fire({
+      icon: 'error',
+      title: 'รหัสผ่านไม่ตรงกัน',
+      text: 'โปรดตรวจสอบรหัสผ่านอีกครั้ง',
+    });
+    return;
+  }
+
+  axios.post("http://localhost:3001/api/auth/register/applicant", f)
+    .then(() => {
+      Swal.fire({
+  title: '🎉 สมัครสมาชิกสำเร็จ!',
+  text: 'ระบบกำลังนำคุณไปยังหน้าล็อกอิน...',
+  icon: 'success',
+  iconColor: '#10b981',
+  showConfirmButton: false,
+  timer: 2000,
+  timerProgressBar: true,
+  background: '#ffffff',
+  color: '#333',
+  customClass: {
+    popup: 'rounded-4 animated-popup shadow',
+    title: 'fw-bold fs-5',
+    htmlContainer: 'fs-6',
   },
+  willClose: () => {
+    this.$router.push("/login");
+  }
+})
+.then(() => {
+        this.$router.push("/login");
+      });
+    })
+    .catch((err) => {
+      console.error("❌ สมัครไม่สำเร็จ:", err);
+      Swal.fire({
+        icon: 'error',
+        title: 'เกิดข้อผิดพลาด',
+        text: 'กรุณาตรวจสอบข้อมูลอีกครั้ง',
+      });
+    });
+}
+  }
 };
 </script>
 

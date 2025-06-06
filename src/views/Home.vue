@@ -104,34 +104,41 @@
         <section class="job-results">
           <h5 class="mb-2 text-orange">พบ {{ filteredJobs.length }} งาน</h5>
 
-          <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
-            <p class="mb-0 text-muted">
-              ผลการค้นหา:
-              <template v-if="!filter.title && !filter.type && !filter.salaryMin && !filter.salaryMax && !filter.employerType">
-                ทั้งหมด
-              </template>
-              <template v-else>
-                <span v-if="filter.title"> | คำค้น: "{{ filter.title }}"</span>
-                <span v-if="filter.type"> | ประเภทงาน: {{ filter.type }}</span>
-                <span v-if="filter.salaryMin || filter.salaryMax">
-                  | ค่าจ้าง:
-                  {{ filter.salaryMin ? Number(filter.salaryMin).toLocaleString() : 'ต่ำสุด' }} -
-                  {{ filter.salaryMax ? Number(filter.salaryMax).toLocaleString() : 'สูงสุด' }}
-                </span>
-                <span v-if="filter.employerType"> | ผู้ว่าจ้าง: {{ filter.employerType }}</span>
-              </template>
-            </p>
-            <div class="d-flex align-items-center flex-nowrap" style="gap: 8px; max-width: 100%;">
-              <label class="form-label fw-semibold mb-0" style="white-space: nowrap;">เรียงตาม:</label>
-              <select v-model="filter.sort" @change="searchJobs" class="form-select"
-                style="border-radius: 10px; height: 38px; font-size: 14px; min-width: 160px; max-width: 200px;">
-                <option value="">ไม่เรียง</option>
-                <option value="latest">วันที่โพสต์ล่าสุด</option>
-                <option value="salary">ค่าจ้างสูงสุด</option>
-                <option value="deadline">หมดเขตเร็วที่สุด</option>
-              </select>
-            </div>
-          </div>
+          <!-- Header Filter Row -->
+<!-- Header Filter Row -->
+<div class="d-flex justify-content-between align-items-center flex-wrap mb-3 gap-3">
+  <!-- Left: Summary -->
+  <p class="mb-0 text-muted flex-grow-1" style="min-width: 200px;">
+    ผลการค้นหา:
+    <template v-if="!filter.title && !filter.type && !filter.salaryMin && !filter.salaryMax && !filter.employerType">
+      ทั้งหมด
+    </template>
+    <template v-else>
+      <span v-if="filter.title"> | คำค้น: "{{ filter.title }}"</span>
+      <span v-if="filter.type"> | ประเภทงาน: {{ filter.type }}</span>
+      <span v-if="filter.salaryMin || filter.salaryMax">
+        | ค่าจ้าง:
+        {{ filter.salaryMin ? Number(filter.salaryMin).toLocaleString() : 'ต่ำสุด' }} -
+        {{ filter.salaryMax ? Number(filter.salaryMax).toLocaleString() : 'สูงสุด' }}
+      </span>
+      <span v-if="filter.employerType"> | ผู้ว่าจ้าง: {{ filter.employerType }}</span>
+    </template>
+  </p>
+
+  <!-- Right: Sort -->
+  <div class="d-flex align-items-center gap-2 flex-nowrap">
+    <label class="form-label fw-semibold mb-0 text-secondary" style="white-space: nowrap;">เรียงตาม:</label>
+    <div class="position-relative">
+      <select v-model="filter.sort" @change="searchJobs" class="form-select custom-select">
+        <option value="">ทั้งหมด</option>
+        <option value="latest">วันที่โพสต์ล่าสุด</option>
+        <option value="salary">ค่าจ้างสูงสุด</option>
+        <option value="deadline">หมดเขตเร็วที่สุด</option>
+      </select>
+    </div>
+  </div>
+</div>
+
 
           <div class="job-grid">
             <div class="job-card p-4 bg-white border rounded-3 shadow-sm position-relative" v-for="job in filteredJobs" :key="job.job_id">
@@ -271,6 +278,34 @@ export default {
 
 
 <style scoped>
+
+.custom-select {
+  border-radius: 999px;
+  padding: 0.45rem 1.25rem;
+  font-size: 0.95rem;
+  border: 1px solid #ddd;
+  background-color: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  min-width: 160px;
+  max-width: 220px;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+
+  /* ลูกศร */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23666' class='bi bi-chevron-down' viewBox='0 0 16 16'%3E%3Cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  background-size: 1rem;
+  padding-right: 2rem;
+}
+
+.custom-select:focus {
+  outline: none;
+  border-color: #ff6600;
+  box-shadow: 0 0 0 0.15rem rgba(255, 102, 0, 0.25);
+}
+
 .popup-overlay {
   position: fixed;
   top: 0;

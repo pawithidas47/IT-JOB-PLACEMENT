@@ -149,9 +149,10 @@
               Date(job.j_appdeadline).toLocaleDateString('th-TH') }}</p>
 
             <div class="d-flex justify-content-between mt-3">
-              <router-link :to="`/jobs/${job.job_id}`" class="btn btn-sm btn-outline-primary rounded-pill px-3">
-                ดูรายละเอียด
-              </router-link>
+             <router-link :to="`/applicant/jobs/${job.job_id}`" class="btn btn-sm btn-outline-primary rounded-pill px-3">
+  ดูรายละเอียด
+</router-link>
+
               <div>
                 <button class="btn btn-sm rounded-pill me-1"
                   :class="isBookmarked(job.job_id) ? 'btn-warning' : 'btn-outline-secondary'" @click="bookmarkJob(job)">
@@ -233,6 +234,9 @@ export default {
           return 0;
         });
     },
+      getJobDetailLink(id) {
+    return this.isLoggedIn ? `/applicant/jobs/${id}` : `/jobs/${id}`;
+  },
     isBookmarked(jobId) {
       return this.bookmarkedIds.includes(jobId);
     },

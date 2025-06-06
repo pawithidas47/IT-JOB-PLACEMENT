@@ -37,15 +37,26 @@ const routes = [
     path: "/applicant/profile",
     component: () => import("@/views/applicant/UserProfile.vue"),
   },
-  {
-    path: "/jobs/:id",
-    name: "JobDetail",
-    component: () => import("@/views/applicant/JobDetailPage.vue"),
-  },
+
+
   {
   path: '/applicant/savedjobs',
   component: () => import('@/views/applicant/SavedJobs.vue'),
 },
+  
+{
+  path: "/jobs/:id",
+  name: "PublicJobDetail",
+  component: () => import("@/views/JobDetail.vue"),
+},
+{
+  path: "/applicant/jobs/:id",
+  name: "ApplicantJobDetail",
+  component: () => import("@/views/applicant/JobDetailPage.vue"),
+  meta: { requiresAuth: true }
+}
+
+
 
 ];
 

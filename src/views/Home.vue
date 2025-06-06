@@ -145,7 +145,10 @@
               <p class="mb-1 text-muted"><i class="bi bi-clock me-1"></i> โพสต์เมื่อ: {{ new Date(job.j_posted_at).toLocaleDateString('th-TH') }}</p>
               <p class="mb-1 text-muted"><i class="bi bi-calendar-event me-1"></i> หมดเขต: {{ new Date(job.j_appdeadline).toLocaleDateString('th-TH') }}</p>
               <div class="d-flex justify-content-between mt-3">
-                <router-link :to="`/jobs/${job.job_id}`" class="btn btn-sm btn-outline-primary rounded-pill px-3">ดูรายละเอียด</router-link>
+                <router-link :to="getJobDetailLink(job.job_id)" class="btn btn-sm btn-outline-primary rounded-pill px-3">
+  ดูรายละเอียด
+</router-link>
+
                 <div>
                   <button class="btn btn-sm btn-outline-secondary rounded-pill me-1" @click="bookmarkJob(job)">
                     <i class="bi bi-bookmark"></i>
@@ -258,7 +261,11 @@ export default {
       }
       alert(`✅ บันทึกงาน: ${job.j_title}`);
     },
+    getJobDetailLink(id) {
+    return this.isLoggedIn ? `/applicant/jobs/${id}` : `/jobs/${id}`;
+  }
   },
+  
 };
 </script>
 

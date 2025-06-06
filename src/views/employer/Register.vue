@@ -126,7 +126,7 @@ export default {
         })
         .then(() => {
           alert("✅ สมัครสมาชิกผู้ว่าจ้างสำเร็จ");
-          this.$router.push("/login");
+          this.$router.push("/employer/dashboard");
         })
         .catch((err) => {
           console.error("❌ สมัครผู้ว่าจ้างไม่สำเร็จ:", err);

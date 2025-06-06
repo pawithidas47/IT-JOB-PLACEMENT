@@ -115,7 +115,8 @@ export default {
     user.name = this.username;
   }
 
-  localStorage.setItem("user", JSON.stringify(user));
+  localStorage.setItem("user", JSON.stringify(res.data.user));
+
   alert("✅ เข้าสู่ระบบสำเร็จ");
 
   this.$router.push(

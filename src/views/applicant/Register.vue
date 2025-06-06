@@ -146,7 +146,7 @@ export default {
         .post("http://localhost:3001/api/auth/register/applicant", f)
         .then(() => {
           alert("✅ สมัครสมาชิกสำเร็จ");
-          this.$router.push("/login");
+          this.$router.push("/applicant/jobs");
         })
         .catch((err) => {
           console.error("❌ สมัครไม่สำเร็จ:", err);

@@ -7,8 +7,15 @@ import RegisterEmployer from "@/views/employer/Register.vue";
 import DashboardEmployer from "@/views/employer/Dashboard.vue";
 import PostJob from "@/views/employer/PostJob.vue";
 import EditJob from "@/views/employer/EditJob.vue";
+import JobApplications from "@/views/applicant/JobApplications.vue";
 
 const routes = [
+  {
+  path: "/applicant/jobapplications",
+  name: "JobApplications",
+  component: JobApplications,
+},
+
   { path: "/", component: HomePage },
   { path: "/login", component: Login },
   { path: "/register/applicant", component: RegisterApplicant },

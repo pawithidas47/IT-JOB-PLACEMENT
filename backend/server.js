@@ -15,6 +15,7 @@ app.use(bodyParser.json());
 app.use("/api/auth", authRoutes);
 app.use("/api/jobs", jobRoutes);
 app.use("/api/applications", applicationRoutes); // ✅ route นี้ใช้จากไฟล์ applicationRoutes.js ที่ถูกต้อง
+app.use("/api/applications", require("./routes/applicationRoutes"));
 
 app.listen(3001, () => {
   console.log("🚀 Server running at http://localhost:3001");

@@ -58,17 +58,19 @@ export default {
     };
   },
   async created() {
-    const jobId = this.$route.params.id;
-    const response = await axios.get(`http://localhost:3001/api/jobs/${jobId}`);
-    this.job = response.data;
+    try {
+      const jobId = this.$route.params.id;
+      const response = await axios.get(`http://localhost:3001/api/jobs/${jobId}`);
+      this.job = response.data;
+    } catch (err) {
+      console.error("❌ โหลดงานไม่สำเร็จ:", err);
+      Swal.fire("เกิดข้อผิดพลาด", "ไม่สามารถโหลดข้อมูลงานได้", "error");
+    }
 
     const userJson = localStorage.getItem("user");
     if (userJson) {
       this.user = JSON.parse(userJson);
     }
-
-    console.log("✅ user:", this.user);
-    console.log("📄 job:", this.job);
   },
   methods: {
     async confirmApply() {
@@ -86,7 +88,7 @@ export default {
           params: { job_id: jobId, applicant_id: applicantId },
         });
 
-        if (check.data.applied) {
+        if (check?.data?.applied) {
           Swal.fire("คุณได้สมัครงานนี้ไปแล้ว", "", "info");
           return;
         }
@@ -94,7 +96,7 @@ export default {
         // ⚠️ Popup ยืนยันการสมัคร
         const result = await Swal.fire({
           title: "ยืนยันการสมัครงาน",
-          text: ` "${this.job.j_title}" หรือไม่?`,
+          text: `คุณต้องการสมัคร "${this.job.j_title}" หรือไม่?`,
           icon: "question",
           showCancelButton: true,
           confirmButtonText: "ยืนยัน",
@@ -115,13 +117,19 @@ export default {
           }
         );
 
+        
+
         Swal.fire("สมัครงานสำเร็จ!", response.data.message, "success").then(() => {
           this.$router.push("/applicant/jobs");
         });
 
       } catch (error) {
         console.error("❌ สมัครงานไม่สำเร็จ:", error);
-        Swal.fire("เกิดข้อผิดพลาด", error.response?.data?.message || "ไม่สามารถสมัครงานได้", "error");
+        Swal.fire(
+          "เกิดข้อผิดพลาด",
+          error.response?.data?.message || "ไม่สามารถสมัครงานได้",
+          "error"
+        );
       }
     },
   },

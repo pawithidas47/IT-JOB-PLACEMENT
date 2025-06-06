@@ -99,6 +99,20 @@ exports.login = (req, res) => {
       return res.status(401).json({ message: "เข้าสู่ระบบล้มเหลว" });
     }
 
-    res.status(200).json({ message: "✅ เข้าสู่ระบบสำเร็จ", user: results[0] });
+res.status(200).json({
+  message: "✅ เข้าสู่ระบบสำเร็จ",
+  user: {
+    id:
+      role === "applicant"
+        ? results[0].applicant_id // ✅ ใช้ field จริง
+        : role === "employer"
+        ? results[0].e_id
+        : results[0].ad_id,
+    ...results[0],
+  }
+});
+
+
+
   });
 };

@@ -2,30 +2,17 @@
   <div>
     <NavbarHome />
 
-    <div
-      class="d-flex justify-content-center align-items-center py-5"
-      style="background-color: #f7f8fa; min-height: calc(100vh - 80px);"
-    >
+    <div class="d-flex justify-content-center align-items-center py-5"
+      style="background-color: #f7f8fa; min-height: calc(100vh - 80px);">
       <div class="card p-4 shadow-sm border-0 rounded-4" style="max-width: 420px; width: 100%;">
         <!-- 🔶 ปุ่มเลือกบทบาทพร้อม slide indicator -->
         <div class="role-toggle-wrapper position-relative">
-          <div
-            class="slider-bg"
-            :class="{ right: role === 'employer' }"
-          ></div>
+          <div class="slider-bg" :class="{ right: role === 'employer' }"></div>
 
-          <button
-            class="role-tab z-1"
-            :class="{ active: role === 'applicant' }"
-            @click="role = 'applicant'"
-          >
+          <button class="role-tab z-1" :class="{ active: role === 'applicant' }" @click="role = 'applicant'">
             ผู้สมัครงาน
           </button>
-          <button
-            class="role-tab z-1"
-            :class="{ active: role === 'employer' }"
-            @click="role = 'employer'"
-          >
+          <button class="role-tab z-1" :class="{ active: role === 'employer' }" @click="role = 'employer'">
             ผู้ว่าจ้าง
           </button>
         </div>
@@ -35,24 +22,13 @@
         <form @submit.prevent="handleLogin">
           <div class="mb-3">
             <label class="form-label">ชื่อผู้ใช้งาน</label>
-            <input
-              v-model="username"
-              type="text"
-              class="form-control rounded-3"
-              placeholder="เช่น mornor01"
-              required
-            />
+            <input v-model="username" type="text" class="form-control rounded-3" placeholder="เช่น mornor01" required />
           </div>
 
           <div class="mb-3">
             <label class="form-label">รหัสผ่าน</label>
-            <input
-              :type="showPassword ? 'text' : 'password'"
-              v-model="password"
-              class="form-control rounded-3"
-              placeholder="กรอกรหัสผ่าน"
-              required
-            />
+            <input :type="showPassword ? 'text' : 'password'" v-model="password" class="form-control rounded-3"
+              placeholder="กรอกรหัสผ่าน" required />
             <div class="form-check mt-2">
               <input type="checkbox" v-model="showPassword" class="form-check-input" id="showPassword" />
               <label for="showPassword" class="form-check-label">แสดงรหัสผ่าน</label>
@@ -107,11 +83,19 @@ export default {
           role: this.role,
         })
         .then((res) => {
+          console.log("🧾 login response:", res.data);
           const user = res.data.user;
-          if (!user.name) user.name = this.username;
 
+          // ✅ ตรวจว่ามี id หรือไม่
+          if (!user || !user.id) {
+            console.warn("❌ login สำเร็จแต่ไม่ได้รับ id จาก backend");
+            return;
+          }
+
+          // ✅ บันทึก user ลง localStorage
           localStorage.setItem("user", JSON.stringify(user));
 
+          // ✅ แสดง SweetAlert2 แบบสวย
           Swal.fire({
             title: '✅ เข้าสู่ระบบสำเร็จ!',
             text: 'ยินดีต้อนรับเข้าสู่ระบบ',
@@ -149,6 +133,8 @@ export default {
   },
 };
 </script>
+
+
 
 <style scoped>
 /* 🔶 ปุ่มแท็บแบบสไลด์ */
@@ -220,11 +206,13 @@ input::placeholder {
 .swal2-popup.animated-popup {
   animation: popScale 0.4s ease-out;
 }
+
 @keyframes popScale {
   0% {
     transform: scale(0.85);
     opacity: 0;
   }
+
   100% {
     transform: scale(1);
     opacity: 1;

@@ -11,7 +11,8 @@
           
         </div>
 
-        <form @submit.prevent="submitForm" novalidate class="needs-validation">
+        <form @submit="submitForm" class="needs-validation">
+
           <div class="mb-3">
             <label class="form-label">ชื่อผู้ใช้งาน<span class="text-danger"> *</span></label>
             <input v-model.trim="form.username" class="form-control rounded-3" required placeholder="ชื่อผู้ใช้" />

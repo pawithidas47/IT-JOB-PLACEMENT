@@ -3,6 +3,41 @@ const router = express.Router();
 const appCtrl = require("../controllers/applicationController");
 const db = require("../models/db");
 
+// ✅ ตรวจสอบสถานะผ่าน query param (เช่น /check?job_id=15&applicant_id=1)
+router.get("/check", appCtrl.checkApplied);
+
+// ✅ สมัครงาน
+router.post("/", appCtrl.apply);
+
+// ✅ ยกเลิกการสมัคร
+router.put("/:id/cancel", (req, res) => {
+  const appId = req.params.id;
+
+  const sql = `
+    UPDATE applications
+    SET app_status = 'cancelled'
+    WHERE application_id = ?
+  `;
+
+  db.query(sql, [appId], (err, result) => {
+    if (err) {
+      console.error("❌ ยกเลิกการสมัครไม่สำเร็จ:", err);
+      return res.status(500).json({ message: "ยกเลิกการสมัครไม่สำเร็จ" });
+    }
+
+    res.json({ message: "✅ ยกเลิกการสมัครเรียบร้อยแล้ว" });
+  });
+});
+
+// ✅ ตรวจสอบสถานะจาก path param (เช่น /check-status/15/1)
+router.get("/check-status/:job_id/:applicant_id", (req, res) => {
+  req.query = {
+    job_id: req.params.job_id,
+    applicant_id: req.params.applicant_id,
+  };
+  appCtrl.checkApplied(req, res);
+});
+
 // ✅ ดึงรายการสมัครงานทั้งหมดของผู้สมัคร
 router.get("/:applicant_id", (req, res) => {
   const applicantId = req.params.applicant_id;
@@ -32,31 +67,5 @@ router.get("/:applicant_id", (req, res) => {
     res.json(results);
   });
 });
-
-// ✅ ยกเลิกการสมัคร
-router.put("/:id/cancel", (req, res) => {
-  const appId = req.params.id;
-
-  const sql = `
-    UPDATE applications
-    SET app_status = 'cancelled'
-    WHERE application_id = ?
-  `;
-
-  db.query(sql, [appId], (err, result) => {
-    if (err) {
-      console.error("❌ ยกเลิกการสมัครไม่สำเร็จ:", err);
-      return res.status(500).json({ message: "ยกเลิกการสมัครไม่สำเร็จ" });
-    }
-
-    res.json({ message: "✅ ยกเลิกการสมัครเรียบร้อยแล้ว" });
-  });
-});
-
-// ✅ สมัครงาน (และตรวจสอบซ้ำ)
-router.post("/", appCtrl.apply);
-
-// ✅ เช็คว่าผู้ใช้สมัครงานนี้ไปแล้วหรือยัง
-router.get("/check", appCtrl.checkApplied);
 
 module.exports = router;

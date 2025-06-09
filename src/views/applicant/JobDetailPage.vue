@@ -4,7 +4,8 @@
 
     <div
       class="container mt-5 d-flex flex-column align-items-center justify-content-center text-center position-relative">
-      <div class="card px-5 py-3 border-0 rounded-4 shadow-sm" style="max-width: 720px; width: 100%;">
+     <div class="job-detail-card px-5 py-4">
+
         <h3 class="mb-4 text-orange fw-bold">
           <i class="bi bi-briefcase-fill me-2"></i>{{ job.j_title }}
         </h3>
@@ -132,6 +133,16 @@ export default {
 </script>
 
 <style scoped>
+.job-detail-card {
+  max-width: 720px;
+  width: 100%;
+  background: #ffffff;
+  border-radius: 24px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15); /* << เพิ่มความเข้ม */
+  margin-top: 2rem;
+}
+
+
 .btn-orange {
   background-color: #ff6600;
   color: white;

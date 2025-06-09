@@ -1,6 +1,6 @@
 <template>
   <div class="navbar-home-wrapper">
-    <router-link to="/" class="brand-title text-decoration-none">
+    <router-link to="/applicant/jobs" class="brand-title text-decoration-none">
       IT job placement <span class="text-highlight">@Mor-Nor</span>
     </router-link>
     <div class="nav-top-right">

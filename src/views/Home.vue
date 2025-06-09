@@ -146,11 +146,12 @@
               <h6 class="fw-bold text-orange mb-2">
                 <i class="bi bi-briefcase-fill me-2"></i> {{ job.j_title }}
               </h6>
-              <p class="mb-1 text-muted"><i class="bi bi-tags-fill me-1"></i> {{ job.j_type }}</p>
-              <p class="mb-1 text-muted"><i class="bi bi-cash-coin me-1"></i> {{ job.j_salary.toLocaleString() }} บาท</p>
-              <p class="mb-1 text-muted"><i class="bi bi-person-badge me-1"></i> {{ job.employer_type || 'ไม่ระบุ' }}</p>
-              <p class="mb-1 text-muted"><i class="bi bi-clock me-1"></i> โพสต์เมื่อ: {{ new Date(job.j_posted_at).toLocaleDateString('th-TH') }}</p>
-              <p class="mb-1 text-muted"><i class="bi bi-calendar-event me-1"></i> หมดเขต: {{ new Date(job.j_appdeadline).toLocaleDateString('th-TH') }}</p>
+               <p class="mb-1 text-muted"><i class="bi bi-tags-fill me-1"></i> ประเภทงาน: {{ job.j_type }}</p>
+<p class="mb-1 text-muted"><i class="bi bi-cash-coin me-1"></i> ค่าจ้าง: {{ job.j_salary.toLocaleString() }} บาท</p>
+<p class="mb-1 text-muted"><i class="bi bi-person-badge me-1"></i> ผู้ว่าจ้าง: {{ job.employer_type || 'ไม่ระบุ' }}</p>
+<p class="mb-1 text-muted"><i class="bi bi-clock me-1"></i> โพสต์เมื่อ: {{ new Date(job.j_posted_at).toLocaleDateString('th-TH') }}</p>
+<p class="mb-1 text-muted"><i class="bi bi-calendar-event me-1"></i> หมดเขต: {{ new Date(job.j_appdeadline).toLocaleDateString('th-TH') }}</p>
+
               <div class="d-flex justify-content-between mt-3">
                 <router-link :to="getJobDetailLink(job.job_id)" class="btn btn-sm btn-outline-primary rounded-pill px-3">
   ดูรายละเอียด

@@ -26,6 +26,7 @@
             <i class="bi bi-calendar-event me-2 text-muted"></i>
             <span class="fw-semibold">วันหมดเขต:</span> {{ formatDate(job.j_appdeadline) }}
           </div>
+          <p><i class="bi bi-person-badge me-2"></i><strong>ผู้ว่าจ้าง:</strong> {{ job.employer_type || 'ไม่ระบุ' }}</p>
           <div class="mb-4">
             <i class="bi bi-card-text me-2 text-muted"></i>
             <span class="fw-semibold">รายละเอียดงาน:</span>

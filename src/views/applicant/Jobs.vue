@@ -201,6 +201,7 @@ export default {
       jobs: [],
       filtered: [],
       bookmarkedIds: [],
+      user: null,
     };
   },
   computed: {
@@ -209,7 +210,9 @@ export default {
     },
   },
   mounted() {
-    const saved = JSON.parse(localStorage.getItem("bookmarkedJobs")) || [];
+    this.user = JSON.parse(localStorage.getItem("user"));
+    const key = `bookmarkedJobs_${this.user.applicant_id}`;
+    const saved = JSON.parse(localStorage.getItem(key)) || [];
     this.bookmarkedIds = saved.map(j => j.job_id);
 
     axios.get('http://localhost:3001/api/jobs')
@@ -248,7 +251,7 @@ export default {
       return this.bookmarkedIds.includes(jobId);
     },
     bookmarkJob(job) {
-      const key = "bookmarkedJobs";
+      const key = `bookmarkedJobs_${this.user.applicant_id}`;
       let existing = JSON.parse(localStorage.getItem(key)) || [];
       const index = existing.findIndex(j => j.job_id === job.job_id);
 
@@ -291,7 +294,7 @@ export default {
           }).catch(() => {
             Swal.fire("ไม่สามารถแชร์ได้", "อุปกรณ์ของคุณไม่รองรับการแชร์", "info");
           });
-        } else if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
+        } else if (navigator.clipboard?.writeText) {
           navigator.clipboard.writeText(shareUrl)
             .then(() => {
               Swal.fire({
@@ -307,7 +310,7 @@ export default {
               Swal.fire("เกิดข้อผิดพลาด", "ไม่สามารถคัดลอกลิงก์ได้", "error");
             });
         } else {
-          // fallback แบบ textarea
+          // fallback textarea
           const textarea = document.createElement("textarea");
           textarea.value = shareUrl;
           textarea.setAttribute("readonly", "");
@@ -342,6 +345,7 @@ export default {
   }
 };
 </script>
+
 
 
 <style scoped>

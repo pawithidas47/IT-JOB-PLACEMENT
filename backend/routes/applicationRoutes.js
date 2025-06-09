@@ -3,6 +3,21 @@ const router = express.Router();
 const appCtrl = require("../controllers/applicationController");
 const db = require("../models/db");
 
+router.delete("/:id", (req, res) => {
+  const applicationId = req.params.id;
+  const sql = "DELETE FROM applications WHERE application_id = ?";
+
+  db.query(sql, [applicationId], (err, result) => {
+    if (err) {
+      console.error("❌ ลบข้อมูลไม่สำเร็จ:", err);
+      return res.status(500).json({ message: "เกิดข้อผิดพลาดในการลบ" });
+    }
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: "ไม่พบข้อมูลการสมัคร" });
+    }
+    res.json({ message: "ลบเรียบร้อยแล้ว" });
+  });
+});
 // ✅ ตรวจสอบสถานะผ่าน query param (เช่น /check?job_id=15&applicant_id=1)
 router.get("/check", appCtrl.checkApplied);
 

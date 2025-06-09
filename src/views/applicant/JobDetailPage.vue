@@ -9,13 +9,17 @@
           <i class="bi bi-briefcase-fill me-2"></i>{{ job.j_title }}
         </h3>
 
-        <div class="text-start mb-4">
-          <p><i class="bi bi-tags-fill me-2"></i><strong>ประเภทงาน:</strong> {{ job.j_type }}</p>
-          <p><i class="bi bi-building me-2"></i><strong>บริษัท:</strong> {{ job.j_company }}</p>
-          <p><i class="bi bi-geo-alt-fill me-2"></i><strong>สถานที่:</strong> {{ job.j_location }}</p>
-          <p><i class="bi bi-cash-coin me-2"></i><strong>เงินเดือน:</strong> {{ job.j_salary }}</p>
-          <p><i class="bi bi-card-text me-2"></i><strong>รายละเอียด:</strong> {{ job.j_description }}</p>
-        </div>
+    <div class="text-start mb-4 fs-6">
+  <p><i class="bi bi-tags-fill me-2"></i><strong>ประเภทงาน:</strong> {{ job.j_type }}</p>
+  <p><i class="bi bi-cash-coin me-2"></i><strong>ค่าจ้าง:</strong> {{ Number(job.j_salary).toLocaleString() }} บาท</p>
+  <p><i class="bi bi-calendar-event me-2"></i><strong>วันหมดเขต:</strong> {{ new Date(job.j_appdeadline).toLocaleDateString('th-TH') }}</p>
+  <p><i class="bi bi-person-badge me-2"></i><strong>ผู้ว่าจ้าง:</strong> {{ job.employer_type || 'ไม่ระบุ' }}</p>
+  <p><i class="bi bi-card-text me-2"></i><strong>รายละเอียดงาน:</strong></p>
+  <div class="bg-light p-3 rounded text-start" style="white-space: pre-line;">
+    {{ job.j_description }}
+  </div>
+</div>
+
 
         <div class="text-center">
           <button :class="alreadyApplied ? 'btn btn-secondary w-100 fw-bold' : 'btn btn-orange w-100 fw-bold'"

@@ -14,7 +14,7 @@
             class="form-control"
             placeholder="ค้นหาตามชื่อ..."
           />
-          <select v-model="selectedStatus" class="custom-select">
+          <select v-model="selectedStatus" class="form-select custom-select">
             <option value="">ทั้งหมด</option>
             <option value="pending">รอพิจารณา</option>
             <option value="accepted">รอการติดต่อ</option>

@@ -11,7 +11,7 @@
         <p class="text-muted mb-0 small">พบ {{ filteredJobs.length }} งาน</p>
         <div class="d-flex gap-2">
           <input v-model="filter.title" class="form-control rounded-pill" placeholder="ค้นหาตามชื่อ..." @input="applyFilter" />
-          <select v-model="filter.status" class="custom-select rounded-pill" @change="applyFilter">
+          <select v-model="filter.status" class="form-select custom-select" @change="applyFilter">
             <option value="">ทั้งหมด</option>
             <option value="active">ยังเปิดรับสมัคร</option>
             <option value="expired">ปิดรับสมัครแล้ว</option>

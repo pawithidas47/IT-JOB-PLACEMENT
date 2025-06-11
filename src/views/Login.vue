@@ -1,20 +1,13 @@
+// ===== FRONTEND: Login.vue =====
 <template>
   <div>
     <NavbarHome />
-
-    <div class="d-flex justify-content-center align-items-center py-5"
-      style="background-color: #f7f8fa; min-height: calc(100vh - 80px);">
+    <div class="d-flex justify-content-center align-items-center py-5" style="background-color: #f7f8fa; min-height: calc(100vh - 80px);">
       <div class="card p-4 shadow-sm border-0 rounded-4" style="max-width: 420px; width: 100%;">
-        <!-- 🔶 ปุ่มเลือกบทบาทพร้อม slide indicator -->
         <div class="role-toggle-wrapper position-relative">
           <div class="slider-bg" :class="{ right: role === 'employer' }"></div>
-
-          <button class="role-tab z-1" :class="{ active: role === 'applicant' }" @click="role = 'applicant'">
-            ผู้สมัครงาน
-          </button>
-          <button class="role-tab z-1" :class="{ active: role === 'employer' }" @click="role = 'employer'">
-            ผู้ว่าจ้าง
-          </button>
+          <button class="role-tab z-1" :class="{ active: role === 'applicant' }" @click="role = 'applicant'">ผู้สมัครงาน</button>
+          <button class="role-tab z-1" :class="{ active: role === 'employer' }" @click="role = 'employer'">ผู้ว่าจ้าง</button>
         </div>
 
         <h5 class="text-center fw-bold mb-4 mt-4">เข้าสู่ระบบ</h5>
@@ -27,17 +20,14 @@
 
           <div class="mb-3">
             <label class="form-label">รหัสผ่าน</label>
-            <input :type="showPassword ? 'text' : 'password'" v-model="password" class="form-control rounded-3"
-              placeholder="กรอกรหัสผ่าน" required />
+            <input :type="showPassword ? 'text' : 'password'" v-model="password" class="form-control rounded-3" placeholder="กรอกรหัสผ่าน" required />
             <div class="form-check mt-2">
               <input type="checkbox" v-model="showPassword" class="form-check-input" id="showPassword" />
               <label for="showPassword" class="form-check-label">แสดงรหัสผ่าน</label>
             </div>
           </div>
 
-          <button type="submit" class="btn btn-orange w-100 py-2 fw-bold rounded-3 mt-2">
-            เข้าสู่ระบบ
-          </button>
+          <button type="submit" class="btn btn-orange w-100 py-2 fw-bold rounded-3 mt-2">เข้าสู่ระบบ</button>
 
           <p class="text-center mt-3">
             ยังไม่มีบัญชี?
@@ -69,9 +59,7 @@ export default {
   },
   computed: {
     registerLink() {
-      return this.role === "applicant"
-        ? "/register/applicant"
-        : "/register/employer";
+      return this.role === "applicant" ? "/register/applicant" : "/register/employer";
     },
   },
   methods: {
@@ -80,22 +68,18 @@ export default {
         .post("http://localhost:3001/api/auth/login", {
           username: this.username,
           password: this.password,
-          role: this.role,
         })
         .then((res) => {
-          console.log("🧾 login response:", res.data);
           const user = res.data.user;
 
-          // ✅ ตรวจว่ามี id หรือไม่
-          if (!user || !user.id) {
-            console.warn("❌ login สำเร็จแต่ไม่ได้รับ id จาก backend");
+          if (!user || !user.applicant_id) {
+            console.warn("❌ login สำเร็จแต่ไม่ได้รับ applicant_id จาก backend");
             return;
           }
 
-          // ✅ บันทึก user ลง localStorage
+          localStorage.setItem("user_id", user.applicant_id);
           localStorage.setItem("user", JSON.stringify(user));
 
-          // ✅ แสดง SweetAlert2 แบบสวย
           Swal.fire({
             title: '✅ เข้าสู่ระบบสำเร็จ!',
             text: 'ยินดีต้อนรับเข้าสู่ระบบ',
@@ -134,10 +118,7 @@ export default {
 };
 </script>
 
-
-
 <style scoped>
-/* 🔶 ปุ่มแท็บแบบสไลด์ */
 .role-toggle-wrapper {
   background: #f3f3f3;
   border-radius: 16px;
@@ -146,7 +127,6 @@ export default {
   height: 44px;
   overflow: hidden;
 }
-
 .role-tab {
   flex: 1;
   z-index: 1;
@@ -157,12 +137,10 @@ export default {
   color: #555;
   transition: color 0.2s ease;
 }
-
 .role-tab.active {
   color: white;
   font-weight: 600;
 }
-
 .slider-bg {
   position: absolute;
   width: 50%;
@@ -174,45 +152,35 @@ export default {
   top: 0;
   left: 0;
 }
-
 .slider-bg.right {
   transform: translateX(100%);
 }
-
-/* 🔶 ปุ่มเข้าสู่ระบบ */
 .btn-orange {
   background-color: #ff6600;
   border: none;
   transition: 0.2s ease-in-out;
   color: white;
 }
-
 .btn-orange:hover {
   background-color: #e65c00;
   color: white;
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(255, 102, 0, 0.25);
 }
-
 .text-orange {
   color: #ff6600;
 }
-
 input::placeholder {
   color: #bbb;
 }
-
-/* 🔶 Animation */
 .swal2-popup.animated-popup {
   animation: popScale 0.4s ease-out;
 }
-
 @keyframes popScale {
   0% {
     transform: scale(0.85);
     opacity: 0;
   }
-
   100% {
     transform: scale(1);
     opacity: 1;

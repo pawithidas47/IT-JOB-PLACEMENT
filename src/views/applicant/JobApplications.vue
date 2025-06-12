@@ -4,16 +4,12 @@
 
     <div class="container py-4">
       <!-- Header Title Centered with Background -->
-      
+
       <!-- Filters with count on left -->
       <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
         <p class="text-muted mb-0 small">พบทั้งหมด {{ filteredJobs.length }} รายการ</p>
         <div class="d-flex gap-2">
-          <input
-            v-model="searchText"
-            class="form-control"
-            placeholder="ค้นหาตามชื่อ..."
-          />
+          <input v-model="searchText" class="form-control" placeholder="ค้นหาตามชื่อ..." />
           <select v-model="selectedStatus" class="form-select custom-select">
             <option value="">ทั้งหมด</option>
             <option value="pending">รอพิจารณา</option>
@@ -47,21 +43,15 @@
               <td>{{ job.job_wage.toLocaleString() }}</td>
               <td><span :class="statusClass(job.status)">{{ translateStatus(job.status) }}</span></td>
               <td>
-           <button
-  v-if="job.status === 'cancelled'"
-  class="btn btn-sm btn-outline-black rounded-pill px-3"
-  @click="deleteApplication(job.application_id)"
->
-  <i class="bi bi-trash me-1"></i>
-</button>
+                <button v-if="job.status === 'cancelled'" class="btn btn-sm btn-outline-black rounded-pill px-3"
+                  @click="deleteApplication(job.application_id)">
+                  <i class="bi bi-trash me-1"></i>
+                </button>
 
 
-                
-                <button
-                  v-else-if="job.status !== 'rejected'"
-                  class="btn btn-outline-danger rounded-pill px-3"
-                  @click="cancelApplication(job.application_id)"
-                >
+
+                <button v-else-if="job.status !== 'rejected'" class="btn btn-outline-danger rounded-pill px-3"
+                  @click="cancelApplication(job.application_id)">
                   ยกเลิก
                 </button>
                 <span v-else class="text-muted">-</span>
@@ -129,9 +119,10 @@ export default {
     },
     async fetchApplications() {
       try {
-        const user = JSON.parse(localStorage.getItem("user"));
-        if (!user?.id) return;
-        const res = await axios.get(`http://localhost:3001/api/applications/${user.id}`);
+        const user_id = localStorage.getItem("user_id");
+        if (!user_id) return;
+        const res = await axios.get(`http://localhost:3001/api/applications/${user_id}`);
+
         this.applications = res.data;
       } catch (err) {
         console.error("❌ ดึงข้อมูลสมัครงานไม่สำเร็จ:", err);
@@ -201,7 +192,8 @@ export default {
 }
 
 .btn-cancelled {
-  color: #6c757d; /* muted gray */
+  color: #6c757d;
+  /* muted gray */
   border: 1px solid #6c757d;
   background-color: transparent;
   transition: all 0.2s;
@@ -212,7 +204,8 @@ export default {
 .btn-cancelled:active {
   color: #000;
   border-color: #000;
-  background-color: #f1f1f1; /* soft background when hovered */
+  background-color: #f1f1f1;
+  /* soft background when hovered */
 }
 
 .custom-select,

@@ -1,66 +1,106 @@
 <template>
   <div>
     <NavbarApplicant />
-    <div class="container py-4">
-      <h3 class="fw-bold mb-4 text-orange">
-        <i class="bi bi-person-circle me-2"></i> โปรไฟล์ของคุณ
-      </h3>
-      <div class="card p-4 shadow-sm">
-        <div class="text-center mb-3">
-          <img v-if="profileImage" :src="profileImage" alt="Profile" class="rounded-circle"
-            style="width: 150px; height: 150px; object-fit: cover;" />
-          <img v-else :src="defaultImage" alt="Default Profile" class="rounded-circle"
-            style="width: 150px; height: 150px; object-fit: cover;" />
-          <input type="file" @change="onImageChange" class="form-control mt-2 w-auto mx-auto" />
-        </div>
+    <div class="container py-5">
+      <!-- Header -->
+      <div class="text-center mb-4">
+        <h2 class="fw-bold text-orange">
+          <i class="bi bi-person-circle me-2"></i> โปรไฟล์ของคุณ
+        </h2>
+      </div>
 
-        <div class="row">
-          <div class="col-md-6 mb-3">
-            <label class="form-label fw-bold">ชื่อ-นามสกุล</label>
-            <input :value="user.a_firstname + ' ' + user.a_lastname" class="form-control" disabled />
+      <div class="card shadow rounded-4 p-4 bg-white">
+        <div class="row g-4">
+          <!-- รูปภาพโปรไฟล์และข้อมูลติดต่อ -->
+          <div class="col-md-3 d-flex flex-column align-items-center">
+            <img
+              :src="profileImage || defaultImage"
+              class="rounded shadow border mb-3"
+              style="width: 100%; max-width: 220px; height: 280px; object-fit: cover"
+              alt="profile"
+            />
+            <div class="w-100 border-top pt-3 mt-2 text-start">
+              <h6 class="fw-bold text-center">ข้อมูลติดต่อ</h6>
+              <div class="mb-2">
+                <label class="form-label small text-muted">เบอร์โทรศัพท์</label>
+                <p class="form-control form-control-sm bg-light mb-1">{{ user.a_phone }}</p>
+              </div>
+              <div class="mb-2">
+                <label class="form-label small text-muted">อีเมล</label>
+                <p class="form-control form-control-sm bg-light mb-1">{{ user.a_email }}</p>
+              </div>
+              <div class="mb-2">
+                <label class="form-label small text-muted">ช่องทางติดต่อเพิ่มเติม</label>
+                <p class="form-control form-control-sm bg-light">-</p>
+              </div>
+            </div>
           </div>
-          <div class="col-md-6 mb-3">
-            <label class="form-label fw-bold">อีเมล</label>
-            <input v-model="user.a_email" class="form-control" disabled />
-          </div>
-          <div class="col-md-6 mb-3">
-            <label class="form-label fw-bold">เบอร์โทร</label>
-            <input v-model="user.a_phone" class="form-control" disabled />
-          </div>
-          <div class="col-md-6 mb-3">
-            <label class="form-label fw-bold">คณะ</label>
-            <input v-model="user.a_faculty" class="form-control" disabled />
+
+          <!-- ข้อมูลรายละเอียด -->
+          <div class="col-md-9">
+            <div class="row g-3 border-start ps-4">
+              <div class="col-md-6">
+                <label class="form-label">ชื่อ</label>
+                <p class="form-control bg-light">{{ user.a_firstname }}</p>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">นามสกุล</label>
+                <p class="form-control bg-light">{{ user.a_lastname }}</p>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">รหัสนิสิต</label>
+                <p class="form-control bg-light">{{ user.a_studentid }}</p>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">คณะ</label>
+                <p class="form-control bg-light">{{ user.a_faculty }}</p>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">วันเกิด</label>
+                <p class="form-control bg-light">{{ formatDate(user.a_birthdate) }}</p>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">เพศ</label>
+                <p class="form-control bg-light">{{ user.a_gender }}</p>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">แนะนำตัวเอง (Bio)</label>
+                <p class="form-control bg-light" style="height: 120px">{{ user.a_bio || '-' }}</p>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">ผลงาน (Portfolio)</label>
+                <div class="form-control bg-light" style="height: 120px; overflow: auto">
+                  <ul class="mb-0 ps-3">
+                    <li v-for="item in portfolios" :key="item.portfolio_id">
+                      <a :href="item.portfolio_url" target="_blank">{{ item.portfolio_url }}</a>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+              <div class="col-12">
+                <label class="form-label">ทักษะและเครื่องมือ (Skills & Tools)</label>
+                <div class="d-flex flex-wrap gap-2">
+                  <span
+                    v-for="skill in skills"
+                    :key="skill.skill_id"
+                    class="badge rounded-pill bg-success px-3 py-2"
+                  >
+                    ✅ {{ skill.skill_name }}
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div class="text-end mt-4">
+              <router-link
+                to="/applicant/editprofile"
+                class="btn px-4 py-2 rounded-pill text-white"
+                style="background-color: #ff6600"
+              >
+                แก้ไขโปรไฟล์
+              </router-link>
+            </div>
           </div>
         </div>
-
-        <div class="mb-3">
-          <label class="form-label fw-bold">แนะนำตัวเอง (Bio)</label>
-          <textarea v-model="user.a_bio" class="form-control" rows="3"></textarea>
-          <button class="btn btn-sm btn-primary mt-2" @click="updateBio">บันทึก</button>
-        </div>
-
-        <div class="mb-3">
-          <label class="form-label fw-bold">ผลงาน (Portfolio)</label>
-          <ul>
-            <li v-for="item in portfolios" :key="item.portfolio_id">
-              <a :href="item.portfolio_url" target="_blank" class="link-primary text-decoration-underline">
-                ลิงก์ที่ {{ item.portfolio_id }}
-              </a>
-            </li>
-          </ul>
-          <div class="input-group mt-2">
-            <input v-model="newPortfolioUrl" type="text" class="form-control" placeholder="แนบลิงก์ผลงานใหม่" />
-            <button class="btn btn-success" @click="addPortfolio">เพิ่ม</button>
-          </div>
-        </div>
-
-        <div class="mb-3">
-          <label class="form-label fw-bold">ทักษะ (Skills)</label>
-          <textarea v-model="newSkillsText" class="form-control" rows="2"
-            placeholder="ระบุทักษะแยกด้วย , เช่น HTML, CSS, JS"></textarea>
-          <button class="btn btn-sm btn-primary mt-2" @click="updateSkills">บันทึก</button>
-        </div>
-
       </div>
     </div>
   </div>
@@ -83,16 +123,11 @@ export default {
       portfolios: [],
       profileImage: null,
       defaultImage: DefaultProfile,
-      newSkillsText: "",
-      newPortfolioUrl: ""
     };
   },
   mounted() {
     const applicantId = localStorage.getItem("user_id");
-    console.log("🧾 applicantId =", applicantId);
-    if (applicantId) {
-      this.fetchProfile(applicantId);
-    }
+    if (applicantId) this.fetchProfile(applicantId);
   },
   methods: {
     async fetchProfile(id) {
@@ -104,59 +139,18 @@ export default {
         if (res.data.user.profile_img_url) {
           this.profileImage = `${BASE_URL}${res.data.user.profile_img_url}`;
         }
-        this.newSkillsText = this.skills.map(s => s.skill_name).join(", ");
       } catch (err) {
         console.error("❌ fetchProfile failed", err);
       }
     },
-    async onImageChange(event) {
-      const file = event.target.files[0];
-      const formData = new FormData();
-      formData.append("image", file);
-
-      const applicantId = localStorage.getItem("user_id");
-      const res = await axios.post(`${BASE_URL}/api/applicant/${applicantId}/upload`, formData);
-      this.profileImage = `${BASE_URL}${res.data.url}`;
+    formatDate(dateStr) {
+      return new Date(dateStr).toLocaleDateString("th-TH", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+      });
     },
-    async updateBio() {
-      try {
-        const id = localStorage.getItem("user_id");
-        await axios.put(`${BASE_URL}/api/applicant/${id}/bio`, {
-          a_bio: this.user.a_bio,
-        });
-        alert("✅ บันทึกเรียบร้อยแล้ว");
-      } catch (err) {
-        console.error("❌ updateBio failed", err);
-      }
-    },
-    async updateSkills() {
-      const id = localStorage.getItem("user_id");
-      const skills = this.newSkillsText.split(",").map(s => s.trim()).filter(s => s);
-
-      try {
-        await axios.put(`${BASE_URL}/api/applicant/${id}/skills`, { skills });
-        alert("✅ บันทึกทักษะเรียบร้อย");
-        this.fetchProfile(id);
-      } catch (err) {
-        console.error("❌ updateSkills failed", err);
-        alert("เกิดข้อผิดพลาด");
-      }
-    },
-    async addPortfolio() {
-      if (!this.newPortfolioUrl.trim()) return;
-      const applicantId = localStorage.getItem("user_id");
-      try {
-        await axios.post(`${BASE_URL}/api/applicant/${applicantId}/portfolio`, {
-          portfolio_url: this.newPortfolioUrl,
-        });
-        this.newPortfolioUrl = "";
-        this.fetchProfile(applicantId);
-      } catch (err) {
-        console.error("❌ addPortfolio failed", err);
-        alert("ไม่สามารถเพิ่มลิงก์ได้");
-      }
-    }
-  }
+  },
 };
 </script>
 

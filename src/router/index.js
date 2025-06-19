@@ -11,16 +11,22 @@ import JobApplications from "@/views/applicant/JobApplications.vue";
 
 const routes = [
   {
-  path: "/applicant/userprofile",
-  name: "UserProfile",
-  component: () => import("@/views/applicant/UserProfile.vue"),
-},
+    path: "/applicant/userprofile",
+    name: "UserProfile",
+    component: () => import("@/views/applicant/UserProfile.vue"),
+  },
+  {
+    path: '/applicant/editprofile',
+    name: 'EditProfile',
+    component: () => import('@/views/applicant/EditProfile.vue')
+  }
+  ,
 
   {
-  path: "/applicant/jobapplications",
-  name: "JobApplications",
-  component: JobApplications,
-},
+    path: "/applicant/jobapplications",
+    name: "JobApplications",
+    component: JobApplications,
+  },
 
   { path: "/", component: HomePage },
   { path: "/login", component: Login },
@@ -53,21 +59,21 @@ const routes = [
 
 
   {
-  path: '/applicant/savedjobs',
-  component: () => import('@/views/applicant/SavedJobs.vue'),
-},
-  
-{
-  path: "/jobs/:id",
-  name: "PublicJobDetail",
-  component: () => import("@/views/JobDetail.vue"),
-},
-{
-  path: "/applicant/jobs/:id",
-  name: "ApplicantJobDetail",
-  component: () => import("@/views/applicant/JobDetailPage.vue"),
-  meta: { requiresAuth: true }
-}
+    path: '/applicant/savedjobs',
+    component: () => import('@/views/applicant/SavedJobs.vue'),
+  },
+
+  {
+    path: "/jobs/:id",
+    name: "PublicJobDetail",
+    component: () => import("@/views/JobDetail.vue"),
+  },
+  {
+    path: "/applicant/jobs/:id",
+    name: "ApplicantJobDetail",
+    component: () => import("@/views/applicant/JobDetailPage.vue"),
+    meta: { requiresAuth: true }
+  }
 
 
 

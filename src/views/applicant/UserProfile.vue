@@ -30,9 +30,10 @@
                 <p class="form-control form-control-sm bg-light mb-1">{{ user.a_email }}</p>
               </div>
               <div class="mb-2">
-                <label class="form-label small text-muted">ช่องทางติดต่อเพิ่มเติม</label>
-                <p class="form-control form-control-sm bg-light">-</p>
-              </div>
+  <label class="form-label small text-muted">ช่องทางติดต่อเพิ่มเติม</label>
+  <p class="form-control form-control-sm bg-light mb-1">{{ user.a_contact || '-' }}</p>
+</div>
+
             </div>
           </div>
 
@@ -56,9 +57,9 @@
                 <p class="form-control bg-light">{{ user.a_faculty }}</p>
               </div>
               <div class="col-md-6">
-                <label class="form-label">วันเกิด</label>
-                <p class="form-control bg-light">{{ formatDate(user.a_birthdate) }}</p>
-              </div>
+  <label class="form-label">อายุ</label>
+  <p class="form-control bg-light">{{ calculateAge(user.a_birthdate) }}</p>
+</div>
               <div class="col-md-6">
                 <label class="form-label">เพศ</label>
                 <p class="form-control bg-light">{{ user.a_gender }}</p>
@@ -130,6 +131,15 @@ export default {
     if (applicantId) this.fetchProfile(applicantId);
   },
   methods: {
+    calculateAge(dateStr) {
+    const birthDate = new Date(dateStr);
+    if (isNaN(birthDate)) return "-";
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const m = today.getMonth() - birthDate.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) age--;
+    return `${age} ปี`;
+  },
     async fetchProfile(id) {
       try {
         const res = await axios.get(`${BASE_URL}/api/applicant/${id}`);
@@ -143,13 +153,16 @@ export default {
         console.error("❌ fetchProfile failed", err);
       }
     },
-    formatDate(dateStr) {
-      return new Date(dateStr).toLocaleDateString("th-TH", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric",
-      });
-    },
+   formatDate(dateStr) {
+  const date = new Date(dateStr);
+  if (isNaN(date)) return "-";
+  const thYear = date.getFullYear() + 543;
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${day}/${month}/${thYear}`; // ✅ เช่น 10/03/2548
+}
+
+,
   },
 };
 </script>

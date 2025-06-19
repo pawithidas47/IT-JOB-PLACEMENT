@@ -126,22 +126,26 @@ export default {
 
 .job-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 24px;
+  align-items: stretch;
 }
 
 .job-card {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  height: 100%; /* ใช้กับ grid แล้วจะสูงเท่ากัน */
-  max-width: 320px; 
-  
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+          /* ความสูงขั้นต่ำเท่ากันทุกใบ */
+  background: white;
+  border: 1px solid #eee;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s ease-in-out;
 }
 
 .job-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 6px 24px rgba(255, 102, 0, 0.2);
+  transform: translateY(-5px);
+  box-shadow: 0 8px 24px rgba(255, 102, 0, 0.15);
 }
 </style>

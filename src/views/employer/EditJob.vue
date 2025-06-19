@@ -1,31 +1,41 @@
 <template>
-  <div class="container mt-5" style="max-width: 600px">
-    <h3 class="mb-4">แก้ไขงาน</h3>
+  <div class="container py-5" style="max-width: 700px;">
+    <h4 class="fw-bold text-orange mb-4">
+      <i class="bi bi-pencil-square me-2"></i> แก้ไขงาน
+    </h4>
     <form @submit.prevent="submitEdit">
       <div class="mb-3">
-        <label>ชื่องาน</label>
+        <label class="form-label fw-semibold">ชื่องาน</label>
         <input v-model="job.j_title" class="form-control" required />
       </div>
       <div class="mb-3">
-        <label>รายละเอียดงาน</label>
-        <textarea v-model="job.j_description" class="form-control" rows="4" required></textarea>
+        <label class="form-label fw-semibold">รายละเอียดงาน</label>
+        <textarea v-model="job.j_description" class="form-control" rows="5" required></textarea>
       </div>
       <div class="mb-3">
-        <label>ประเภทงาน</label>
-        <select v-model="job.j_type" class="form-control" required>
-          <option value="part-time">งานพาร์ทไทม์</option>
-          <option value="freelance">งานฟรีแลนซ์</option>
+        <label class="form-label fw-semibold">ประเภทงาน</label>
+        <select v-model="job.j_type" class="form-select" required>
+          <option disabled value="">-- กรุณาเลือกประเภท --</option>
+          <option value="ออกแบบและมัลติมีเดีย">ออกแบบและมัลติมีเดีย</option>
+          <option value="การตลาดดิจิทัล">การตลาดดิจิทัล</option>
+          <option value="แอดมินเพจ / โซเชียลมีเดีย">แอดมินเพจ / โซเชียลมีเดีย</option>
+          <option value="ตัดต่อวิดีโอ / คอนเทนต์">ตัดต่อวิดีโอ / คอนเทนต์</option>
+          <option value="คีย์ข้อมูล / Data Entry">คีย์ข้อมูล / Data Entry</option>
         </select>
       </div>
       <div class="mb-3">
-        <label>ค่าจ้าง</label>
+        <label class="form-label fw-semibold">ค่าจ้าง</label>
         <input v-model.number="job.j_salary" type="number" class="form-control" required />
       </div>
       <div class="mb-3">
-        <label>วันปิดรับสมัคร</label>
+        <label class="form-label fw-semibold">วันปิดรับสมัคร</label>
         <input v-model="job.j_appdeadline" type="date" class="form-control" required />
       </div>
-      <button class="btn btn-warning text-white w-100">บันทึกการแก้ไข</button>
+      <div class="text-end">
+        <button class="btn btn-orange fw-bold px-4 py-2 rounded-pill shadow-sm">
+          <i class="bi bi-check2-circle me-2"></i> บันทึกการแก้ไข
+        </button>
+      </div>
     </form>
   </div>
 </template>
@@ -37,24 +47,16 @@ export default {
   name: "EditJob",
   data() {
     return {
-      job: {
-        j_title: "",
-        j_description: "",
-        j_type: "",
-        j_salary: null,
-        j_appdeadline: "",
-      },
+      job: {}
     };
   },
   mounted() {
-    // ดึง id งานจาก params ของ route
     const jobId = this.$route.params.id;
     this.fetchJob(jobId);
   },
   methods: {
     fetchJob(id) {
-      axios
-        .get(`http://localhost:3001/api/jobs/${id}`)
+      axios.get(`http://localhost:3001/api/jobs/${id}`)
         .then((res) => {
           this.job = res.data;
         })
@@ -66,8 +68,7 @@ export default {
     },
     submitEdit() {
       const jobId = this.$route.params.id;
-      axios
-        .put(`http://localhost:3001/api/jobs/${jobId}`, this.job)
+      axios.put(`http://localhost:3001/api/jobs/${jobId}`, this.job)
         .then(() => {
           alert("บันทึกการแก้ไขสำเร็จ");
           this.$router.push("/employer/dashboard");
@@ -76,7 +77,20 @@ export default {
           console.error("แก้ไขงานล้มเหลว:", err);
           alert("เกิดข้อผิดพลาดในการแก้ไขงาน");
         });
-    },
-  },
+    }
+  }
 };
 </script>
+
+<style scoped>
+.text-orange {
+  color: #ff6600;
+}
+.btn-orange {
+  background-color: #ff6600;
+  color: white;
+}
+.btn-orange:hover {
+  background-color: #e65c00;
+}
+</style>

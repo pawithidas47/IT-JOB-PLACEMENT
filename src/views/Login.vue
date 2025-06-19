@@ -54,7 +54,7 @@ export default {
       username: "",
       password: "",
       showPassword: false,
-      role: "applicant",
+      role: "applicant", // applicant | employer
     };
   },
   computed: {
@@ -64,36 +64,43 @@ export default {
   },
   methods: {
     handleLogin() {
+      const url =
+        this.role === "applicant"
+          ? "http://localhost:3001/api/auth/login"
+          : "http://localhost:3001/api/auth/employer/login";
+
       axios
-        .post("http://localhost:3001/api/auth/login", {
+        .post(url, {
           username: this.username,
           password: this.password,
         })
         .then((res) => {
           const user = res.data.user;
+          const idKey = this.role === "applicant" ? "applicant_id" : "employer_id";
 
-          if (!user || !user.applicant_id) {
-            console.warn("❌ login สำเร็จแต่ไม่ได้รับ applicant_id จาก backend");
+          if (!user || !user[idKey]) {
+            console.warn("❌ Login response ไม่มีข้อมูล id:", user);
             return;
           }
 
-          localStorage.setItem("user_id", user.applicant_id);
+          localStorage.setItem("user_id", user[idKey]);
           localStorage.setItem("user", JSON.stringify(user));
+          localStorage.setItem("user_role", this.role); // เพิ่ม role ด้วย
 
           Swal.fire({
-            title: '✅ เข้าสู่ระบบสำเร็จ!',
-            text: 'ยินดีต้อนรับเข้าสู่ระบบ',
-            icon: 'success',
-            iconColor: '#10b981',
+            title: "✅ เข้าสู่ระบบสำเร็จ!",
+            text: "ยินดีต้อนรับเข้าสู่ระบบ",
+            icon: "success",
+            iconColor: "#10b981",
             showConfirmButton: false,
             timer: 2000,
             timerProgressBar: true,
-            background: '#ffffff',
-            color: '#333',
+            background: "#ffffff",
+            color: "#333",
             customClass: {
-              popup: 'rounded-4 animated-popup shadow',
-              title: 'fw-bold fs-5',
-              htmlContainer: 'fs-6',
+              popup: "rounded-4 animated-popup shadow",
+              title: "fw-bold fs-5",
+              htmlContainer: "fs-6",
             },
             willClose: () => {
               this.$router.push(
@@ -101,22 +108,23 @@ export default {
                   ? "/applicant/jobs"
                   : "/employer/dashboard"
               );
-            }
+            },
           });
         })
         .catch((err) => {
           console.error("❌ Login failed:", err);
           Swal.fire({
-            icon: 'error',
-            title: 'เข้าสู่ระบบไม่สำเร็จ',
-            text: 'กรุณาตรวจสอบชื่อผู้ใช้หรือรหัสผ่าน',
-            confirmButtonColor: '#ff6600'
+            icon: "error",
+            title: "เข้าสู่ระบบไม่สำเร็จ",
+            text: "กรุณาตรวจสอบชื่อผู้ใช้หรือรหัสผ่าน",
+            confirmButtonColor: "#ff6600",
           });
         });
     },
   },
 };
 </script>
+
 
 <style scoped>
 .role-toggle-wrapper {

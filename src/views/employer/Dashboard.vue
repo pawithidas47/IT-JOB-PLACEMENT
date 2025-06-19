@@ -2,44 +2,50 @@
   <div>
     <NavbarEmployer />
 
-    <div class="container py-4">
-      <!-- Header -->
+    <div class="container py-4" style="max-width: 800px">
       <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
-        <h4 class="fw-bold text-orange">
-          <i class="bi bi-briefcase-fill me-2"></i> จัดการงานของคุณ
-        </h4>
+        <h4 class="fw-bold text-orange"><i class="bi bi-briefcase-fill me-2"></i> งานทั้งหมด</h4>
         <router-link to="/employer/post-job" class="btn btn-orange fw-bold px-4 py-2 rounded-pill shadow-sm">
           <i class="bi bi-plus-circle me-2"></i> เพิ่มงานใหม่
         </router-link>
       </div>
 
-      <!-- Search -->
       <div class="input-group mb-4 shadow-sm">
         <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
         <input type="text" class="form-control border-start-0" placeholder="ค้นหาชื่องาน..." v-model="search" />
       </div>
 
-      <!-- Jobs Card Grid -->
-      <div class="row g-4">
-        <div v-for="job in filteredJobs" :key="job.job_id" class="col-md-6 col-lg-4">
-          <div class="job-card p-4 rounded-4 shadow-sm h-100 position-relative">
-            <h5 class="fw-bold mb-2 text-dark">
-              <i class="bi bi-briefcase text-orange me-2"></i> {{ job.j_title }}
-            </h5>
-            <p class="mb-1"><i class="bi bi-tags-fill me-2 text-muted"></i> ประเภท: {{ job.j_type }}</p>
-            <p class="mb-1"><i class="bi bi-calendar-event me-2 text-muted"></i> โพสต์เมื่อ: {{ formatDate(job.j_posted_at) }}</p>
-            <p class="mb-3"><i class="bi bi-cash-coin me-2 text-muted"></i> ค่าจ้าง: {{ parseFloat(job.j_salary).toLocaleString() }} บาท</p>
-
-            <div class="d-flex justify-content-end gap-2 mt-auto">
-              <button @click="openEdit(job)" class="btn btn-sm btn-outline-secondary rounded-circle" title="แก้ไข">
-                <i class="bi bi-pencil-fill"></i>
-              </button>
-              <button @click="deleteJob(job.job_id)" class="btn btn-sm btn-outline-danger rounded-circle" title="ลบ">
-                <i class="bi bi-trash-fill"></i>
-              </button>
-            </div>
-          </div>
+      <!-- Card-Post Style -->
+      <div v-for="job in filteredJobs" :key="job.job_id" class="job-post shadow-sm rounded-4 p-4 mb-4 bg-white">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <h5 class="fw-bold text-orange"><i class="bi bi-briefcase-fill me-2"></i>{{ job.j_title }}</h5>
+          <small class="text-muted">{{ formatDate(job.j_posted_at) }}</small>
         </div>
+
+        <ul class="list-unstyled mb-3 small text-dark">
+          <li><i class="bi bi-tags-fill me-2 text-muted"></i><strong>ประเภทงาน:</strong> {{ job.j_type }}</li>
+          <li><i class="bi bi-cash-coin me-2 text-muted"></i><strong>ค่าจ้าง:</strong> {{ parseFloat(job.j_salary).toLocaleString() }} บาท</li>
+          <li><i class="bi bi-calendar-x me-2 text-muted"></i><strong>หมดเขต:</strong> {{ formatDate(job.j_appdeadline) }}</li>
+          <li><i class="bi bi-person-vcard me-2 text-muted"></i><strong>ผู้ว่าจ้าง:</strong> {{ user?.e_type || 'ไม่ระบุ' }}</li>
+        </ul>
+
+        <div class="bg-light rounded p-3 small font-monospace" style="white-space: pre-wrap;">
+          {{ job.j_description }}
+        </div>
+
+        <div class="d-flex justify-content-end gap-2 mt-3">
+          <button @click="openEdit(job)" class="btn btn-sm btn-outline-secondary rounded-pill">
+            ✏️ แก้ไข
+          </button>
+          <button @click="deleteJob(job.job_id)" class="btn btn-sm btn-outline-danger rounded-pill">
+            🗑️ ลบ
+          </button>
+        </div>
+      </div>
+
+      <div v-if="filteredJobs.length === 0" class="text-center text-muted py-5">
+        <i class="bi bi-emoji-frown fs-1"></i>
+        <p class="mt-3">ไม่พบงานที่ตรงกับคำค้น</p>
       </div>
 
       <!-- Modal แก้ไขงาน -->
@@ -156,7 +162,6 @@ export default {
     async submitEdit() {
       const j = { ...this.editingJob };
 
-      // ✅ แปลงวันที่ให้เหมาะกับ MySQL
       if (j.j_appdeadline) {
         const d = new Date(j.j_appdeadline);
         const yyyy = d.getFullYear();
@@ -170,8 +175,7 @@ export default {
         this.showModal = false;
         this.fetchJobs();
       } catch (err) {
-        console.error("❌ บันทึกงานล้มเหลว:", err);
-        alert("เกิดข้อผิดพลาดในการบันทึก");
+        console.error("❌ แก้ไขล้มเหลว:", err);
       }
     },
     async deleteJob(id) {
@@ -180,7 +184,7 @@ export default {
         await axios.delete(`http://localhost:3001/api/jobs/${id}`);
         this.fetchJobs();
       } catch (err) {
-        console.error("❌ ลบงานล้มเหลว:", err);
+        console.error("❌ ลบล้มเหลว:", err);
       }
     },
   },
@@ -198,48 +202,46 @@ export default {
 .btn-orange:hover {
   background-color: #e65c00;
 }
+.job-post {
+  border: 1px solid #eee;
+  border-left: 4px solid #ff6600;
+  transition: 0.3s;
+}
+.job-post:hover {
+  box-shadow: 0 8px 24px rgba(255, 102, 0, 0.1);
+}
 
-/* โมดัลแบบกล่องลอย */
+/* Modal style */
 .modal-backdrop {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(20, 20, 20, 0.4);
+  background: rgba(30, 30, 30, 0.45);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 9999;
+  z-index: 1000;
 }
 
 .modal-box {
   background: #fff;
   padding: 2rem;
   border-radius: 1rem;
-  max-width: 500px;
   width: 100%;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
-  animation: pop-in 0.3s ease;
+  max-width: 500px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  animation: pop-in 0.25s ease;
 }
 @keyframes pop-in {
   from {
     opacity: 0;
-    transform: scale(0.95);
+    transform: translateY(-10px) scale(0.98);
   }
   to {
     opacity: 1;
-    transform: scale(1);
+    transform: translateY(0) scale(1);
   }
-}
-
-.job-card {
-  border: 1px solid #eee;
-  transition: 0.3s;
-  background-color: white;
-}
-.job-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 6px 20px rgba(255, 102, 0, 0.1);
 }
 </style>

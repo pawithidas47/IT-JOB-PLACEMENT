@@ -3,17 +3,24 @@
     <NavbarEmployer />
 
     <div class="container py-4" style="max-width: 800px">
-      <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
-        <h4 class="fw-bold text-orange"><i class="bi bi-briefcase-fill me-2"></i> งานทั้งหมด</h4>
-        <router-link to="/employer/post-job" class="btn btn-orange fw-bold px-4 py-2 rounded-pill shadow-sm">
-          <i class="bi bi-plus-circle me-2"></i> เพิ่มงานใหม่
-        </router-link>
-      </div>
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+  <h4 class="fw-bold text-orange"><i class="bi bi-briefcase-fill me-2"></i> งานทั้งหมด</h4>
+  <router-link to="/employer/post-job" class="btn btn-add-job d-flex align-items-center">
+    <i class="bi bi-plus-circle-fill me-2 fs-5"></i> เพิ่มงานใหม่
+  </router-link>
+</div>
 
-      <div class="input-group mb-4 shadow-sm">
-        <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
-        <input type="text" class="form-control border-start-0" placeholder="ค้นหาชื่องาน..." v-model="search" />
-      </div>
+<!-- ค้นหา -->
+<div class="search-box mb-4 shadow-sm">
+  <i class="bi bi-search text-muted search-icon"></i>
+  <input
+    type="text"
+    class="form-control search-input"
+    placeholder="ค้นหาชื่องานที่คุณโพสต์ไว้..."
+    v-model="search"
+/>
+</div>
+
 
       <!-- Card-Post Style -->
       <div v-for="job in filteredJobs" :key="job.job_id" class="job-post shadow-sm rounded-4 p-4 mb-4 bg-white">
@@ -192,6 +199,52 @@ export default {
 </script>
 
 <style scoped>
+/* ปุ่มเพิ่มงาน */
+.btn-add-job {
+  background-color: #ff6600;
+  color: white;
+  font-weight: 500;
+  font-size: 15px;
+  padding: 8px 16px;
+  border-radius: 999px;
+  box-shadow: 0 3px 10px rgba(255, 102, 0, 0.2);
+  transition: all 0.2s ease;
+  line-height: 1.2;
+}
+.btn-add-job:hover {
+  background-color: #e65c00;
+  transform: translateY(-1px);
+}
+
+/* กล่องค้นหา */
+.search-box {
+  position: relative;
+  border: 1px solid #ddd;
+  border-radius: 999px;
+  background: white;
+  padding: 4px 14px;
+  display: flex;
+  align-items: center;
+  height: 42px;
+}
+.search-icon {
+  font-size: 1.1rem;
+  margin-right: 8px;
+  color: #999;
+}
+.search-input {
+  border: none;
+  outline: none !important;
+  box-shadow: none !important;
+  background: transparent;
+  font-size: 14.5px;
+  flex: 1;
+}
+.search-input::placeholder {
+  color: #bbb;
+}
+
+
 .text-orange {
   color: #ff6600;
 }

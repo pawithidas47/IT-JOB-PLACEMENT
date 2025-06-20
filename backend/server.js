@@ -10,10 +10,13 @@ const applicationRoutes = require("./routes/applicationRoutes");
 const applicantRoutes = require("./routes/applicantRoutes");
 
 const app = express();
-
-
+const employerRoutes = require("./routes/employerRoutes");
 
 app.use(cors());
+app.use("/api/employer", employerRoutes);
+
+
+
 app.use(bodyParser.json());
 
 // ✅ เสิร์ฟไฟล์รูป

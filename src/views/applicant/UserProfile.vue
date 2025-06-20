@@ -112,6 +112,7 @@ import axios from "axios";
 import NavbarApplicant from "@/components/NavbarApplicant.vue";
 import DefaultProfile from "@/assets/default-profile.png";
 
+
 const BASE_URL = "http://localhost:3001";
 
 export default {
@@ -126,10 +127,11 @@ export default {
       defaultImage: DefaultProfile,
     };
   },
-  mounted() {
-    const applicantId = localStorage.getItem("user_id");
-    if (applicantId) this.fetchProfile(applicantId);
-  },
+ mounted() {
+  const id = this.$route.params.id || localStorage.getItem("user_id");
+  if (id) this.fetchProfile(id);
+}
+,
   methods: {
     calculateAge(dateStr) {
     const birthDate = new Date(dateStr);

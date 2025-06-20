@@ -168,6 +168,24 @@ router.post("/:id/portfolio", async (req, res) => {
     res.status(500).json({ message: "เกิดข้อผิดพลาด", error: err });
   }
 });
+router.get("/:id", async (req, res) => {
+  const id = req.params.id;
+  try {
+    const [user] = await db.promise().query("SELECT * FROM applicants WHERE applicant_id = ?", [id]);
+    const [portfolios] = await db.promise().query("SELECT * FROM portfolios WHERE applicant_id = ?", [id]);
+    const [skills] = await db.promise().query(`
+      SELECT s.skill_id, s.skill_name
+      FROM user_skills us
+      JOIN skills s ON us.skill_id = s.skill_id
+      WHERE us.applicant_id = ?
+    `, [id]);
+
+    res.json({ user: user[0], portfolios, skills });
+  } catch (err) {
+    res.status(500).json({ error: err });
+  }
+});
+
 
 // ✅ ลบ portfolio ทั้งหมดของผู้ใช้
 router.delete("/:id/portfolio/all", async (req, res) => {

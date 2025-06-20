@@ -1,23 +1,48 @@
 const express = require("express");
 const router = express.Router();
-const jobCtrl = require("../controllers/jobController"); // เช็คว่าการนำเข้าถูกต้องไหม
+const multer = require("multer");
+const upload = multer({ dest: "uploads/" });
 
-// เส้นทาง POST สำหรับเพิ่มงานใหม่
-router.post("/", jobCtrl.postJob);
+const db = require("../models/db");
+const jobCtrl = require("../controllers/jobController");
 
-// เส้นทาง GET สำหรับดึงข้อมูลงานทั้งหมด
-router.get("/", jobCtrl.getJobs); // ใช้ฟังก์ชัน getJobs
+// ✅ POST: เพิ่มงานใหม่ (อัปโหลดไฟล์รองรับ formData)
+router.post("/", upload.any(), async (req, res) => {
+  const {
+    j_title,
+    j_description,
+    j_type,
+    j_salary,
+    j_appdeadline,
+    employer_id
+  } = req.body;
 
-// เส้นทาง GET สำหรับดึงงานตามผู้ว่าจ้าง
+  try {
+    await db.promise().query(
+      `INSERT INTO jobs (j_title, j_description, j_type, j_salary, j_appdeadline, employer_id)
+       VALUES (?, ?, ?, ?, ?, ?)`,
+      [j_title, j_description, j_type, j_salary, j_appdeadline, employer_id]
+    );
+    res.json({ message: "โพสต์สำเร็จ" });
+  } catch (err) {
+    console.error("❌ เพิ่มงานล้มเหลว:", err);
+    res.status(500).json({ error: "ไม่สามารถเพิ่มงานได้" });
+  }
+});
+
+// ✅ GET: ดึงข้อมูลงานทั้งหมด
+router.get("/", jobCtrl.getJobs);
+
+// ✅ GET: ดึงงานตามผู้ว่าจ้าง
 router.get("/employer/:id", jobCtrl.getJobsByEmployer);
 
-// เส้นทาง DELETE สำหรับลบงาน
-router.delete("/:id", jobCtrl.deleteJob);
+// ✅ GET: ดึงงานตาม ID
+router.get("/:id", jobCtrl.getJobById);
 
-// เส้นทาง PUT สำหรับแก้ไขงาน
+// ✅ PUT: แก้ไขงาน
 router.put("/:id", jobCtrl.updateJob);
 
-// เส้นทาง GET สำหรับดึงข้อมูลงานตาม ID
-router.get("/:id", jobCtrl.getJobById);
+// ✅ DELETE: ลบงาน
+router.delete("/:id", jobCtrl.deleteJob);
 
 module.exports = router;

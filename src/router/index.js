@@ -45,6 +45,12 @@ const routes = [
     component: () => import("@/views/employer/Applicants.vue"),
 
   },
+  {
+  path: "/employer/applicant",
+  name: "EmployerApplicantProfile",
+  component: () => import("@/views/employer/ApplicantProfile.vue"),
+},
+
 
   // Applicant
   {
@@ -85,6 +91,12 @@ const routes = [
     path: "/applicant/savedjobs",
     component: () => import("@/views/applicant/SavedJobs.vue"),
   },
+  {
+  path: '/applicant/:id',
+  name: 'PublicApplicantProfile',
+  component: () => import('@/views/applicant/UserProfile.vue')  // ✅ ใช้ component เดิมได้เลย
+}
+,
 
   // Job detail (public)
   {
@@ -92,6 +104,15 @@ const routes = [
     name: "PublicJobDetail",
     component: () => import("@/views/JobDetail.vue"),
   },
+{
+  path: "/employer/applicant",
+  name: "EmployerApplicantProfile",
+  component: () => import("@/views/employer/ApplicantProfile.vue")
+}
+
+
+,
+
 ];
 
 const router = createRouter({

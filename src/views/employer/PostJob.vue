@@ -16,7 +16,8 @@
           <!-- Detail -->
           <div class="col-12">
             <label class="form-label">รายละเอียดงาน</label>
-            <textarea v-model="job.detail" class="form-control rounded-3" rows="3" placeholder="อธิบายลักษณะงานโดยรวม" required></textarea>
+            <textarea v-model="job.detail" class="form-control rounded-3" rows="3" placeholder="อธิบายลักษณะงานโดยรวม"
+              required></textarea>
           </div>
 
           <!-- Style + Goal -->
@@ -84,7 +85,8 @@
 
           <!-- Submit -->
           <div class="col-12">
-            <button class="btn btn-warning w-100 fw-bold text-white py-2">📨 โพสต์งาน</button>
+            <button class="btn btn-orange w-100 fw-bold py-2"> โพสต์งาน</button>
+
           </div>
         </form>
       </div>
@@ -96,7 +98,8 @@
           <h6 class="fw-bold mb-1">{{ job.j_title }}</h6>
           <p class="mb-1 text-muted">{{ job.j_type }}</p>
           <p class="mb-1"><strong>รายละเอียด:</strong> {{ job.detail }}</p>
-          <p><strong>ติดต่อ:</strong> {{ job.contact }} | 💰 {{ job.j_salary?.toLocaleString() }} บาท | ⏳ {{ job.duration }}</p>
+          <p><strong>ติดต่อ:</strong> {{ job.contact }} | 💰 {{ job.j_salary?.toLocaleString() }} บาท | ⏳ {{
+            job.duration }}</p>
         </div>
       </div>
     </div>
@@ -131,6 +134,15 @@ export default {
     const u = localStorage.getItem("user");
     if (!u) return this.$router.push("/login");
     this.user = JSON.parse(u);
+
+    // แปลงวันที่ให้เป็น YYYY-MM-DD ถ้ามีค่าเริ่มต้นจาก backend
+    if (this.job.j_appdeadline) {
+      const date = new Date(this.job.j_appdeadline);
+      const yyyy = date.getFullYear();
+      const mm = String(date.getMonth() + 1).padStart(2, "0");
+      const dd = String(date.getDate()).padStart(2, "0");
+      this.job.j_appdeadline = `${yyyy}-${mm}-${dd}`; // 👈 ทำให้ตรงกับ format ของ input[type="date"]
+    }
   },
   methods: {
     handleFileUpload(e) {
@@ -156,9 +168,28 @@ export default {
         employer_id: this.user.employer_id,
       };
 
-      alert("✅ งานถูกโพสต์แล้ว (mock)");
-      console.log("📦 ส่ง:", payload, "📎 ไฟล์:", this.files);
-    },
+      // ✅ ใช้งาน API จริง
+      const formData = new FormData();
+      Object.entries(payload).forEach(([key, value]) => {
+        formData.append(key, value);
+      });
+      this.files.forEach(file => {
+        formData.append("files", file);
+      });
+
+
+      // สมมุติว่า POST ไปที่ /api/jobs
+      this.$axios.post("http://localhost:3001/api/jobs", formData)
+        .then(() => {
+          alert("✅ โพสต์งานสำเร็จ");
+          this.$router.push("/employer/dashboard");
+        })
+        .catch(err => {
+          console.error("❌ โพสต์ล้มเหลว:", err);
+          alert("โพสต์ไม่สำเร็จ");
+        });
+    }
+    ,
   },
 };
 </script>
@@ -167,8 +198,22 @@ export default {
 .text-orange {
   color: #ff6600;
 }
+
 .form-box {
   background: #fff;
   border: 1px solid #eee;
+}
+
+.btn-orange {
+  background-color: #ff6600;
+  color: white;
+  transition: all 0.2s ease-in-out;
+  border: none;
+}
+
+.btn-orange:hover {
+  background-color: #e65c00;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(255, 102, 0, 0.25);
 }
 </style>

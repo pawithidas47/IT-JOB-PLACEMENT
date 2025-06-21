@@ -5,7 +5,8 @@ import DashboardEmployer from "@/views/employer/Dashboard.vue";
 import PostJob from "@/views/employer/PostJob.vue";
 import EditJob from "@/views/employer/EditJob.vue";
 import RegisterEmployer from "@/views/employer/Register.vue";
-
+import EmployerProfile from "@/views/employer/EmployerProfile.vue";
+import EditProfile from "@/views/employer/EditProfile.vue"
 // ✅ Applicant views
 import RegisterApplicant from "@/views/applicant/Register.vue";
 import JobApplications from "@/views/applicant/JobApplications.vue";
@@ -50,6 +51,16 @@ const routes = [
   name: "EmployerApplicantProfile",
   component: () => import("@/views/employer/ApplicantProfile.vue"),
 },
+   {
+      path: "/employer/profile",
+      name: "EmployerProfile",
+      component: EmployerProfile,
+    },
+    {
+      path: "/employer/edit-profile",
+      name: "EmployerEditProfile",
+      component: EditProfile,
+    },
 
 
   // Applicant

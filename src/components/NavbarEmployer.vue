@@ -12,13 +12,19 @@
           👤 {{ user?.e_username || 'guest' }}
         </button>
         <ul class="dropdown-menu" :class="{ show: showDropdown }">
-          <li><hr class="dropdown-divider"></li>
-          <li>
-            <button class="dropdown-item text-danger" @click="logout">
-              <i class="bi bi-box-arrow-right me-2"></i> ออกจากระบบ
-            </button>
-          </li>
-        </ul>
+  <li>
+    <router-link to="/employer/profile" class="dropdown-item">
+      <i class="bi bi-person-lines-fill me-2"></i> โปรไฟล์ของฉัน
+    </router-link>
+  </li>
+  <li><hr class="dropdown-divider"></li>
+  <li>
+    <button class="dropdown-item text-danger" @click="logout">
+      <i class="bi bi-box-arrow-right me-2"></i> ออกจากระบบ
+    </button>
+  </li>
+</ul>
+
       </div>
     </div>
   </div>

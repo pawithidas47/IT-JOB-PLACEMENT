@@ -31,6 +31,12 @@ const routes = [
     component: DashboardEmployer,
   },
   {
+  path: '/employer/jobs/:id',
+  name: 'EmployerJobDetail',
+  component: () => import('@/views/employer/EmployerJobDetail.vue')
+}
+,
+  {
     path: "/employer/post-job",
     name: "PostJob",
     component: PostJob,

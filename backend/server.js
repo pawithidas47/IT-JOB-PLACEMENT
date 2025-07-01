@@ -24,7 +24,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/jobs", jobRoutes);
 app.use("/api/applications", applicationRoutes);
 app.use("/api/applicant", applicantRoutes);
-app.use("/api/employer", employerRoutes);
+app.use("/api/employers", employerRoutes);
 
 // ✅ DELETE กรณีจำเป็น (ลบการสมัคร)
 app.delete("/api/applications/:id", (req, res) => {
@@ -86,6 +86,15 @@ app.post("/api/upload-profile-employer/:employer_id", upload.single("profile"), 
     console.error("❌ อัปโหลดโปรไฟล์ผู้ว่าจ้างล้มเหลว:", err);
     res.status(500).json({ error: "เกิดข้อผิดพลาดในการอัปโหลด" });
   }
+});
+app.get('/api/applicants/employer/:employerId', async (req, res) => {
+  const employerId = req.params.employerId;
+  // ตรวจสอบว่า employerId ถูกต้อง และดึงข้อมูลจากฐานข้อมูล
+  const applicants = await getApplicantsForEmployer(employerId);
+  if (!applicants) {
+    return res.status(404).json({ error: "ไม่พบข้อมูลผู้สมัครงาน" });
+  }
+  res.json(applicants);
 });
 
 

@@ -1,113 +1,175 @@
 <template>
   <div>
     <NavbarEmployer />
-
-    <div class="container py-4" style="max-width: 800px">
-<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
-  <h4 class="fw-bold text-orange"><i class="bi bi-briefcase-fill me-2"></i> งานทั้งหมด</h4>
-  <router-link to="/employer/post-job" class="btn btn-add-job d-flex align-items-center">
-    <i class="bi bi-plus-circle-fill me-2 fs-5"></i> เพิ่มงานใหม่
-  </router-link>
-</div>
-
-<!-- ค้นหา -->
-<div class="search-box mb-4 shadow-sm">
-  <i class="bi bi-search text-muted search-icon"></i>
-  <input
-    type="text"
-    class="form-control search-input"
-    placeholder="ค้นหาชื่องานที่คุณโพสต์ไว้..."
-    v-model="search"
-/>
-</div>
-
-
-      <!-- Card-Post Style -->
-      <div v-for="job in filteredJobs" :key="job.job_id" class="job-post shadow-sm rounded-4 p-4 mb-4 bg-white">
-        <div class="d-flex justify-content-between align-items-center mb-2">
-          <h5 class="fw-bold text-orange"><i class="bi bi-briefcase-fill me-2"></i>{{ job.j_title }}</h5>
-          <small class="text-muted">{{ formatDate(job.j_posted_at) }}</small>
-        </div>
-
-        <ul class="list-unstyled mb-3 small text-dark">
-          <li><i class="bi bi-tags-fill me-2 text-muted"></i><strong>ประเภทงาน:</strong> {{ job.j_type }}</li>
-          <li><i class="bi bi-cash-coin me-2 text-muted"></i><strong>ค่าจ้าง:</strong> {{ parseFloat(job.j_salary).toLocaleString() }} บาท</li>
-          <li><i class="bi bi-calendar-x me-2 text-muted"></i><strong>หมดเขต:</strong> {{ formatDate(job.j_appdeadline) }}</li>
-          <li><i class="bi bi-person-vcard me-2 text-muted"></i><strong>ผู้ว่าจ้าง:</strong> {{ user?.e_type || 'ไม่ระบุ' }}</li>
-        </ul>
-
-        <div class="bg-light rounded p-3 small font-monospace" style="white-space: pre-wrap;">
-          {{ job.j_description }}
-        </div>
-
-        <div class="d-flex justify-content-end gap-2 mt-3">
-          <button @click="openEdit(job)" class="btn btn-sm btn-outline-secondary rounded-pill">
-            ✏️ แก้ไข
-          </button>
-          <button @click="deleteJob(job.job_id)" class="btn btn-sm btn-outline-danger rounded-pill">
-            🗑️ ลบ
+    <div class="container py-5 d-flex flex-column flex-lg-row gap-4" style="max-width: 1140px; margin: 0 auto">
+      <!-- ข้อมูลบริษัทด้านซ้าย -->
+      <div class="card p-4 shadow rounded-4" style="width: 100%">
+        <div class="text-end mb-2">
+          <button class="btn btn-sm btn-outline-secondary rounded-pill" @click="editMode = !editMode">
+            {{ editMode ? 'ยกเลิกการแก้ไข' : '✏️ แก้ไขโปรไฟล์บริษัท' }}
           </button>
         </div>
-      </div>
 
-      <div v-if="filteredJobs.length === 0" class="text-center text-muted py-5">
-        <i class="bi bi-emoji-frown fs-1"></i>
-        <p class="mt-3">ไม่พบงานที่ตรงกับคำค้น</p>
-      </div>
-
-      <!-- Modal แก้ไขงาน -->
-      <div v-if="showModal" class="modal-backdrop">
-        <div class="modal-box">
-          <h5 class="fw-bold text-orange mb-3">
-            🛠️ แก้ไขงาน
+        <div class="text-center mb-4">
+          <img :src="user.profile_img_url ? 'http://localhost:3001' + user.profile_img_url : '/default-profile.jpg'"
+            class="rounded mb-2" style="width: 100px; height: 100px; object-fit: cover" />
+          <div v-if="editMode" class="mb-3">
+            <input type="file" @change="uploadProfileImage" class="form-control form-control-sm" />
+          </div>
+          <h5 class="fw-bold mb-0">
+            <template v-if="editMode">
+              <input v-model="user.e_company_name" class="form-control form-control-sm text-center"
+                placeholder="ชื่อบริษัทของคุณ" />
+            </template>
+            <template v-else>
+              {{ user.e_company_name || 'ชื่อบริษัทของคุณ' }}
+            </template>
           </h5>
-          <form @submit.prevent="submitEdit">
-            <div class="mb-3">
-              <label class="form-label">ชื่องาน</label>
-              <input v-model="editingJob.j_title" class="form-control" required />
+        </div>
+
+        <h6 class="fw-bold text-success mb-3">ข้อมูลติดต่อบริษัท</h6>
+        <ul class="list-unstyled small text-muted mb-4">
+          <li><i class="bi bi-telephone me-2"></i> <b>โทรศัพท์: </b>
+            <template v-if="editMode">
+              <input v-model="user.e_phone" class="form-control form-control-sm" />
+            </template>
+            <template v-else>
+              {{ user.e_phone || '-' }}
+            </template>
+          </li>
+          <li><i class="bi bi-person-circle me-2"></i> <b>ผู้ติดต่อ: </b>
+            <template v-if="editMode">
+              <input v-model="user.e_contact" class="form-control form-control-sm" />
+            </template>
+            <template v-else>
+              {{ user.e_contact || '-' }}
+            </template>
+          </li>
+          <li><i class="bi bi-person-badge me-2"></i> <b>ตำแหน่ง: </b>
+            <template v-if="editMode">
+              <input v-model="user.e_position" class="form-control form-control-sm" />
+            </template>
+            <template v-else>
+              {{ user.e_position || '-' }}
+            </template>
+          </li>
+          <li><i class="bi bi-globe me-2"></i> <b>เว็บไซต์: </b>
+            <template v-if="editMode">
+              <input v-model="user.e_website" class="form-control form-control-sm"
+                placeholder="https://your-company.com" />
+            </template>
+            <template v-else>
+              <a v-if="user.e_website" :href="user.e_website" target="_blank">{{ user.e_website }}</a>
+              <span v-else>—</span>
+            </template>
+          </li>
+        </ul>
+        <h6 class="fw-bold text-success mb-2">เกี่ยวกับบริษัท</h6>
+        <div v-if="!editMode" class="card bg-light p-3 mb-4">
+          <p class="small mb-0">
+            {{ user.e_description || 'คุณยังไม่ได้เพิ่มรายละเอียดเกี่ยวกับบริษัทของคุณ' }}
+          </p>
+        </div>
+        <textarea v-else v-model="user.e_description" class="form-control mb-4" rows="3"
+          placeholder="ใส่คำอธิบายเกี่ยวกับบริษัทของคุณ"></textarea>
+        <!-- ประเภทบริษัท -->
+        <div class="mb-4">
+          <div class="border rounded-4 p-3 shadow-sm bg-white w-100 text-center">
+            <i class="bi bi-building fs-1 text-secondary mb-2"></i>
+            <div class="fw-semibold text-muted">ประเภทธุรกิจ</div>
+            <template v-if="editMode">
+              <input v-model="user.e_type" class="form-control form-control-sm text-center mt-2"
+                placeholder="ระบุประเภท เช่น ร้านอาหาร, ค้าปลีก, ฯลฯ" />
+            </template>
+            <template v-else>
+              <div class="fw-bold text-success mt-1">{{ user.e_type || '—' }}</div>
+            </template>
+          </div>
+        </div>
+
+
+        <h6 class="fw-bold text-success mb-2">แกลเลอรี่รูปภาพบริษัท</h6>
+        <div class="d-flex gap-2 overflow-auto mb-3">
+          <img v-for="img in user.e_gallery || []" :key="img" :src="'http://localhost:3001' + img" class="rounded"
+            style="height: 80px; object-fit: cover" />
+
+        </div>
+
+        <input v-if="editMode" type="file" multiple @change="handleGalleryUpload"
+          class="form-control form-control-sm mb-4" />
+
+        <h6 class="fw-bold text-success mb-2">ที่อยู่บริษัท</h6>
+        <div v-if="editMode">
+          <textarea v-model="user.e_address" class="form-control form-control-sm" rows="2"
+            placeholder="กรอกที่อยู่บริษัท"></textarea>
+        </div>
+        <p v-else class="small mb-2">
+          {{ user.e_address || 'ยังไม่ระบุที่อยู่บริษัท' }}
+        </p>
+
+        <iframe v-if="user.e_map_iframe" :src="user.e_map_iframe" width="100%" height="220" style="border:0"
+          allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+        <input v-if="editMode" v-model="user.e_map_iframe" placeholder="วางลิงก์ iframe ของ Google Maps ที่นี่"
+          class="form-control form-control-sm mt-2" />
+
+        <button v-if="editMode" class="btn btn-success w-100 rounded-pill mt-3" @click="saveProfile">
+          💾 บันทึกการแก้ไข
+        </button>
+      </div>
+
+      <!-- รายการตำแหน่งงานด้านขวา -->
+      <div class="flex-grow-1" style="flex-basis: 43%">
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <h5 class="fw-bold mb-0 text-orange">
+            ตำแหน่งงานที่รับสมัคร
+          </h5>
+          <span class="text-muted small" style="font-size: 1rem">{{ filteredJobs.length }} ตำแหน่ง</span>
+          
+        </div>
+
+        <div class="search-box mb-4 shadow-sm">
+          <i class="bi bi-search text-muted search-icon"></i>
+          <input type="text" class="form-control search-input" placeholder="ค้นหาชื่องานที่คุณโพสต์ไว้..."
+            v-model="search" />
+        </div>
+
+        <div v-for="job in filteredJobs" :key="job.job_id" class="job-card border rounded-4 bg-white shadow-sm p-4 mb-4"
+          @click="$router.push(`/employer/jobs/${job.job_id}`)" style="cursor: pointer">
+          <div class="d-flex justify-content-between align-items-start">
+            <div>
+              <h6 class="fw-bold mb-1 text-dark">{{ job.j_title }}</h6>
+              <p class="text-muted small mb-1">
+                <i class="bi bi-cash-coin me-1"></i> ค่าจ้าง: <span class="text-success">{{
+                  parseFloat(job.j_salary).toLocaleString() }} บาท</span>
+              </p>
+              <p class="text-muted small mb-1">
+                <i class="bi bi-calendar3 me-1"></i> หมดเขต: {{ formatDate(job.j_appdeadline) }}
+              </p>
+              <p class="text-muted small">
+                <i class="bi bi-person-lines-fill me-1"></i>
+                อัตราที่รับ: {{ job.j_amount ? job.j_amount + ' คน' : 'ยังไม่ระบุ' }}
+              </p>
+
+
+
+
+              <div class="d-flex flex-wrap gap-2 mt-2">
+                <span class="badge rounded-pill bg-success">งานพาร์ทไทม์</span>
+                <span class="badge rounded-pill bg-danger">สัมภาษณ์ออนไลน์</span>
+              </div>
             </div>
-            <div class="mb-3">
-              <label class="form-label">รายละเอียด</label>
-              <textarea v-model="editingJob.j_description" class="form-control" rows="4" required></textarea>
-            </div>
-            <div class="mb-3">
-              <label class="form-label">ประเภทงาน</label>
-              <select v-model="editingJob.j_type" class="form-select" required>
-                <option disabled value="">-- เลือกประเภท --</option>
-                <option value="ออกแบบและมัลติมีเดีย">ออกแบบและมัลติมีเดีย</option>
-                <option value="การตลาดดิจิทัล">การตลาดดิจิทัล</option>
-                <option value="พัฒนาเว็บไซต์">พัฒนาเว็บไซต์</option>
-                <option value="UX/UI Design">UX/UI Design</option>
-                <option value="IT Support">IT Support</option>
-                <option value="ดูแลระบบเครือข่าย">ดูแลระบบเครือข่าย</option>
-                <option value="เขียนบทความ/แปลบทความเทคโนโลยี">เขียน/แปลบทความเทคโนโลยี</option>
-                <option value="คีย์ข้อมูล / Data Entry">คีย์ข้อมูล / Data Entry</option>
-                <option value="แอดมินเพจ / ดูแลโซเชียลมีเดีย">แอดมินเพจ / โซเชียลมีเดีย</option>
-                <option value="ตัดต่อวิดีโอ / สร้างคอนเทนต์">ตัดต่อวิดีโอ / คอนเทนต์</option>
-                <option value="ที่ปรึกษาด้านเทคโนโลยี">ที่ปรึกษาด้านเทคโนโลยี</option>
-              </select>
-            </div>
-            <div class="mb-3">
-              <label class="form-label">ค่าจ้าง</label>
-              <input v-model.number="editingJob.j_salary" type="number" class="form-control" required />
-            </div>
-            <div class="mb-3">
-              <label class="form-label">วันปิดรับสมัคร</label>
-              <input v-model="editingJob.j_appdeadline" type="date" class="form-control" required />
-            </div>
-            <div class="text-end mt-4">
-              <button class="btn btn-secondary me-2" type="button" @click="showModal = false">ยกเลิก</button>
-              <button class="btn btn-orange" type="submit">
-                <i class="bi bi-floppy me-1"></i> บันทึก
-              </button>
-            </div>
-          </form>
+          </div>
+        </div>
+
+        <div v-if="filteredJobs.length === 0" class="text-center text-muted py-5">
+          <i class="bi bi-emoji-frown fs-1"></i>
+          <p class="mt-3">ไม่พบงานที่ตรงกับคำค้น</p>
         </div>
       </div>
     </div>
   </div>
 </template>
-
 <script>
 import axios from "axios";
 import NavbarEmployer from "@/components/NavbarEmployer.vue";
@@ -117,11 +179,13 @@ export default {
   components: { NavbarEmployer },
   data() {
     return {
-      user: null,
+      user: {},
       search: "",
       jobs: [],
-      showModal: false,
       editingJob: {},
+      showModal: false,
+      editMode: false,
+      galleryImages: [],
     };
   },
   computed: {
@@ -136,6 +200,7 @@ export default {
     if (!userStr) return this.$router.push("/login");
     this.user = JSON.parse(userStr);
     this.fetchJobs();
+    this.fetchUserProfile();
   },
   methods: {
     formatDate(d) {
@@ -146,6 +211,37 @@ export default {
         year: "numeric",
       });
     },
+    async fetchUserProfile() {
+      try {
+        const res = await axios.get(`http://localhost:3001/api/employers/${this.user.employer_id}`);
+        const profile = res.data;
+        if (profile.e_gallery) {
+          profile.e_gallery = JSON.parse(profile.e_gallery);
+        } else {
+          profile.e_gallery = [];
+        }
+        this.user = profile;
+        localStorage.setItem("user", JSON.stringify(this.user));
+      } catch (err) {
+        console.error("❌ โหลดข้อมูลโปรไฟล์ล้มเหลว:", err);
+      }
+    }
+    ,
+    async uploadProfileImage(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const formData = new FormData();
+      formData.append("profile", file);
+
+      try {
+        const res = await axios.post(`http://localhost:3001/api/employers/upload-profile-employer/${this.user.employer_id}`, formData);
+        this.user.profile_img_url = res.data.url;
+      } catch (err) {
+        console.error("❌ อัปโหลดรูปโปรไฟล์ล้มเหลว:", err);
+        alert("ไม่สามารถอัปโหลดรูปได้");
+      }
+    },
     async fetchJobs() {
       try {
         const res = await axios.get(`http://localhost:3001/api/jobs/employer/${this.user.employer_id}`);
@@ -155,35 +251,8 @@ export default {
       }
     },
     openEdit(job) {
-      const date = new Date(job.j_appdeadline);
-      const yyyy = date.getFullYear();
-      const mm = String(date.getMonth() + 1).padStart(2, '0');
-      const dd = String(date.getDate()).padStart(2, '0');
-
-      this.editingJob = {
-        ...job,
-        j_appdeadline: `${yyyy}-${mm}-${dd}`
-      };
+      this.editingJob = { ...job };
       this.showModal = true;
-    },
-    async submitEdit() {
-      const j = { ...this.editingJob };
-
-      if (j.j_appdeadline) {
-        const d = new Date(j.j_appdeadline);
-        const yyyy = d.getFullYear();
-        const mm = String(d.getMonth() + 1).padStart(2, '0');
-        const dd = String(d.getDate()).padStart(2, '0');
-        j.j_appdeadline = `${yyyy}-${mm}-${dd}`;
-      }
-
-      try {
-        await axios.put(`http://localhost:3001/api/jobs/${j.job_id}`, j);
-        this.showModal = false;
-        this.fetchJobs();
-      } catch (err) {
-        console.error("❌ แก้ไขล้มเหลว:", err);
-      }
     },
     async deleteJob(id) {
       if (!confirm("คุณแน่ใจหรือไม่ว่าต้องการลบงานนี้?")) return;
@@ -194,29 +263,60 @@ export default {
         console.error("❌ ลบล้มเหลว:", err);
       }
     },
+    async saveProfile() {
+      try {
+        await axios.put(`http://localhost:3001/api/employers/${this.user.employer_id}`, this.user);
+        alert("บันทึกข้อมูลสำเร็จ");
+        localStorage.setItem("user", JSON.stringify(this.user));
+        this.editMode = false;
+      } catch (err) {
+        console.error("❌ บันทึกโปรไฟล์ล้มเหลว:", err);
+        alert("เกิดข้อผิดพลาดในการบันทึกข้อมูล");
+      }
+    },
+    async handleGalleryUpload(event) {
+      const files = event.target.files;
+      const formData = new FormData();
+      for (const file of files) {
+        formData.append("gallery", file);
+      }
+
+      try {
+        const res = await axios.post(`http://localhost:3001/api/employers/${this.user.employer_id}/upload-gallery`, formData);
+        this.user.e_gallery = res.data.urls;
+        localStorage.setItem("user", JSON.stringify(this.user));
+      } catch (err) {
+        console.error("❌ อัปโหลดแกลเลอรี่ล้มเหลว:", err);
+      }
+    }
+
   },
 };
 </script>
 
 <style scoped>
-/* ปุ่มเพิ่มงาน */
+.text-orange {
+  color: #ff6600;
+}
+
+.btn-orange {
+  background-color: #ff6600;
+  color: white;
+}
+
+.btn-orange:hover {
+  background-color: #e65c00;
+}
+
 .btn-add-job {
   background-color: #ff6600;
   color: white;
-  font-weight: 500;
-  font-size: 15px;
   padding: 8px 16px;
   border-radius: 999px;
-  box-shadow: 0 3px 10px rgba(255, 102, 0, 0.2);
-  transition: all 0.2s ease;
-  line-height: 1.2;
-}
-.btn-add-job:hover {
-  background-color: #e65c00;
-  transform: translateY(-1px);
+  font-weight: 500;
+  transition: 0.2s;
 }
 
-/* กล่องค้นหา */
 .search-box {
   position: relative;
   border: 1px solid #ddd;
@@ -227,74 +327,18 @@ export default {
   align-items: center;
   height: 42px;
 }
+
 .search-icon {
-  font-size: 1.1rem;
   margin-right: 8px;
-  color: #999;
 }
+
 .search-input {
   border: none;
-  outline: none !important;
-  box-shadow: none !important;
-  background: transparent;
-  font-size: 14.5px;
+  outline: none;
   flex: 1;
 }
-.search-input::placeholder {
-  color: #bbb;
-}
 
-
-.text-orange {
-  color: #ff6600;
-}
-.btn-orange {
-  background-color: #ff6600;
-  color: white;
-}
-.btn-orange:hover {
-  background-color: #e65c00;
-}
-.job-post {
-  border: 1px solid #eee;
-  border-left: 4px solid #ff6600;
-  transition: 0.3s;
-}
-.job-post:hover {
-  box-shadow: 0 8px 24px rgba(255, 102, 0, 0.1);
-}
-
-/* Modal style */
-.modal-backdrop {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(30, 30, 30, 0.45);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-}
-
-.modal-box {
-  background: #fff;
-  padding: 2rem;
-  border-radius: 1rem;
-  width: 100%;
-  max-width: 500px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-  animation: pop-in 0.25s ease;
-}
-@keyframes pop-in {
-  from {
-    opacity: 0;
-    transform: translateY(-10px) scale(0.98);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
+.badge {
+  font-size: 13px;
 }
 </style>

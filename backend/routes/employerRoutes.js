@@ -4,10 +4,10 @@ const db = require("../models/db");
 const multer = require("multer");
 const path = require("path");
 
-// ✅ ตั้งค่าการอัปโหลดรูปโปรไฟล์ (ใช้ multer)
+// ✅ ตั้งค่า multer สำหรับอัปโหลดรูปโปรไฟล์
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, "uploads/"); // โฟลเดอร์เป้าหมาย
+    cb(null, "uploads/");
   },
   filename: (req, file, cb) => {
     const ext = path.extname(file.originalname);
@@ -15,10 +15,11 @@ const storage = multer.diskStorage({
     cb(null, uniqueName);
   },
 });
-
 const upload = multer({ storage });
 
-// ✅ GET: ผู้สมัครที่สมัครงานของ employer ID นั้น
+/* -------------------------------
+✅ GET ผู้สมัครของ employer
+-------------------------------- */
 router.get("/:id/applicants", async (req, res) => {
   const employerId = req.params.id;
 
@@ -35,23 +36,60 @@ router.get("/:id/applicants", async (req, res) => {
        ORDER BY a.app_date DESC`,
       [employerId]
     );
-
     res.json(rows);
   } catch (err) {
     console.error("❌ [GET /:id/applicants] Failed:", err);
     res.status(500).json({ error: "ไม่สามารถโหลดข้อมูลผู้สมัครได้" });
   }
 });
+router.post("/:id/upload-gallery", upload.array("gallery", 10), async (req, res) => {
+  const employerId = req.params.id;
+  const urls = req.files.map((file) => "/uploads/" + file.filename);
 
-// ✅ PUT: เปลี่ยนสถานะของผู้สมัคร
-router.put("/applications/:id/status", async (req, res) => {
-  // เช็คว่า body ส่ง status มาหรือไม่
-  if (!req.body || !req.body.status) {
-    return res.status(400).json({ error: "Missing status in request body" });
+  try {
+    await db.promise().query(
+      "UPDATE employers SET e_gallery = ? WHERE employer_id = ?",
+      [JSON.stringify(urls), employerId]
+    );
+    res.json({ message: "อัปโหลดแกลเลอรี่สำเร็จ", urls });
+  } catch (err) {
+    console.error("❌ อัปโหลดแกลเลอรี่ล้มเหลว:", err);
+    res.status(500).json({ error: "เกิดข้อผิดพลาดในการอัปโหลดแกลเลอรี่" });
   }
+});
+router.post("/:id/upload-gallery", upload.array("gallery", 10), async (req, res) => {
+  const employerId = req.params.id;
+  const urls = req.files.map((file) => "/uploads/" + file.filename);
 
+  try {
+    // อัปเดตแกลเลอรี่แบบ JSON string
+    await db.promise().query(
+      "UPDATE employers SET e_gallery = ? WHERE employer_id = ?",
+      [JSON.stringify(urls), employerId]
+    );
+    res.json({ message: "อัปโหลดแกลเลอรี่สำเร็จ", urls });
+  } catch (err) {
+    console.error("❌ อัปโหลดแกลเลอรี่ผิดพลาด:", err);
+    res.status(500).json({ error: "เกิดข้อผิดพลาดในการอัปโหลด" });
+  }
+});
+// Node.js (Express)
+router.put('/api/jobs/:id', async (req, res) => {
+  const { j_amount } = req.body;
+  await db.query("UPDATE jobs SET j_amount = $1 WHERE job_id = $2", [j_amount, req.params.id]);
+  res.send({ message: "Updated" });
+});
+
+/* -------------------------------
+✅ PUT เปลี่ยนสถานะของผู้สมัคร
+-------------------------------- */
+router.put("/applications/:id/status", async (req, res) => {
   const applicationId = req.params.id;
   const { status } = req.body;
+
+  if (!status) {
+    return res.status(400).json({ error: "Missing status in request body" });
+  }
 
   try {
     await db.promise().query(
@@ -65,7 +103,9 @@ router.put("/applications/:id/status", async (req, res) => {
   }
 });
 
-// ✅ GET: โปรไฟล์ผู้ว่าจ้าง
+/* -------------------------------
+✅ GET โปรไฟล์พื้นฐาน
+-------------------------------- */
 router.get("/:id/profile", async (req, res) => {
   const employerId = req.params.id;
   try {
@@ -82,7 +122,9 @@ router.get("/:id/profile", async (req, res) => {
   }
 });
 
-// ✅ PUT: แก้ไขโปรไฟล์ผู้ว่าจ้าง
+/* -------------------------------
+✅ PUT โปรไฟล์พื้นฐาน (ชื่อ, เบอร์ ฯลฯ)
+-------------------------------- */
 router.put("/:id/profile", async (req, res) => {
   const employerId = req.params.id;
   const { e_firstname, e_lastname, e_email, e_phone, e_type } = req.body;
@@ -101,7 +143,57 @@ router.put("/:id/profile", async (req, res) => {
   }
 });
 
-// ✅ POST: อัปโหลดรูปโปรไฟล์ของผู้ว่าจ้าง
+/* -------------------------------
+✅ PUT ข้อมูลบริษัท (e_description, e_address, e_map_iframe, e_website)
+-------------------------------- */
+router.put("/:id", async (req, res) => {
+  const employerId = req.params.id;
+  const {
+    e_company_name,
+    e_contact,
+    e_position,
+    e_description,
+    e_address,
+    e_map_iframe,
+    e_website,
+  } = req.body;
+
+  try {
+    await db.promise().query(
+      `UPDATE employers
+       SET 
+         e_company_name = ?, 
+         e_contact = ?, 
+         e_position = ?, 
+         e_description = ?, 
+         e_address = ?, 
+         e_map_iframe = ?, 
+         e_website = ?, 
+         e_updated = NOW()
+       WHERE employer_id = ?`,
+      [
+        e_company_name,
+        e_contact,
+        e_position,
+        e_description,
+        e_address,
+        e_map_iframe,
+        e_website,
+        employerId,
+      ]
+    );
+    res.json({ message: "อัปเดตข้อมูลบริษัทสำเร็จ" });
+  } catch (err) {
+    console.error("❌ อัปเดตข้อมูลบริษัทล้มเหลว:", err);
+    res.status(500).json({ error: "ไม่สามารถอัปเดตข้อมูลบริษัทได้" });
+  }
+});
+
+
+/* -------------------------------
+✅ POST อัปโหลดรูปโปรไฟล์
+-------------------------------- */
+// ✅ POST อัปโหลดรูปโปรไฟล์
 router.post("/upload-profile-employer/:employer_id", upload.single("profile"), async (req, res) => {
   const employerId = req.params.employer_id;
   const profilePath = "/uploads/" + req.file.filename;
@@ -117,5 +209,19 @@ router.post("/upload-profile-employer/:employer_id", upload.single("profile"), a
     res.status(500).json({ error: "เกิดข้อผิดพลาดในการอัปโหลด" });
   }
 });
+
+// ✅ GET ข้อมูลผู้ว่าจ้างตาม ID (แก้ที่นี่)
+router.get('/:id', async (req, res) => {
+  const { id } = req.params;
+  try {
+    const [rows] = await db.promise().query("SELECT * FROM employers WHERE employer_id = ?", [id]);
+    if (rows.length === 0) return res.status(404).json({ message: "ไม่พบผู้ว่าจ้าง" });
+    res.json(rows[0]);
+  } catch (err) {
+    console.error("❌ ดึงข้อมูลผู้ว่าจ้างล้มเหลว:", err);
+    res.status(500).json({ error: "เกิดข้อผิดพลาดในการโหลดข้อมูล" });
+  }
+});
+
 
 module.exports = router;

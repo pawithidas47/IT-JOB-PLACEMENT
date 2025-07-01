@@ -6,25 +6,27 @@
     <div class="nav-top-right">
       <router-link to="/employer/dashboard" class="top-link" exact-active-class="active-link">จัดการงาน</router-link>
       <router-link to="/employer/applicants" class="top-link" exact-active-class="active-link">ตรวจสอบผู้สมัครงาน</router-link>
+      
+      <!-- เพิ่มปุ่มลงประกาศงาน -->
+      <router-link to="/employer/post-job" class="top-link btn-add-job">ลงประกาศงาน</router-link>
 
       <div class="dropdown" @click="toggleDropdown">
         <button class="btn btn-user dropdown-toggle" type="button">
           👤 {{ user?.e_username || 'guest' }}
         </button>
         <ul class="dropdown-menu" :class="{ show: showDropdown }">
-  <li>
-    <router-link to="/employer/profile" class="dropdown-item">
-      <i class="bi bi-person-lines-fill me-2"></i> โปรไฟล์ของฉัน
-    </router-link>
-  </li>
-  <li><hr class="dropdown-divider"></li>
-  <li>
-    <button class="dropdown-item text-danger" @click="logout">
-      <i class="bi bi-box-arrow-right me-2"></i> ออกจากระบบ
-    </button>
-  </li>
-</ul>
-
+          <li>
+            <router-link to="/employer/profile" class="dropdown-item">
+              <i class="bi bi-person-lines-fill me-2"></i> โปรไฟล์ของฉัน
+            </router-link>
+          </li>
+          <li><hr class="dropdown-divider"></li>
+          <li>
+            <button class="dropdown-item text-danger" @click="logout">
+              <i class="bi bi-box-arrow-right me-2"></i> ออกจากระบบ
+            </button>
+          </li>
+        </ul>
       </div>
     </div>
   </div>
@@ -155,5 +157,19 @@ export default {
 .dropdown-divider {
   margin: 4px 0;
   border-top: 1px solid #ddd;
+}
+
+/* ปรับแต่งปุ่ม "ลงประกาศงาน" */
+.btn-add-job {
+  background-color: #ff6600;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 999px;
+  font-weight: 500;
+  transition: 0.2s;
+}
+
+.btn-add-job:hover {
+  background-color: #e65c00;
 }
 </style>

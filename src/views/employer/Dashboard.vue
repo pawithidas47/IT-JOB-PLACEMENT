@@ -264,16 +264,18 @@ export default {
       }
     },
     async saveProfile() {
-      try {
-        await axios.put(`http://localhost:3001/api/employers/${this.user.employer_id}`, this.user);
-        alert("บันทึกข้อมูลสำเร็จ");
-        localStorage.setItem("user", JSON.stringify(this.user));
-        this.editMode = false;
-      } catch (err) {
-        console.error("❌ บันทึกโปรไฟล์ล้มเหลว:", err);
-        alert("เกิดข้อผิดพลาดในการบันทึกข้อมูล");
-      }
-    },
+  try {
+    console.log("📝 กำลังบันทึก:", this.user.e_type);  // <--- เพิ่ม
+    await axios.put(`http://localhost:3001/api/employers/${this.user.employer_id}`, this.user);
+    alert("บันทึกข้อมูลสำเร็จ");
+    localStorage.setItem("user", JSON.stringify(this.user));
+    this.editMode = false;
+  } catch (err) {
+    console.error("❌ บันทึกโปรไฟล์ล้มเหลว:", err);
+    alert("เกิดข้อผิดพลาดในการบันทึกข้อมูล");
+  }
+}
+,
     async handleGalleryUpload(event) {
       const files = event.target.files;
       const formData = new FormData();

@@ -6,6 +6,8 @@ const path = require("path");
 require("dotenv").config();
 
 const db = require("./models/db");
+const connection = db.promise(); // ✅ เพิ่มบรรทัดนี้
+
 const authRoutes = require("./routes/authRoutes");
 const jobRoutes = require("./routes/jobRoutes");
 const applicationRoutes = require("./routes/applicationRoutes");
@@ -96,6 +98,56 @@ app.get('/api/applicants/employer/:employerId', async (req, res) => {
   }
   res.json(applicants);
 });
+app.put('/api/employers/:id', async (req, res) => {
+  const employerId = req.params.id;
+
+  const {
+    e_company_name,
+    e_phone,
+    e_contact,
+    e_position,
+    e_website,
+    e_description,
+    e_type,
+    e_address,
+    e_map_iframe
+  } = req.body;
+
+  const sql = `
+    UPDATE employers SET 
+      e_company_name = ?, 
+      e_phone = ?, 
+      e_contact = ?, 
+      e_position = ?, 
+      e_website = ?, 
+      e_description = ?, 
+      e_type = ?, 
+      e_address = ?, 
+      e_map_iframe = ? 
+    WHERE employer_id = ?
+  `;
+
+  try {
+    await connection.execute(sql, [
+      e_company_name,
+      e_phone,
+      e_contact,
+      e_position,
+      e_website,
+      e_description,
+      e_type,
+      e_address,
+      e_map_iframe,
+      employerId
+    ]);
+
+    res.sendStatus(200);
+  } catch (err) {
+    console.error("❌ Error updating employer:", err);
+    res.status(500).send("เกิดข้อผิดพลาดในการอัปเดตข้อมูล");
+  }
+});
+
 
 
 // ✅ Start server

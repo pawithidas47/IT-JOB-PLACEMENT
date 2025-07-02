@@ -148,6 +148,7 @@ router.put("/:id/profile", async (req, res) => {
 -------------------------------- */
 router.put("/:id", async (req, res) => {
   const employerId = req.params.id;
+
   const {
     e_company_name,
     e_contact,
@@ -156,6 +157,7 @@ router.put("/:id", async (req, res) => {
     e_address,
     e_map_iframe,
     e_website,
+    e_type // ✅ อย่าลืมเพิ่มตรงนี้ด้วย
   } = req.body;
 
   try {
@@ -169,6 +171,7 @@ router.put("/:id", async (req, res) => {
          e_address = ?, 
          e_map_iframe = ?, 
          e_website = ?, 
+         e_type = ?,              -- ✅ เพิ่มตรงนี้
          e_updated = NOW()
        WHERE employer_id = ?`,
       [
@@ -179,9 +182,11 @@ router.put("/:id", async (req, res) => {
         e_address,
         e_map_iframe,
         e_website,
-        employerId,
+        e_type,                  // ✅ และตรงนี้
+        employerId
       ]
     );
+
     res.json({ message: "อัปเดตข้อมูลบริษัทสำเร็จ" });
   } catch (err) {
     console.error("❌ อัปเดตข้อมูลบริษัทล้มเหลว:", err);

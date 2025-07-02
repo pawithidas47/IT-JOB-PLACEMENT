@@ -97,14 +97,14 @@
 
         </div>
         <!-- modal ดูภาพ -->
-    <div v-if="selectedImage" class="modal-backdrop" @click.self="selectedImage = null">
-  <div class="modal-image-wrapper">
-    <button class="close-btn" @click="selectedImage = null">✕</button>
-    <button class="nav-btn left" @click="prevImage">‹</button>
-    <img :src="selectedImage" class="preview-image" />
-    <button class="nav-btn right" @click="nextImage">›</button>
-  </div>
-</div>
+        <div v-if="selectedImage" class="modal-backdrop" @click.self="selectedImage = null">
+          <div class="modal-image-wrapper">
+            <button class="close-btn" @click="selectedImage = null">✕</button>
+            <button class="nav-btn left" @click="prevImage">‹</button>
+            <img :src="selectedImage" class="preview-image" />
+            <button class="nav-btn right" @click="nextImage">›</button>
+          </div>
+        </div>
 
 
 
@@ -191,21 +191,21 @@ export default {
   name: "DashboardEmployer",
   components: { NavbarEmployer },
   data() {
-  return {
-    user: {
-      e_gallery: [],   // กำหนดค่าเริ่มต้นภายในเดียวกัน
-    },
-    search: "",
-    jobs: [],
-    editingJob: {},
-    showModal: false,
-    selectedImage: null,
-    editMode: false,
-    currentImageIndex: 0,
-    galleryImages: [],
-  };
-}
-,
+    return {
+      user: {
+        e_gallery: [],   // กำหนดค่าเริ่มต้นภายในเดียวกัน
+      },
+      search: "",
+      jobs: [],
+      editingJob: {},
+      showModal: false,
+      selectedImage: null,
+      editMode: false,
+      currentImageIndex: 0,
+      galleryImages: [],
+    };
+  }
+  ,
   computed: {
     filteredJobs() {
       return this.jobs.filter((job) =>
@@ -294,17 +294,22 @@ export default {
       }
     }
     ,
-    async updateStatus(applicationId, newStatus) {
+   async updateStatus(applicationId, newStatus) {
+  console.log("📦 ส่งไป:", { applicationId, newStatus });
+
   try {
-    await axios.put(`http://localhost:3001/api/employer/applications/${applicationId}/status`, {
-      app_status: newStatus
-    });
-    console.log("✅ อัปเดตสำเร็จ");
+    await axios.put(
+      `http://localhost:3001/api/employers/applications/${applicationId}/status`,
+      { app_status: newStatus }
+    );
+    console.log("✅ อัปเดตสถานะสำเร็จ");
   } catch (err) {
-    console.error("❌ อัปเดตสถานะล้มเหลว:", err);
+    console.error("❌ อัปเดตสถานะล้มเหลว:", err.response?.data || err.message);
   }
 }
-,
+
+
+    ,
     async handleGalleryUpload(event) {
       const files = event.target.files;
       const formData = new FormData();
@@ -320,23 +325,24 @@ export default {
         console.error("❌ อัปโหลดแกลเลอรี่ล้มเหลว:", err);
       }
     },
-      showImage(url) {
-  this.currentImageIndex = this.user.e_gallery.findIndex(img => 'http://localhost:3001' + img === url);
-  this.selectedImage = url;
-},
-nextImage() {
-  const total = this.user.e_gallery.length;
-  this.currentImageIndex = (this.currentImageIndex + 1) % total;
-  this.selectedImage = 'http://localhost:3001' + this.user.e_gallery[this.currentImageIndex];
-},
-prevImage() {
-  const total = this.user.e_gallery.length;
-  this.currentImageIndex = (this.currentImageIndex - 1 + total) % total;
-  this.selectedImage = 'http://localhost:3001' + this.user.e_gallery[this.currentImageIndex];
-},
+    showImage(url) {
+      this.currentImageIndex = this.user.e_gallery.findIndex(img => 'http://localhost:3001' + img === url);
+      this.selectedImage = url;
+    },
+    nextImage() {
+      const total = this.user.e_gallery.length;
+      this.currentImageIndex = (this.currentImageIndex + 1) % total;
+      this.selectedImage = 'http://localhost:3001' + this.user.e_gallery[this.currentImageIndex];
+    },
+    prevImage() {
+      const total = this.user.e_gallery.length;
+      this.currentImageIndex = (this.currentImageIndex - 1 + total) % total;
+      this.selectedImage = 'http://localhost:3001' + this.user.e_gallery[this.currentImageIndex];
+    },
 
 
-}}
+  }
+}
   ;
 </script>
 
@@ -388,6 +394,7 @@ prevImage() {
   transition: background 0.2s;
   z-index: 10;
 }
+
 .close-btn:hover {
   background: rgba(0, 0, 0, 0.9);
 }
@@ -407,14 +414,16 @@ prevImage() {
   z-index: 10;
   transition: background 0.2s;
 }
+
 .nav-btn:hover {
   background: rgba(0, 0, 0, 0.9);
 }
+
 .nav-btn.left {
   left: 10px;
 }
+
 .nav-btn.right {
   right: 10px;
 }
-
 </style>

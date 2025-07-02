@@ -131,13 +131,15 @@ export default {
   try {
     await axios.put(
       `http://localhost:3001/api/employer/applications/${app.application_id}/status`,
-      { status: app.status },
-      { headers: { "Content-Type": "application/json" } } // ✅ ระบุ content-type
+      { app_status: app.status },
+      { headers: { "Content-Type": "application/json" } }
     );
+    console.log("✅ เปลี่ยนสถานะสำเร็จ");
   } catch (err) {
-    console.error("❌ เปลี่ยนสถานะล้มเหลว:", err);
+    console.error("❌ เปลี่ยนสถานะล้มเหลว:", err.response?.data || err.message);
   }
 },
+
 
   },
 };

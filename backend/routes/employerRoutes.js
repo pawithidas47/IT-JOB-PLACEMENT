@@ -85,16 +85,16 @@ router.put('/api/jobs/:id', async (req, res) => {
 -------------------------------- */
 router.put("/applications/:id/status", async (req, res) => {
   const applicationId = req.params.id;
-  const { status } = req.body;
+  const { app_status } = req.body;
 
-  if (!status) {
-    return res.status(400).json({ error: "Missing status in request body" });
+  if (!app_status) {
+    return res.status(400).json({ error: "Missing app_status in request body" });
   }
 
   try {
     await db.promise().query(
       "UPDATE applications SET app_status = ? WHERE application_id = ?",
-      [status, applicationId]
+      [app_status, applicationId]
     );
     res.json({ message: "อัปเดตสถานะสำเร็จ" });
   } catch (err) {
@@ -102,6 +102,7 @@ router.put("/applications/:id/status", async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
 
 /* -------------------------------
 ✅ GET โปรไฟล์พื้นฐาน

@@ -9,7 +9,8 @@
 
         <!-- วันที่ -->
         <p class="text-muted small mb-1">
-          <i class="bi bi-calendar-event me-2"></i> {{ formatDate(job.created_at) }}
+          <i class="bi bi-calendar-event me-2"></i> {{ formatDate(job.j_posted_at) || '-' }}
+
         </p>
 
         <!-- หัวเรื่องงาน -->
@@ -96,13 +97,15 @@ export default {
   },
   methods: {
     formatDate(dateStr) {
-      const date = new Date(dateStr);
-      return date.toLocaleDateString("th-TH", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric",
-      });
-    },
+  if (!dateStr) return null;
+  const date = new Date(dateStr);
+  return isNaN(date) ? null : date.toLocaleDateString("th-TH", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric"
+  });
+}
+,
     formatSalary(salary) {
       return parseFloat(salary).toLocaleString();
     },

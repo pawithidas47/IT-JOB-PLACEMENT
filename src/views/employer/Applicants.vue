@@ -27,7 +27,8 @@
             <i class="bi bi-briefcase-fill me-2 text-orange"></i><strong>งาน:</strong> {{ app.j_title }}
           </p>
           <p class="mb-1 text-muted small">
-            <i class="bi bi-calendar-event me-2"></i> สมัครเมื่อ: {{ formatDate(app.applied_at) }}
+            <i class="bi bi-calendar-event me-2"></i> สมัครเมื่อ: {{ formatDate(app.app_date) || '-' }}
+
           </p>
           <p class="mb-1 text-muted small">
             <i class="bi bi-telephone-fill me-2"></i> {{ app.a_phone || '-' }} |
@@ -91,14 +92,16 @@ export default {
     this.fetchApplicants();
   },
   methods: {
-    formatDate(dateStr) {
-      const date = new Date(dateStr);
-      return date.toLocaleDateString("th-TH", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric",
-      });
-    },
+   formatDate(dateStr) {
+  if (!dateStr) return null;
+  const date = new Date(dateStr);
+  return isNaN(date) ? null : date.toLocaleDateString("th-TH", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric"
+  });
+}
+,
     statusText(status) {
       switch (status) {
         case "approved":

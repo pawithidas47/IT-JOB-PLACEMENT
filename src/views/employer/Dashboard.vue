@@ -294,6 +294,17 @@ export default {
       }
     }
     ,
+    async updateStatus(applicationId, newStatus) {
+  try {
+    await axios.put(`http://localhost:3001/api/employer/applications/${applicationId}/status`, {
+      app_status: newStatus
+    });
+    console.log("✅ อัปเดตสำเร็จ");
+  } catch (err) {
+    console.error("❌ อัปเดตสถานะล้มเหลว:", err);
+  }
+}
+,
     async handleGalleryUpload(event) {
       const files = event.target.files;
       const formData = new FormData();

@@ -173,6 +173,32 @@ app.get('/api/employer/:employer_id/applicants', async (req, res) => {
   }
 });
 
+// PUT: อัปเดตสถานะการสมัคร เช่น อนุมัติ/รอตรวจ/ปฏิเสธ
+app.put('/api/employer/applications/:id/status', async (req, res) => {
+  const applicationId = req.params.id;
+  const { app_status } = req.body;
+
+  if (!app_status || !applicationId) {
+    return res.status(400).json({ message: "Missing required data" });
+  }
+
+  try {
+    const [result] = await connection.execute(
+      "UPDATE applications SET app_status = ? WHERE application_id = ?",
+      [app_status, applicationId]
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: "ไม่พบข้อมูลการสมัคร" });
+    }
+
+    res.json({ message: "อัปเดตสถานะสำเร็จ" });
+  } catch (err) {
+    console.error("❌ อัปเดตสถานะล้มเหลว:", err);
+    res.status(500).json({ message: "เกิดข้อผิดพลาดในเซิร์ฟเวอร์" });
+  }
+});
+
 
 
 // ✅ Start server

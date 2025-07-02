@@ -120,8 +120,15 @@
           {{ user.e_address || 'ยังไม่ระบุที่อยู่บริษัท' }}
         </p>
 
-        <iframe v-if="user.e_map_iframe" :src="user.e_map_iframe" width="100%" height="220" style="border:0"
-          allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+        <iframe
+  :src="user.e_map_iframe"
+  width="100%"
+  height="220"
+  style="border:0; border-radius: 8px"
+  allowfullscreen
+  loading="lazy"
+  referrerpolicy="no-referrer-when-downgrade"
+></iframe>
         <input v-if="editMode" v-model="user.e_map_iframe" placeholder="วางลิงก์ iframe ของ Google Maps ที่นี่"
           class="form-control form-control-sm mt-2" />
 
@@ -140,12 +147,16 @@
           <span class="text-muted small" style="font-size: 1rem">{{ filteredJobs.length }} ตำแหน่ง</span>
 
         </div>
+<div class="position-relative mb-4">
+  <input
+    type="text"
+    class="form-control ps-5 py-2 rounded-pill shadow-sm"
+    placeholder="ค้นหาชื่องานที่คุณโพสต์ไว้..."
+    v-model="search"
+  />
+  <i class="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
+</div>
 
-        <div class="search-box mb-4 shadow-sm">
-          <i class="bi bi-search text-muted search-icon"></i>
-          <input type="text" class="form-control search-input" placeholder="ค้นหาชื่องานที่คุณโพสต์ไว้..."
-            v-model="search" />
-        </div>
 
         <div v-for="job in filteredJobs" :key="job.job_id" class="job-card border rounded-4 bg-white shadow-sm p-4 mb-4"
           @click="$router.push(`/employer/jobs/${job.job_id}`)" style="cursor: pointer">

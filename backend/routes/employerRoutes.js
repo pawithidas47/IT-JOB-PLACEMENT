@@ -227,6 +227,32 @@ router.get('/:id', async (req, res) => {
     res.status(500).json({ error: "เกิดข้อผิดพลาดในการโหลดข้อมูล" });
   }
 });
+// GET /api/employer/:employer_id/applicants
+router.get('/employer/:employer_id/applicants', async (req, res) => {
+  const { employer_id } = req.params;
+
+  try {
+    const [result] = await db.execute(`
+      SELECT 
+        applications.*,
+        applicants.a_firstname,
+        applicants.a_lastname,
+        applicants.a_email,
+        applicants.a_phone,
+        applicants.profile_img_url,
+        jobs.j_title
+      FROM applications
+      INNER JOIN applicants ON applications.applicant_id = applicants.applicant_id
+      INNER JOIN jobs ON applications.job_id = jobs.job_id
+      WHERE jobs.employer_id = ?
+    `, [employer_id]);
+
+    res.json(result);
+  } catch (err) {
+    console.error("❌ ดึงข้อมูลผู้สมัครล้มเหลว:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
 
 
 module.exports = router;

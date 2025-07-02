@@ -91,9 +91,22 @@
         <h6 class="fw-bold text-success mb-2">แกลเลอรี่รูปภาพบริษัท</h6>
         <div class="d-flex gap-2 overflow-auto mb-3">
           <img v-for="img in user.e_gallery || []" :key="img" :src="'http://localhost:3001' + img" class="rounded"
-            style="height: 80px; object-fit: cover" />
+            style="height: 80px; object-fit: cover; cursor: pointer"
+            @click="showImage('http://localhost:3001' + img)" />
+
 
         </div>
+        <!-- modal ดูภาพ -->
+    <div v-if="selectedImage" class="modal-backdrop" @click.self="selectedImage = null">
+  <div class="modal-image-wrapper">
+    <button class="close-btn" @click="selectedImage = null">✕</button>
+    <button class="nav-btn left" @click="prevImage">‹</button>
+    <img :src="selectedImage" class="preview-image" />
+    <button class="nav-btn right" @click="nextImage">›</button>
+  </div>
+</div>
+
+
 
         <input v-if="editMode" type="file" multiple @change="handleGalleryUpload"
           class="form-control form-control-sm mb-4" />
@@ -125,7 +138,7 @@
             ตำแหน่งงานที่รับสมัคร
           </h5>
           <span class="text-muted small" style="font-size: 1rem">{{ filteredJobs.length }} ตำแหน่ง</span>
-          
+
         </div>
 
         <div class="search-box mb-4 shadow-sm">
@@ -178,16 +191,21 @@ export default {
   name: "DashboardEmployer",
   components: { NavbarEmployer },
   data() {
-    return {
-      user: {},
-      search: "",
-      jobs: [],
-      editingJob: {},
-      showModal: false,
-      editMode: false,
-      galleryImages: [],
-    };
-  },
+  return {
+    user: {
+      e_gallery: [],   // กำหนดค่าเริ่มต้นภายในเดียวกัน
+    },
+    search: "",
+    jobs: [],
+    editingJob: {},
+    showModal: false,
+    selectedImage: null,
+    editMode: false,
+    currentImageIndex: 0,
+    galleryImages: [],
+  };
+}
+,
   computed: {
     filteredJobs() {
       return this.jobs.filter((job) =>
@@ -264,18 +282,18 @@ export default {
       }
     },
     async saveProfile() {
-  try {
-    console.log("📝 กำลังบันทึก:", this.user.e_type);  // <--- เพิ่ม
-    await axios.put(`http://localhost:3001/api/employers/${this.user.employer_id}`, this.user);
-    alert("บันทึกข้อมูลสำเร็จ");
-    localStorage.setItem("user", JSON.stringify(this.user));
-    this.editMode = false;
-  } catch (err) {
-    console.error("❌ บันทึกโปรไฟล์ล้มเหลว:", err);
-    alert("เกิดข้อผิดพลาดในการบันทึกข้อมูล");
-  }
-}
-,
+      try {
+        console.log("📝 กำลังบันทึก:", this.user.e_type);  // <--- เพิ่ม
+        await axios.put(`http://localhost:3001/api/employers/${this.user.employer_id}`, this.user);
+        alert("บันทึกข้อมูลสำเร็จ");
+        localStorage.setItem("user", JSON.stringify(this.user));
+        this.editMode = false;
+      } catch (err) {
+        console.error("❌ บันทึกโปรไฟล์ล้มเหลว:", err);
+        alert("เกิดข้อผิดพลาดในการบันทึกข้อมูล");
+      }
+    }
+    ,
     async handleGalleryUpload(event) {
       const files = event.target.files;
       const formData = new FormData();
@@ -290,57 +308,102 @@ export default {
       } catch (err) {
         console.error("❌ อัปโหลดแกลเลอรี่ล้มเหลว:", err);
       }
-    }
+    },
+      showImage(url) {
+  this.currentImageIndex = this.user.e_gallery.findIndex(img => 'http://localhost:3001' + img === url);
+  this.selectedImage = url;
+},
+nextImage() {
+  const total = this.user.e_gallery.length;
+  this.currentImageIndex = (this.currentImageIndex + 1) % total;
+  this.selectedImage = 'http://localhost:3001' + this.user.e_gallery[this.currentImageIndex];
+},
+prevImage() {
+  const total = this.user.e_gallery.length;
+  this.currentImageIndex = (this.currentImageIndex - 1 + total) % total;
+  this.selectedImage = 'http://localhost:3001' + this.user.e_gallery[this.currentImageIndex];
+},
 
-  },
-};
+
+}}
+  ;
 </script>
 
 <style scoped>
-.text-orange {
-  color: #ff6600;
-}
-
-.btn-orange {
-  background-color: #ff6600;
-  color: white;
-}
-
-.btn-orange:hover {
-  background-color: #e65c00;
-}
-
-.btn-add-job {
-  background-color: #ff6600;
-  color: white;
-  padding: 8px 16px;
-  border-radius: 999px;
-  font-weight: 500;
-  transition: 0.2s;
-}
-
-.search-box {
-  position: relative;
-  border: 1px solid #ddd;
-  border-radius: 999px;
-  background: white;
-  padding: 4px 14px;
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
   display: flex;
   align-items: center;
-  height: 42px;
+  justify-content: center;
+  z-index: 9999;
 }
 
-.search-icon {
-  margin-right: 8px;
+.modal-image-wrapper {
+  position: relative;
+  border-radius: 16px;
+  max-width: 90vw;
+  max-height: 90vh;
+  background: #fff;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.search-input {
+.preview-image {
+  display: block;
+  max-width: 100%;
+  max-height: 90vh;
+  object-fit: contain;
+  border-radius: 0;
+}
+
+/* ปุ่มปิด */
+.close-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: rgba(0, 0, 0, 0.6);
+  color: white;
   border: none;
-  outline: none;
-  flex: 1;
+  border-radius: 50%;
+  padding: 0.4rem 0.6rem;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: background 0.2s;
+  z-index: 10;
+}
+.close-btn:hover {
+  background: rgba(0, 0, 0, 0.9);
 }
 
-.badge {
-  font-size: 13px;
+/* ปุ่มเลื่อนซ้าย/ขวา */
+.nav-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(0, 0, 0, 0.6);
+  color: white;
+  border: none;
+  padding: 0.6rem 0.8rem;
+  font-size: 2rem;
+  border-radius: 50%;
+  cursor: pointer;
+  z-index: 10;
+  transition: background 0.2s;
 }
+.nav-btn:hover {
+  background: rgba(0, 0, 0, 0.9);
+}
+.nav-btn.left {
+  left: 10px;
+}
+.nav-btn.right {
+  right: 10px;
+}
+
 </style>

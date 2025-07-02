@@ -147,6 +147,31 @@ app.put('/api/employers/:id', async (req, res) => {
     res.status(500).send("เกิดข้อผิดพลาดในการอัปเดตข้อมูล");
   }
 });
+app.get('/api/employer/:employer_id/applicants', async (req, res) => {
+  const employer_id = req.params.employer_id;
+
+  try {
+    const [result] = await connection.execute(`
+      SELECT 
+        applications.*,
+        applicants.a_firstname,
+        applicants.a_lastname,
+        applicants.a_email,
+        applicants.a_phone,
+        applicants.profile_img_url,
+        jobs.j_title
+      FROM applications
+      INNER JOIN applicants ON applications.applicant_id = applicants.applicant_id
+      INNER JOIN jobs ON applications.job_id = jobs.job_id
+      WHERE jobs.employer_id = ?
+    `, [employer_id]);
+
+    res.json(result);
+  } catch (err) {
+    console.error("❌ ดึงข้อมูลผู้สมัครล้มเหลว:", err);
+    res.status(500).json({ message: "เกิดข้อผิดพลาดในเซิร์ฟเวอร์" });
+  }
+});
 
 
 

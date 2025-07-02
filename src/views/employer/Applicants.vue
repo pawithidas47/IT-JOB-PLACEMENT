@@ -27,8 +27,7 @@
             <i class="bi bi-briefcase-fill me-2 text-orange"></i><strong>งาน:</strong> {{ app.j_title }}
           </p>
           <p class="mb-1 text-muted small">
-            <i class="bi bi-calendar-event me-2"></i> สมัครเมื่อ: {{ formatDate(app.app_date) || '-' }}
-
+            <i class="bi bi-calendar-event me-2"></i> สมัครเมื่อ: {{ formatDate(app.applied_at) }}
           </p>
           <p class="mb-1 text-muted small">
             <i class="bi bi-telephone-fill me-2"></i> {{ app.a_phone || '-' }} |
@@ -82,7 +81,7 @@ export default {
     return {
       user: null,
       applicants: [],
-      defaultProfile, // ✅ รูป fallback
+      defaultProfile,
     };
   },
   mounted() {
@@ -92,16 +91,17 @@ export default {
     this.fetchApplicants();
   },
   methods: {
-   formatDate(dateStr) {
-  if (!dateStr) return null;
-  const date = new Date(dateStr);
-  return isNaN(date) ? null : date.toLocaleDateString("th-TH", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric"
-  });
-}
-,
+    formatDate(dateStr) {
+      if (!dateStr) return "-";
+      const date = new Date(dateStr);
+      return isNaN(date)
+        ? "-"
+        : date.toLocaleDateString("th-TH", {
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
+          });
+    },
     statusText(status) {
       switch (status) {
         case "approved":
@@ -115,32 +115,33 @@ export default {
     },
     async fetchApplicants() {
       try {
-        const res = await axios.get(`http://localhost:3001/api/employer/${this.user.employer_id}/applicants`);
-        // ✅ map เพื่อเพิ่ม profileImage ให้แต่ละผู้สมัคร
-        this.applicants = res.data.map(app => ({
+        const res = await axios.get(
+          `http://localhost:3001/api/employers/${this.user.employer_id}/applicants`
+        );
+        this.applicants = res.data.map((app) => ({
           ...app,
+          status: app.status || "pending",
           profileImage: app.profile_img_url
             ? `http://localhost:3001${app.profile_img_url}`
-            : this.defaultProfile
+            : this.defaultProfile,
         }));
       } catch (err) {
         console.error("❌ โหลดข้อมูลผู้สมัครล้มเหลว:", err);
       }
     },
-   async updateStatus(app) {
-  try {
-    await axios.put(
-      `http://localhost:3001/api/employer/applications/${app.application_id}/status`,
-      { app_status: app.status },
-      { headers: { "Content-Type": "application/json" } }
-    );
-    console.log("✅ เปลี่ยนสถานะสำเร็จ");
-  } catch (err) {
-    console.error("❌ เปลี่ยนสถานะล้มเหลว:", err.response?.data || err.message);
-  }
-},
-
-
+    async updateStatus(app) {
+      try {
+        await axios.put(
+          `http://localhost:3001/api/employer/applications/${app.application_id}/status`,
+          { app_status: app.status },
+          { headers: { "Content-Type": "application/json" } }
+        );
+        console.log("✅ เปลี่ยนสถานะสำเร็จ");
+        await this.fetchApplicants();
+      } catch (err) {
+        console.error("❌ เปลี่ยนสถานะล้มเหลว:", err.response?.data || err.message);
+      }
+    },
   },
 };
 </script>
@@ -149,15 +150,12 @@ export default {
 .text-orange {
   color: #ff6600;
 }
-
 .card {
   transition: all 0.2s ease;
 }
-
 .card:hover {
   box-shadow: 0 8px 24px rgba(255, 102, 0, 0.1);
 }
-
 .badge {
   font-size: 0.8rem;
 }

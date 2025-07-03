@@ -112,9 +112,8 @@ exports.updateJob = (req, res) => {
 // ✅ GET /api/jobs/:id - ดึงงานตาม ID (พร้อม employer_type)
 exports.getJobById = (req, res) => {
   const jobId = req.params.id;
-
   const q = `
-    SELECT jobs.*, employers.e_type AS employer_type
+    SELECT jobs.*, employers.e_company_name
     FROM jobs
     JOIN employers ON jobs.employer_id = employers.employer_id
     WHERE jobs.job_id = ?
@@ -128,7 +127,9 @@ exports.getJobById = (req, res) => {
     if (results.length === 0) {
       return res.status(404).json({ message: "ไม่พบงานนี้" });
     }
-    res.json(results[0]); // ✅ ส่งกลับ job + employer_type
+    res.json(results[0]);
   });
 };
+
+
 

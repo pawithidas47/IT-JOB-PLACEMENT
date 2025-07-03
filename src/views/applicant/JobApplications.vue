@@ -3,9 +3,7 @@
     <NavbarApplicant />
 
     <div class="container py-4">
-      <!-- Header Title Centered with Background -->
-
-      <!-- Filters with count on left -->
+      <!-- Header -->
       <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
         <p class="text-muted mb-0 small">พบทั้งหมด {{ filteredJobs.length }} รายการ</p>
         <div class="d-flex gap-2">
@@ -14,6 +12,7 @@
             <option value="">ทั้งหมด</option>
             <option value="pending">รอพิจารณา</option>
             <option value="accepted">รอการติดต่อ</option>
+            <option value="approved">อนุมัติแล้ว</option>
             <option value="rejected">ถูกปฏิเสธ</option>
             <option value="cancelled">ยกเลิกแล้ว</option>
           </select>
@@ -43,14 +42,16 @@
               <td>{{ job.job_wage.toLocaleString() }}</td>
               <td><span :class="statusClass(job.status)">{{ translateStatus(job.status) }}</span></td>
               <td>
-                <button v-if="job.status === 'cancelled'" class="btn btn-sm btn-outline-black rounded-pill px-3"
+                <button
+                  v-if="job.status === 'cancelled'"
+                  class="btn btn-sm btn-outline-black rounded-pill px-3"
                   @click="deleteApplication(job.application_id)">
                   <i class="bi bi-trash me-1"></i>
                 </button>
 
-
-
-                <button v-else-if="job.status !== 'rejected'" class="btn btn-outline-danger rounded-pill px-3"
+                <button
+                  v-else-if="job.status !== 'rejected'"
+                  class="btn btn-outline-danger rounded-pill px-3"
                   @click="cancelApplication(job.application_id)">
                   ยกเลิก
                 </button>
@@ -66,6 +67,7 @@
     </div>
   </div>
 </template>
+
 <script>
 import NavbarApplicant from "@/components/NavbarApplicant.vue";
 import axios from "axios";
@@ -78,8 +80,6 @@ export default {
     return {
       selectedStatus: "",
       searchText: "",
-      filterType: "",
-      filterEmployer: "",
       applications: [],
     };
   },
@@ -88,16 +88,8 @@ export default {
       return this.applications.filter((job) => {
         const statusMatch = this.selectedStatus ? job.status === this.selectedStatus : true;
         const nameMatch = job.job_name.toLowerCase().includes(this.searchText.toLowerCase());
-        const typeMatch = this.filterType ? job.job_type === this.filterType : true;
-        const employerMatch = this.filterEmployer ? job.employer_name === this.filterEmployer : true;
-        return statusMatch && nameMatch && typeMatch && employerMatch;
+        return statusMatch && nameMatch;
       });
-    },
-    uniqueTypes() {
-      return [...new Set(this.applications.map((job) => job.job_type))].filter(Boolean);
-    },
-    uniqueEmployers() {
-      return [...new Set(this.applications.map((job) => job.employer_name))].filter(Boolean);
     },
   },
   methods: {
@@ -105,24 +97,25 @@ export default {
       return {
         pending: "รอพิจารณา",
         accepted: "รอการติดต่อ",
+        approved: "อนุมัติแล้ว",
         rejected: "ถูกปฏิเสธ",
         cancelled: "ยกเลิกแล้ว",
       }[code] || code;
     },
     statusClass(status) {
       return {
-        "text-warning fw-bold": status === "pending",
-        "text-success fw-bold": status === "accepted",
-        "text-danger fw-bold": status === "rejected",
-        "text-muted fw-bold": status === "cancelled",
-      };
+        pending: "text-warning fw-bold",
+        accepted: "text-success fw-bold",
+        approved: "text-primary fw-bold",
+        rejected: "text-danger fw-bold",
+        cancelled: "text-muted fw-bold",
+      }[status] || "";
     },
     async fetchApplications() {
       try {
         const user_id = localStorage.getItem("user_id");
         if (!user_id) return;
         const res = await axios.get(`http://localhost:3001/api/applications/${user_id}`);
-
         this.applications = res.data;
       } catch (err) {
         console.error("❌ ดึงข้อมูลสมัครงานไม่สำเร็จ:", err);
@@ -166,7 +159,9 @@ export default {
     },
     formatDate(dateStr) {
       return new Date(dateStr).toLocaleDateString("th-TH", {
-        day: "2-digit", month: "2-digit", year: "numeric"
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
       });
     },
   },
@@ -175,6 +170,7 @@ export default {
   },
 };
 </script>
+
 <style scoped>
 .btn-outline-black {
   color: #545050;
@@ -182,32 +178,11 @@ export default {
   background-color: transparent;
   transition: all 0.2s ease;
 }
-
-.btn-outline-black:hover,
-.btn-outline-black:focus,
-.btn-outline-black:active {
+.btn-outline-black:hover {
   background-color: #000;
   color: #fff;
   border-color: #000;
 }
-
-.btn-cancelled {
-  color: #6c757d;
-  /* muted gray */
-  border: 1px solid #6c757d;
-  background-color: transparent;
-  transition: all 0.2s;
-}
-
-.btn-cancelled:hover,
-.btn-cancelled:focus,
-.btn-cancelled:active {
-  color: #000;
-  border-color: #000;
-  background-color: #f1f1f1;
-  /* soft background when hovered */
-}
-
 .custom-select,
 .form-control {
   border-radius: 999px !important;
@@ -217,32 +192,11 @@ export default {
   min-width: 200px;
   max-width: 240px;
 }
-
-.btn-delete-icon {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background-color: #ffecec;
-  border: none;
-  color: #e53935;
-  font-size: 1.2rem;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  transition: background-color 0.3s, color 0.3s;
-}
-
-.btn-delete-icon:hover {
-  background-color: #e53935;
-  color: #fff;
-}
-
 .table thead {
   background-color: #f9f9f9;
   font-weight: 600;
   border-bottom: 2px solid #eee;
 }
-
 .table td,
 .table th {
   vertical-align: middle;

@@ -30,9 +30,15 @@
                 <option disabled value="">-- กรุณาเลือก --</option>
                 <option value="ออกแบบและมัลติมีเดีย">ออกแบบและมัลติมีเดีย</option>
                 <option value="การตลาดดิจิทัล">การตลาดดิจิทัล</option>
-                <option value="แอดมินเพจ / โซเชียลมีเดีย">แอดมินเพจ / โซเชียลมีเดีย</option>
-                <option value="ตัดต่อวิดีโอ / คอนเทนต์">ตัดต่อวิดีโอ / คอนเทนต์</option>
+                <option value="พัฒนาเว็บไซต์">พัฒนาเว็บไซต์</option>
+                <option value="UX/UI Design">UX/UI Design</option>
+                <option value="IT Support">IT Support</option>
+                <option value="ดูแลระบบเครือข่าย">ดูแลระบบเครือข่าย</option>
+                <option value="เขียนบทความ/ แปลบทบความเทคโนโลยี่">เขียน/ แปลบทบความเทคโนโลยี่</option>
                 <option value="คีย์ข้อมูล / Data Entry">คีย์ข้อมูล / Data Entry</option>
+                <option value="แอดมินเพจ / ดูแลโซเชียลมีเดีย">แอดมินเพจ / โซเชียลมีเดีย</option>
+                <option value="ตัดต่อวิดีโอ / สร้างคอนเทนต์">ตัดต่อวิดีโอ / คอนเทนต์</option>
+                <option value="ที่ปรึกษาด้านเทคโนโลยี่">ที่ปรึกษาด้านเทคโนโลยี่</option>
               </select>
             </div>
 
@@ -96,9 +102,13 @@
               <input v-model="job.j_appdeadline" type="date" class="form-control" required />
             </div>
 
-            <!-- ปุ่มบันทึก -->
-            <div class="d-flex justify-content-end mt-4">
-              <button class="btn btn-orange fw-bold px-4 py-2 rounded-pill shadow-sm">
+            <!-- ปุ่มบันทึก + ยกเลิก -->
+            <div class="d-flex justify-content-end gap-2 mt-4">
+              <button type="button" class="btn btn-outline-secondary px-4 py-2 rounded-pill" @click="cancelEdit">
+                <i class="bi bi-x-circle me-1"></i> ยกเลิก
+              </button>
+
+              <button type="submit" class="btn btn-orange fw-bold px-4 py-2 rounded-pill shadow-sm">
                 <i class="bi bi-check2-circle me-2"></i> บันทึกการแก้ไข
               </button>
             </div>
@@ -153,6 +163,9 @@ export default {
           alert("เกิดข้อผิดพลาดในการบันทึกข้อมูล");
         });
     },
+    cancelEdit() {
+      this.$router.back(); // หรือจะใช้: this.$router.push(`/employer/jobs/${this.job?.job_id}`);
+    }
   },
 };
 </script>

@@ -15,18 +15,20 @@
           👤 {{ user?.e_username || 'guest' }}
         </button>
         <ul class="dropdown-menu" :class="{ show: showDropdown }">
-          <li>
-            <router-link to="/employer/profile" class="dropdown-item">
-              <i class="bi bi-person-lines-fill me-2"></i> โปรไฟล์ของฉัน
-            </router-link>
-          </li>
-          <li><hr class="dropdown-divider"></li>
-          <li>
-            <button class="dropdown-item text-danger" @click="logout">
-              <i class="bi bi-box-arrow-right me-2"></i> ออกจากระบบ
-            </button>
-          </li>
-        </ul>
+  <li>
+    <div class="dropdown-item text-nowrap text-truncate text-muted" title="อีเมลของคุณ">
+      <i class="bi bi-envelope me-2"></i>
+      <span class="email-text">{{ user?.e_email || 'ไม่มีอีเมล' }}</span>
+    </div>
+  </li>
+  <li><hr class="dropdown-divider" /></li>
+  <li>
+    <button class="dropdown-item text-danger" @click="logout">
+      <i class="bi bi-box-arrow-right me-2"></i> ออกจากระบบ
+    </button>
+  </li>
+</ul>
+
       </div>
     </div>
   </div>
@@ -56,6 +58,25 @@ export default {
 </script>
 
 <style scoped>
+.email-text {
+  font-size: 13.5px;
+  font-weight: 400;
+  color: #666;
+  max-width: 150px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dropdown-item.text-danger {
+  font-weight: 500;
+}
+
+.dropdown-item.text-danger:hover {
+  background-color: #fff5f5;
+  color: #d9534f;
+}
+
 .navbar-home-wrapper {
   padding: 16px 64px;
   border-bottom: 4px solid #ff6600;

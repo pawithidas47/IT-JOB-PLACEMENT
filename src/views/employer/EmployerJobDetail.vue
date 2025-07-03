@@ -5,63 +5,74 @@
 
     <!-- รายละเอียดงาน -->
     <div class="container py-5" v-if="job">
-      <div class="card shadow rounded-4 p-4">
+      <div class="card shadow-lg rounded-4 p-5 border-0 bg-white">
 
         <!-- วันที่ -->
-        <p class="text-muted small mb-1">
-          <i class="bi bi-calendar-event me-2"></i> {{ formatDate(job.j_posted_at) || '-' }}
-
+        <p class="text-muted small mb-2">
+          <i class="bi bi-calendar-event me-2"></i>{{ formatDate(job.j_posted_at) || '-' }}
         </p>
 
         <!-- หัวเรื่องงาน -->
-        <h5 class="fw-bold mb-1">รับสมัคร {{ job.j_title }}</h5>
-        <p class="text-muted mb-2">{{ job.e_company_name }}</p>
+        <h2 class="fw-bold text-orange mb-1">รับสมัคร {{ job.j_title }}</h2>
+        <p class="text-muted mb-3 fs-6">{{ job.e_company_name || '-' }}</p>
 
         <!-- ประเภท/หมวดหมู่ -->
-        <div class="d-flex flex-wrap gap-2 mb-3">
-          <span class="badge bg-success">งาน{{ job.j_type }}</span>
-          <span class="text-muted small">หมวดหมู่ {{ job.j_category || '-' }}</span>
+        <div class="d-flex flex-wrap gap-2 mb-4">
+          <span class="badge bg-warning text-dark px-3 py-2 rounded-pill">หมวดหมู่: {{ job.j_type || '-' }}</span>
         </div>
 
         <!-- จำนวนรับ -->
-        <p class="fw-bold mb-1">จำนวนที่รับ {{ job.j_amount || '-' }} อัตรา</p>
+        <p class="mb-3"><strong>จำนวนที่รับ:</strong> {{ job.j_amount || '-' }} อัตรา</p>
 
         <!-- ลักษณะงาน -->
-        <h6 class="fw-bold mt-4">ลักษณะงาน</h6>
-        <ul class="small">
-          <li v-for="line in splitLines(job.j_description)" :key="line">{{ line }}</li>
+        <h5 class="fw-bold text-secondary mt-4">ลักษณะงาน</h5>
+        <ul class="list-group list-group-flush mb-4">
+          <li class="list-group-item" v-for="line in splitLines(job.j_description)" :key="line">📌 {{ line }}</li>
         </ul>
 
         <!-- คุณสมบัติผู้สมัคร -->
-        <h6 class="fw-bold mt-4">คุณสมบัติผู้สมัคร</h6>
-        <ul class="small">
-          <li v-for="line in splitLines(job.j_qualification)" :key="line">{{ line }}</li>
+        <h5 class="fw-bold text-secondary">คุณสมบัติผู้สมัคร</h5>
+        <ul class="list-group list-group-flush mb-4">
+          <li class="list-group-item" v-for="line in splitLines(job.j_qualification || '')" :key="line">✅ {{ line }}</li>
         </ul>
 
         <!-- เงินเดือน -->
-        <h6 class="fw-bold mt-4">เงินเดือน/ค่าตอบแทน</h6>
-        <p>{{ formatSalary(job.j_salary) }} บาท</p>
+        <h5 class="fw-bold text-secondary">เงินเดือน/ค่าตอบแทน</h5>
+        <p class="mb-4">💰 {{ formatSalary(job.j_salary) }} บาท</p>
 
         <!-- สวัสดิการ -->
-        <h6 class="fw-bold mt-4">สวัสดิการ</h6>
-        <ul class="small">
-          <li v-for="line in splitLines(job.j_benefits)" :key="line">{{ line }}</li>
+        <h5 class="fw-bold text-secondary">สวัสดิการ</h5>
+        <ul class="list-group list-group-flush mb-4">
+          <li class="list-group-item" v-for="line in splitLines(job.j_welfare)" :key="line">🎁 {{ line }}</li>
         </ul>
 
+        <!-- สิ่งที่ต้องส่ง -->
+        <h5 class="fw-bold text-secondary">สิ่งที่ต้องส่ง</h5>
+        <p class="mb-4">📎 {{ job.j_deliverable || 'ไม่ระบุ' }}</p>
+
         <!-- สถานที่ทำงาน -->
-        <h6 class="fw-bold mt-4">สถานที่ปฏิบัติงาน</h6>
-        <p>{{ job.j_location || 'ไม่ระบุ' }}</p>
+        <h5 class="fw-bold text-secondary">สถานที่ปฏิบัติงาน</h5>
+        <p class="mb-4">📍 {{ job.j_location || 'ไม่ระบุ' }}</p>
 
         <!-- เวลาทำงาน -->
-        <h6 class="fw-bold mt-4">จำนวนวันและเวลาทำงาน</h6>
-        <p>{{ job.j_worktime || 'ไม่ระบุ' }}</p>
+        <h5 class="fw-bold text-secondary">วันและเวลาทำงาน</h5>
+        <p class="mb-4">🕒 {{ job.j_worktime || 'ไม่ระบุ' }}</p>
+
+        <!-- ช่องทางติดต่อ -->
+        <h5 class="fw-bold text-secondary">ช่องทางติดต่อ</h5>
+        <p class="mb-4">📱 {{ job.j_contact || '-' }}</p>
+
+        <!-- วันปิดรับสมัคร -->
+        <h5 class="fw-bold text-secondary">วันปิดรับสมัคร</h5>
+        <p class="mb-4">⏳ {{ formatDate(job.j_appdeadline) || '-' }}</p>
 
         <!-- ปุ่มแก้ไข -->
-        <div class="d-flex justify-content-between align-items-center mt-4">
-          <button class="btn btn-outline-secondary rounded-pill" @click="editJob">
-            <i class="bi bi-pencil-square me-1"></i> แก้ไขงาน
+        <div class="d-flex justify-content-end mt-4">
+          <button class="btn btn-outline-primary px-4 py-2 rounded-pill" @click="editJob">
+            <i class="bi bi-pencil-square me-1"></i> แก้ไขงานนี้
           </button>
         </div>
+
       </div>
     </div>
 
@@ -97,15 +108,14 @@ export default {
   },
   methods: {
     formatDate(dateStr) {
-  if (!dateStr) return null;
-  const date = new Date(dateStr);
-  return isNaN(date) ? null : date.toLocaleDateString("th-TH", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric"
-  });
-}
-,
+      if (!dateStr) return null;
+      const date = new Date(dateStr);
+      return isNaN(date) ? null : date.toLocaleDateString("th-TH", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric"
+      });
+    },
     formatSalary(salary) {
       return parseFloat(salary).toLocaleString();
     },
@@ -113,7 +123,6 @@ export default {
       return text?.split('\n') || [];
     },
     editJob() {
-      // ไปยังหน้าแก้ไขงาน
       this.$router.push(`/employer/jobs/edit/${this.job.job_id}`);
     }
   },
@@ -121,5 +130,7 @@ export default {
 </script>
 
 <style scoped>
-/* ปรับแต่งสไตล์ */
+.text-orange {
+  color: #ff6600;
+}
 </style>

@@ -7,88 +7,100 @@
         <h4 class="fw-bold mb-4 text-orange">📝 โพสต์งานใหม่</h4>
 
         <form @submit.prevent="submitJob" class="row g-3">
-          <!-- Job Title -->
-          <div class="col-12">
-            <label class="form-label">ชื่องาน</label>
-            <input v-model="job.j_title" class="form-control rounded-3" required />
-          </div>
-
-          <!-- Detail -->
-          <div class="col-12">
-            <label class="form-label">รายละเอียดงาน</label>
-            <textarea v-model="job.detail" class="form-control rounded-3" rows="3" placeholder="อธิบายลักษณะงานโดยรวม"
-              required></textarea>
-          </div>
-
-          <!-- Style + Goal -->
-          <div class="col-md-6">
-            <label class="form-label">เป้าหมายของงาน</label>
-            <input v-model="job.goal" class="form-control rounded-3" placeholder="เพิ่มยอดขาย / Awareness" />
-          </div>
-          <div class="col-md-6">
-            <label class="form-label">โทน/สไตล์</label>
-            <input v-model="job.style" class="form-control rounded-3" placeholder="มินิมอล / Modern" />
-          </div>
-
-          <!-- Upload -->
-          <div class="col-12">
-            <label class="form-label">แนบไฟล์ (Brief/Reference)</label>
-            <input type="file" multiple class="form-control rounded-3" @change="handleFileUpload" />
-          </div>
-
-          <!-- Deliverable / Revisions -->
-          <div class="col-md-6">
-            <label class="form-label">สิ่งที่ต้องส่งมอบ</label>
-            <input v-model="job.deliverable" class="form-control rounded-3" placeholder="เช่น PNG, PSD, AI" />
-          </div>
-          <div class="col-md-6">
-            <label class="form-label">จำนวนรอบแก้ไข</label>
-            <input v-model="job.revisions" type="number" class="form-control rounded-3" />
-          </div>
-
-          <!-- Duration + Contact -->
-          <div class="col-md-6">
-            <label class="form-label">ระยะเวลาส่งงาน</label>
-            <input v-model="job.duration" class="form-control rounded-3" placeholder="เช่น 7 วัน" />
-          </div>
-          <div class="col-md-6">
-            <label class="form-label">ช่องทางติดต่อ</label>
-            <input v-model="job.contact" class="form-control rounded-3" placeholder="LINE / Email" required />
-          </div>
-
-          <!-- Job Type -->
-          <div class="col-md-6">
-            <label class="form-label">ประเภทงาน</label>
-            <select v-model="job.j_type" class="form-select rounded-3" required>
-              <option disabled value="">-- เลือกประเภท --</option>
-              <option>ออกแบบและมัลติมีเดีย</option>
-              <option>คีย์ข้อมูล / Data Entry</option>
-              <option>แอดมินเพจ / ดูแลโซเชียล</option>
-              <option>ตัดต่อวิดีโอ / สร้างคอนเทนต์</option>
+  <!-- 1. ชื่องาน -->
+  <div class="col-12">
+    <label class="form-label fw-bold">ชื่องาน</label>
+    <input v-model="job.title" class="form-control rounded-3" placeholder="เช่น พนักงานขายสินค้า" required />
+  </div>
+<div class="col-12">
+            <label class="form-label fw-bold">หมวดหมู่งาน</label>
+            <select v-model="job.category" class="form-select rounded-3" required>
+  <option disabled value="">-- เลือกหมวดหมู่ --</option>
+              <option value="ออกแบบและมัลติมีเดีย">ออกแบบและมัลติมีเดีย</option>
+              <option value="การตลาดดิจิทัล">การตลาดดิจิทัล</option>
+              <option value="พัฒนาเว็บไซต์">พัฒนาเว็บไซต์</option>
+              <option value="UX/UI Design">UX/UI Design</option>
+              <option value="IT Support">IT Support</option>
+              <option value="ดูแลระบบเครือข่าย">ดูแลระบบเครือข่าย</option>
+              <option value="เขียนบทความ/ แปลบทบความเทคโนโลยี่">เขียน/ แปลบทบความเทคโนโลยี่</option>
+              <option value="คีย์ข้อมูล / Data Entry">คีย์ข้อมูล / Data Entry</option>
+              <option value="แอดมินเพจ / ดูแลโซเชียลมีเดีย">แอดมินเพจ / โซเชียลมีเดีย</option>
+              <option value="ตัดต่อวิดีโอ / สร้างคอนเทนต์">ตัดต่อวิดีโอ / คอนเทนต์</option>
+              <option value="ที่ปรึกษาด้านเทคโนโลยี่">ที่ปรึกษาด้านเทคโนโลยี่</option>
             </select>
           </div>
+  <!-- 2. รายละเอียดงาน -->
+  <div class="col-12">
+    <label class="form-label fw-bold">รายละเอียดงาน</label>
+    <textarea v-model="job.description" class="form-control rounded-3" rows="4" placeholder="อธิบายลักษณะงานโดยรวม" required></textarea>
+  </div>
 
-          <!-- Salary + Deadline -->
-          <div class="col-md-3">
-            <label class="form-label">ค่าจ้าง (บาท)</label>
-            <input v-model.number="job.j_salary" type="number" class="form-control rounded-3" required />
-          </div>
-          <div class="col-md-3 d-flex align-items-end">
-            <button class="btn btn-outline-secondary w-100" type="button" @click="recommend">
-              🔮 แนะนำโดย AI
-            </button>
-          </div>
-          <div class="col-md-6">
-            <label class="form-label">วันปิดรับสมัคร</label>
-            <input v-model="job.j_appdeadline" type="date" class="form-control rounded-3" required />
-          </div>
+  <!-- 3. จำนวนที่รับ -->
+  <div class="col-md-6">
+    <label class="form-label fw-bold">จำนวนที่รับ</label>
+    <input v-model="job.vacancy" class="form-control rounded-3" placeholder="เช่น 3 อัตรา" />
+  </div>
 
-          <!-- Submit -->
-          <div class="col-12">
-            <button class="btn btn-orange w-100 fw-bold py-2"> โพสต์งาน</button>
+  <!-- 4. คุณสมบัติผู้สมัคร -->
+  <div class="col-md-6">
+    <label class="form-label fw-bold">คุณสมบัติผู้สมัคร</label>
+    <input v-model="job.qualification" class="form-control rounded-3" placeholder="เช่น มีโน้ตบุ๊ก, ใช้ Photoshop ได้" />
+  </div>
 
-          </div>
-        </form>
+  <!-- 6. ค่าตอบแทน -->
+  <div class="col-md-6">
+    <label class="form-label fw-bold">ค่าตอบแทน / รายได้</label>
+    <input v-model="job.salary" class="form-control rounded-3" placeholder="เช่น 50 บาท/ชม." required />
+  </div>
+
+  <!-- 7. ระยะเวลางาน -->
+  <div class="col-md-6">
+    <label class="form-label fw-bold">ระยะเวลางาน</label>
+    <input v-model="job.duration" class="form-control rounded-3" placeholder="เช่น 1 ก.ค. - 30 ส.ค." />
+  </div>
+
+  <!-- 8. วัน-เวลาทำงาน -->
+  <div class="col-md-6">
+    <label class="form-label fw-bold">วัน-เวลาทำงาน</label>
+    <input v-model="job.working_time" class="form-control rounded-3" placeholder="เช่น จ.-ศ. 9:00-17:00" />
+  </div>
+
+  <!-- 9. สถานที่ทำงาน -->
+  <div class="col-md-6">
+    <label class="form-label fw-bold">สถานที่ทำงาน</label>
+    <input v-model="job.location" class="form-control rounded-3" placeholder="เช่น ออนไลน์ / กรุงเทพฯ" />
+  </div>
+
+  <!-- 10. สวัสดิการ -->
+  <div class="col-md-6">
+    <label class="form-label fw-bold">สวัสดิการ (ถ้ามี)</label>
+    <input v-model="job.welfare" class="form-control rounded-3" placeholder="เช่น ค่าอาหาร / เบี้ยขยัน" />
+  </div>
+
+  <!-- 11. สิ่งที่ต้องส่ง -->
+  <div class="col-12">
+    <label class="form-label fw-bold">สิ่งที่ต้องส่ง (ถ้ามี)</label>
+    <input v-model="job.deliverable" class="form-control rounded-3" placeholder="เช่น PSD, Excel, รูปภาพ" />
+  </div>
+
+  <!-- 12. ช่องทางติดต่อ -->
+  <div class="col-md-6">
+    <label class="form-label fw-bold">ช่องทางติดต่อ</label>
+    <input v-model="job.contact" class="form-control rounded-3" placeholder="LINE / Email / เบอร์โทร" required />
+  </div>
+
+  <!-- 13. วันปิดรับสมัคร -->
+  <div class="col-md-6">
+    <label class="form-label fw-bold">วันปิดรับสมัคร</label>
+    <input v-model="job.deadline" type="date" class="form-control rounded-3" required />
+  </div>
+
+  <!-- Submit -->
+  <div class="col-12">
+    <button type="submit" class="btn btn-orange w-100 fw-bold py-2">📨 โพสต์งาน</button>
+  </div>
+</form>
+
       </div>
 
       <!-- Preview -->
@@ -114,17 +126,19 @@ export default {
   data() {
     return {
       job: {
-        j_title: "",
-        detail: "",
-        goal: "",
-        style: "",
-        deliverable: "",
-        revisions: null,
+        title: "",
+        description: "",
+        category: "",
+        vacancy: "",
+        qualification: "",
+        salary: "",
         duration: "",
+        working_time: "",
+        location: "",
+        welfare: "",
+        deliverable: "",
         contact: "",
-        j_type: "",
-        j_salary: null,
-        j_appdeadline: "",
+        deadline: ""
       },
       user: null,
       files: [],
@@ -135,64 +149,59 @@ export default {
     if (!u) return this.$router.push("/login");
     this.user = JSON.parse(u);
 
-    // แปลงวันที่ให้เป็น YYYY-MM-DD ถ้ามีค่าเริ่มต้นจาก backend
-    if (this.job.j_appdeadline) {
-      const date = new Date(this.job.j_appdeadline);
+    // แปลงวันที่ (optional)
+    if (this.job.deadline) {
+      const date = new Date(this.job.deadline);
       const yyyy = date.getFullYear();
       const mm = String(date.getMonth() + 1).padStart(2, "0");
       const dd = String(date.getDate()).padStart(2, "0");
-      this.job.j_appdeadline = `${yyyy}-${mm}-${dd}`; // 👈 ทำให้ตรงกับ format ของ input[type="date"]
+      this.job.deadline = `${yyyy}-${mm}-${dd}`;
     }
   },
   methods: {
     handleFileUpload(e) {
       this.files = [...e.target.files];
     },
-    recommend() {
-      // Mock AI logic: generate based on job type (in real case call API)
-      if (this.job.j_type.includes("แอดมิน") || this.job.j_type.includes("คีย์ข้อมูล")) {
-        this.job.j_salary = 800;
-        this.job.duration = "ภายใน 3 วัน";
-      } else if (this.job.j_type.includes("ออกแบบ") || this.job.j_type.includes("ตัดต่อ")) {
-        this.job.j_salary = 1500;
-        this.job.duration = "ภายใน 5 วัน";
-      } else {
-        this.job.j_salary = 1000;
-        this.job.duration = "ภายใน 4 วัน";
-      }
-    },
     submitJob() {
-      const payload = {
-        ...this.job,
-        j_description: `รายละเอียด: ${this.job.detail}\nเป้าหมาย: ${this.job.goal}\nสไตล์: ${this.job.style}\nสิ่งที่ส่งมอบ: ${this.job.deliverable}\nรอบแก้ไข: ${this.job.revisions}\nส่งภายใน: ${this.job.duration}`,
-        employer_id: this.user.employer_id,
-      };
+const payload = {
+  j_title: this.job.title,
+  j_description: this.job.description,
+  j_type: this.job.category,
+  j_salary: this.job.salary,
+  j_appdeadline: this.job.deadline,
+  j_amount: this.job.vacancy,
+  j_duration: this.job.duration,
+  j_worktime: this.job.working_time,
+  j_location: this.job.location,
+  j_welfare: this.job.welfare,
+  j_deliverable: this.job.deliverable,
+  j_contact: this.job.contact,
+  j_qualification: this.job.qualification, // ✅ ต้องมี
+  employer_id: this.user.employer_id
+};
 
-      // ✅ ใช้งาน API จริง
-      const formData = new FormData();
-      Object.entries(payload).forEach(([key, value]) => {
-        formData.append(key, value);
-      });
-      this.files.forEach(file => {
-        formData.append("files", file);
-      });
 
+  const formData = new FormData();
+  Object.entries(payload).forEach(([key, value]) => {
+    formData.append(key, value);
+  });
 
-      // สมมุติว่า POST ไปที่ /api/jobs
-      this.$axios.post("http://localhost:3001/api/jobs", formData)
-        .then(() => {
-          alert("✅ โพสต์งานสำเร็จ");
-          this.$router.push("/employer/dashboard");
-        })
-        .catch(err => {
-          console.error("❌ โพสต์ล้มเหลว:", err);
-          alert("โพสต์ไม่สำเร็จ");
-        });
-    }
-    ,
-  },
+  this.$axios.post("http://localhost:3001/api/jobs", formData)
+    .then(() => {
+      alert("✅ โพสต์งานสำเร็จ");
+      this.$router.push("/employer/dashboard");
+    })
+    .catch(err => {
+      console.error("❌ โพสต์ล้มเหลว:", err);
+      alert("โพสต์ไม่สำเร็จ");
+    });
+}
+
+    
+  }
 };
 </script>
+
 
 <style scoped>
 .text-orange {

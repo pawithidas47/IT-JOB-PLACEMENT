@@ -61,13 +61,8 @@
           <h5 class="fw-bold text-dark mb-2">วันและเวลาทำงาน</h5>
           <p class="mb-4 text-dark">{{ job?.j_worktime || 'ไม่ระบุ' }}</p>
 
-          <!-- ช่องทางติดต่อ -->
-          <h5 class="fw-bold text-dark mb-2">ช่องทางติดต่อ</h5>
-          <p class="mb-4 text-dark">{{ job?.j_contact || '-' }}</p>
-
-          <!-- วันปิดรับสมัคร -->
-          <h5 class="fw-bold text-dark mb-2">วันปิดรับสมัคร</h5>
-          <p class="mb-4 text-dark">{{ formatDate(job?.j_appdeadline) || '-' }}</p>
+       
+  
 
           <!-- ปุ่มแก้ไข + ลบ -->
           <div class="d-flex justify-content-end gap-2 mt-4">

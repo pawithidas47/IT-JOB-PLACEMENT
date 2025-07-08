@@ -83,19 +83,7 @@
     <input v-model="job.deliverable" class="form-control rounded-3" placeholder="เช่น PSD, Excel, รูปภาพ" />
   </div>
 
-  <!-- 12. ช่องทางติดต่อ -->
-  <div class="col-md-6">
-    <label class="form-label fw-bold">ช่องทางติดต่อ</label>
-    <input v-model="job.contact" class="form-control rounded-3" placeholder="LINE / Email / เบอร์โทร" required />
-  </div>
-
-  <!-- 13. วันปิดรับสมัคร -->
-  <div class="col-md-6">
-    <label class="form-label fw-bold">วันปิดรับสมัคร</label>
-    <input v-model="job.deadline" type="date" class="form-control rounded-3" required />
-  </div>
-
-  <!-- Submit -->
+  
   <div class="col-12">
     <button type="submit" class="btn btn-orange w-100 fw-bold py-2">📨 โพสต์งาน</button>
   </div>

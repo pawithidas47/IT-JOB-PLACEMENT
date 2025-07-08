@@ -12,62 +12,78 @@
         <p class="mt-2">ยังไม่มีผู้สมัครในงานของคุณ</p>
       </div>
 
-      <!-- Card ผู้สมัคร -->
-      <div v-for="app in applicants" :key="app.application_id"
-        class="card mb-4 p-3 shadow-sm rounded-4 border-0 d-flex flex-row gap-3 align-items-center flex-wrap">
-
+      <!-- การ์ดผู้สมัคร -->
+      <div
+        v-for="app in applicants"
+        :key="app.application_id"
+        class="card p-4 shadow-sm rounded-4 border-0 d-flex flex-column flex-md-row align-items-start align-items-md-center gap-3 mb-4"
+      >
         <!-- รูปโปรไฟล์ -->
-        <img :src="app.profileImage" class="rounded-circle border" style="width: 80px; height: 80px; object-fit: cover"
-          alt="profile" />
+        <img
+          :src="app.profileImage"
+          class="rounded-circle border"
+          style="width: 80px; height: 80px; object-fit: cover"
+          alt="profile"
+        />
 
         <!-- ข้อมูล -->
         <div class="flex-grow-1">
           <h5 class="fw-bold mb-1">{{ app.a_firstname }} {{ app.a_lastname }}</h5>
           <p class="mb-1">
-            <i class="bi bi-briefcase-fill me-2 text-orange"></i><strong>งาน:</strong> {{ app.j_title }}
+            <i class="bi bi-briefcase-fill me-2 text-orange"></i>
+            <strong>งาน:</strong> {{ app.j_title }}
           </p>
           <p class="mb-1 text-muted small">
             <i class="bi bi-calendar-event me-2"></i> สมัครเมื่อ: {{ formatDate(app.applied_at) }}
           </p>
-          <p class="mb-1 text-muted small">
-            <i class="bi bi-telephone-fill me-2"></i> {{ app.a_phone || '-' }} |
-            <i class="bi bi-envelope-fill ms-3 me-2"></i> {{ app.a_email || '-' }}
+          <p class="mb-0 text-muted small">
+            <i class="bi bi-telephone-fill me-2"></i> {{ app.a_phone || '-' }}
+            <span class="mx-2">|</span>
+            <i class="bi bi-envelope-fill me-2"></i> {{ app.a_email || '-' }}
           </p>
         </div>
 
-        <!-- ปุ่ม Action -->
-        <div class="d-flex flex-column align-items-end gap-2">
-          <span class="badge rounded-pill px-3 py-2" :class="{
-            'bg-secondary': app.status === 'pending',
-            'bg-success': app.status === 'approved',
-            'bg-danger': app.status === 'rejected'
-          }">
+        <!-- Action -->
+        <div class="d-flex flex-column align-items-md-end gap-2">
+          <span
+            class="badge px-3 py-2 text-white"
+            :class="{
+              'bg-secondary': app.status === 'pending',
+              'bg-success': app.status === 'approved',
+              'bg-danger': app.status === 'rejected'
+            }"
+          >
             {{ statusText(app.status) }}
           </span>
 
-          <select v-model="app.status" @change="updateStatus(app)" class="form-select form-select-sm">
+          <select
+            v-model="app.status"
+            @change="updateStatus(app)"
+            class="form-select form-select-sm rounded-pill"
+          >
             <option value="pending">รอดำเนินการ</option>
             <option value="approved">อนุมัติ</option>
             <option value="rejected">ปฏิเสธ</option>
           </select>
 
-          <div class="d-flex gap-2 mt-1">
-            <a :href="`mailto:${app.a_email}`" class="btn btn-outline-secondary btn-sm">📧</a>
-            <router-link :to="{
+          <router-link
+            :to="{
               name: 'EmployerApplicantProfile',
               query: {
                 applicant_id: app.applicant_id,
                 application_id: app.application_id
               }
-            }" class="btn btn-sm btn-outline-primary rounded-pill">
-              ดูโปรไฟล์
-            </router-link>
-          </div>
+            }"
+            class="btn btn-sm btn-outline-primary rounded-pill mt-1"
+          >
+            ดูโปรไฟล์
+          </router-link>
         </div>
       </div>
     </div>
   </div>
 </template>
+
 
 <script>
 import axios from "axios";
@@ -150,13 +166,22 @@ export default {
 .text-orange {
   color: #ff6600;
 }
+
 .card {
   transition: all 0.2s ease;
 }
+
 .card:hover {
-  box-shadow: 0 8px 24px rgba(255, 102, 0, 0.1);
+  box-shadow: 0 8px 24px rgba(255, 102, 0, 0.12);
 }
+
 .badge {
   font-size: 0.8rem;
+  min-width: 120px;
+  text-align: center;
+}
+
+select.form-select-sm {
+  min-width: 160px;
 }
 </style>

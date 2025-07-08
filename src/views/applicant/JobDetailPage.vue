@@ -48,12 +48,6 @@
         <h5 class="fw-bold text-dark mb-2">วันและเวลาทำงาน</h5>
         <p class="mb-4 text-dark">{{ job?.j_worktime || 'ไม่ระบุ' }}</p>
 
-        <h5 class="fw-bold text-dark mb-2">ช่องทางติดต่อ</h5>
-        <p class="mb-4 text-dark">{{ job?.j_contact || '-' }}</p>
-
-        <h5 class="fw-bold text-dark mb-2">วันปิดรับสมัคร</h5>
-        <p class="mb-4 text-dark">{{ formatDate(job?.j_appdeadline) || '-' }}</p>
-
         <div class="text-center">
           <button :class="alreadyApplied ? 'btn btn-secondary w-100 fw-bold' : 'btn btn-orange w-100 fw-bold'"
             :disabled="alreadyApplied" @click="confirmApply">
@@ -63,75 +57,60 @@
         </div>
       </div>
 
-      
-  <!-- ขวา: ข้อมูลบริษัท -->
-<div class="card shadow rounded-4 p-4 bg-white" style="flex: 1; min-width: 260px; max-width: 360px;">
 
-  <!-- โลโก้ + ชื่อบริษัท -->
-  <div class="text-center mb-3">
-    <img
-      :src="job.e_profile_img_url ? 'http://localhost:3001' + job.e_profile_img_url : '/default-profile.jpg'"
-      class="rounded-circle mb-2"
-      style="width: 100px; height: 100px; object-fit: cover"
-    />
-    <h5 class="fw-bold mb-1">{{ job?.e_company_name || 'ชื่อบริษัท' }}</h5>
-    <p class="text-muted small mb-2">{{ job?.e_type || 'ประเภทธุรกิจ' }}</p>
-  </div>
+      <!-- ขวา: ข้อมูลบริษัท -->
+      <div class="card shadow rounded-4 p-4 bg-white" style="flex: 1; min-width: 260px; max-width: 360px;">
 
-  <!-- เกี่ยวกับบริษัท -->
-  <h6 class="fw-bold text-success mb-2">เกี่ยวกับบริษัท</h6>
-  <p class="small" v-if="job.e_description">{{ job.e_description }}</p>
+        <!-- โลโก้ + ชื่อบริษัท -->
+        <div class="text-center mb-3">
+          <img :src="job.e_profile_img_url ? 'http://localhost:3001' + job.e_profile_img_url : '/default-profile.jpg'"
+            class="rounded-circle mb-2" style="width: 100px; height: 100px; object-fit: cover" />
+          <h5 class="fw-bold mb-1">{{ job?.e_company_name || 'ชื่อบริษัท' }}</h5>
+          <p class="text-muted small mb-2">{{ job?.e_type || 'ประเภทธุรกิจ' }}</p>
+        </div>
 
-  <!-- แกลเลอรี่บริษัท -->
-  <h6 class="fw-bold text-success mb-2 mt-4">แกลเลอรี่รูปภาพบริษัท</h6>
-  <div class="d-flex gap-2 overflow-auto mb-3">
-    <img
-      v-for="img in galleryArray"
-      :key="img"
-      :src="'http://localhost:3001' + img"
-      class="rounded"
-      style="height: 80px; object-fit: cover; cursor: pointer"
-      @click="showImage('http://localhost:3001' + img)"
-    />
-  </div>
+        <!-- เกี่ยวกับบริษัท -->
+        <h6 class="fw-bold text-success mb-2">เกี่ยวกับบริษัท</h6>
+        <p class="small" v-if="job.e_description">{{ job.e_description }}</p>
 
-  <!-- modal preview รูป -->
-  <div v-if="selectedImage" class="modal-backdrop" @click.self="selectedImage = null">
-    <div class="modal-image-wrapper">
-      <button class="close-btn" @click="selectedImage = null">✕</button>
-      <button class="nav-btn left" @click="prevImage">‹</button>
-      <img :src="selectedImage" class="preview-image" />
-      <button class="nav-btn right" @click="nextImage">›</button>
-    </div>
-  </div>
+        <!-- แกลเลอรี่บริษัท -->
+        <h6 class="fw-bold text-success mb-2 mt-4">แกลเลอรี่รูปภาพบริษัท</h6>
+        <div class="d-flex gap-2 overflow-auto mb-3">
+          <img v-for="img in galleryArray" :key="img" :src="'http://localhost:3001' + img" class="rounded"
+            style="height: 80px; object-fit: cover; cursor: pointer"
+            @click="showImage('http://localhost:3001' + img)" />
+        </div>
 
-  <!-- ที่อยู่บริษัท -->
-  <h6 class="fw-bold text-success mb-2 mt-3">ที่อยู่บริษัท</h6>
-  <p class="small mb-2">{{ job?.e_address || 'ยังไม่ระบุที่อยู่บริษัท' }}</p>
+        <!-- modal preview รูป -->
+        <div v-if="selectedImage" class="modal-backdrop" @click.self="selectedImage = null">
+          <div class="modal-image-wrapper">
+            <button class="close-btn" @click="selectedImage = null">✕</button>
+            <button class="nav-btn left" @click="prevImage">‹</button>
+            <img :src="selectedImage" class="preview-image" />
+            <button class="nav-btn right" @click="nextImage">›</button>
+          </div>
+        </div>
 
-  <iframe
-    v-if="job?.e_map_iframe"
-    :src="job.e_map_iframe"
-    width="100%"
-    height="220"
-    style="border: 0; border-radius: 8px"
-    allowfullscreen
-    loading="lazy"
-    referrerpolicy="no-referrer-when-downgrade"
-  ></iframe>
+        <!-- ที่อยู่บริษัท -->
+        <h6 class="fw-bold text-success mb-2 mt-3">ที่อยู่บริษัท</h6>
+        <p class="small mb-2">{{ job?.e_address || 'ยังไม่ระบุที่อยู่บริษัท' }}</p>
 
-  <!-- ข้อมูลติดต่อ -->
-  <h6 class="fw-bold text-success mb-2 mt-3">ข้อมูลติดต่อบริษัท</h6>
-  <ul class="list-unstyled small text-muted">
-    <li><i class="bi bi-person-circle me-2"></i> {{ job?.e_contact || '-' }}</li>
-    <li><i class="bi bi-telephone me-2"></i> {{ job?.e_phone || '-' }}</li>
-    <li>
-      <i class="bi bi-globe me-2"></i>
-      <a v-if="job?.e_website" :href="job.e_website" target="_blank">{{ job.e_website }}</a>
-      <span v-else>-</span>
-    </li>
-  </ul>
-</div>
+        <iframe v-if="job?.e_map_iframe" :src="job.e_map_iframe" width="100%" height="220"
+          style="border: 0; border-radius: 8px" allowfullscreen loading="lazy"
+          referrerpolicy="no-referrer-when-downgrade"></iframe>
+
+        <!-- ข้อมูลติดต่อ -->
+        <h6 class="fw-bold text-success mb-2 mt-3">ข้อมูลติดต่อบริษัท</h6>
+        <ul class="list-unstyled small text-muted">
+          <li><i class="bi bi-person-circle me-2"></i> {{ job?.e_contact || '-' }}</li>
+          <li><i class="bi bi-telephone me-2"></i> {{ job?.e_phone || '-' }}</li>
+          <li>
+            <i class="bi bi-globe me-2"></i>
+            <a v-if="job?.e_website" :href="job.e_website" target="_blank">{{ job.e_website }}</a>
+            <span v-else>-</span>
+          </li>
+        </ul>
+      </div>
 
 
     </div>

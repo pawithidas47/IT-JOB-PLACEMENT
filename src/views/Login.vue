@@ -1,4 +1,3 @@
-// ===== FRONTEND: Login.vue =====
 <template>
   <div>
     <NavbarHome />
@@ -14,8 +13,8 @@
 
         <form @submit.prevent="handleLogin">
           <div class="mb-3">
-            <label class="form-label">ชื่อผู้ใช้งาน</label>
-            <input v-model="username" type="text" class="form-control rounded-3" placeholder="เช่น mornor01" required />
+            <label class="form-label">อีเมล</label>
+            <input v-model="email" type="email" class="form-control rounded-3" placeholder="example@domain.com" required />
           </div>
 
           <div class="mb-3">
@@ -51,7 +50,7 @@ export default {
   components: { NavbarHome },
   data() {
     return {
-      username: "",
+      email: "",
       password: "",
       showPassword: false,
       role: "applicant", // applicant | employer
@@ -71,7 +70,7 @@ export default {
 
       axios
         .post(url, {
-          username: this.username,
+          email: this.email,
           password: this.password,
         })
         .then((res) => {
@@ -85,7 +84,7 @@ export default {
 
           localStorage.setItem("user_id", user[idKey]);
           localStorage.setItem("user", JSON.stringify(user));
-          localStorage.setItem("user_role", this.role); // เพิ่ม role ด้วย
+          localStorage.setItem("user_role", this.role);
 
           Swal.fire({
             title: "✅ เข้าสู่ระบบสำเร็จ!",
@@ -116,7 +115,7 @@ export default {
           Swal.fire({
             icon: "error",
             title: "เข้าสู่ระบบไม่สำเร็จ",
-            text: "กรุณาตรวจสอบชื่อผู้ใช้หรือรหัสผ่าน",
+            text: "กรุณาตรวจสอบอีเมลหรือรหัสผ่าน",
             confirmButtonColor: "#ff6600",
           });
         });
@@ -125,8 +124,8 @@ export default {
 };
 </script>
 
-
 <style scoped>
+/* สไตล์เดิมเหมือนของคุณทุกอย่าง */
 .role-toggle-wrapper {
   background: #f3f3f3;
   border-radius: 16px;

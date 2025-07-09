@@ -4,26 +4,22 @@
     <div class="container-fluid px-4 py-4">
       <div class="main-layout align-items-start">
         <!-- Sidebar Filter -->
-        <aside class="filter-panel shadow-popup text-start bg-white"
-          style="padding: 24px; border-radius: 12px; width: 260px; box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);">
+        <aside class="filter-panel shadow-popup text-start bg-white" style="padding: 24px; border-radius: 12px; width: 260px; box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);">
           <form class="d-flex flex-column gap-3" @submit.prevent="searchJobs">
-            <!-- คำค้น -->
+            <!-- Search -->
             <div>
               <label class="form-label mb-1 fw-semibold text-dark">คำที่ต้องการค้นหา</label>
               <div class="position-relative">
-                <input v-model="filter.title" @input="searchJobs" type="text" class="form-control ps-4"
-                  placeholder="  เช่น งานออกแบบ" style="border-radius: 10px; height: 38px; font-size: 14px;" />
+                <input v-model="filter.title" @input="searchJobs" type="text" class="form-control ps-4" placeholder="  เช่น งานออกแบบ" style="border-radius: 10px; height: 38px; font-size: 14px;" />
                 <span class="position-absolute top-50 start-0 translate-middle-y ms-2 text-muted">
                   <i class="bi bi-search"></i>
                 </span>
               </div>
             </div>
-
-            <!-- ประเภทงาน -->
+            <!-- Type -->
             <div>
               <label class="form-label mb-1 fw-semibold text-dark">ประเภทงาน</label>
-              <select v-model="filter.type" @change="searchJobs" class="form-select"
-                style="border-radius: 10px; height: 38px; font-size: 14px;">
+              <select v-model="filter.type" @change="searchJobs" class="form-select" style="border-radius: 10px; height: 38px; font-size: 14px;">
                 <option value="">ทั้งหมด</option>
                 <option value="ออกแบบและมัลติมีเดีย">ออกแบบและมัลติมีเดีย</option>
                 <option value="การตลาดดิจิทัล">การตลาดดิจิทัล</option>
@@ -38,13 +34,11 @@
                 <option value="ที่ปรึกษาด้านเทคโนโลยี">ที่ปรึกษาด้านเทคโนโลยี</option>
               </select>
             </div>
-
-            <!-- ค่าจ้าง -->
+            <!-- Salary -->
             <div>
               <label class="form-label mb-1 fw-semibold text-dark">ค่าจ้าง (บาท)</label>
               <div class="d-flex align-items-center">
-                <select v-model="filter.salaryMin" @change="searchJobs" class="form-select me-2"
-                  style="border-radius: 10px; height: 38px; font-size: 14px;">
+                <select v-model="filter.salaryMin" @change="searchJobs" class="form-select me-2" style="border-radius: 10px; height: 38px; font-size: 14px;">
                   <option value="">ต่ำสุด</option>
                   <option value="100">100</option>
                   <option value="300">300</option>
@@ -55,8 +49,7 @@
                   <option value="10000">10000</option>
                 </select>
                 <span>-</span>
-                <select v-model="filter.salaryMax" @change="searchJobs" class="form-select ms-2"
-                  style="border-radius: 10px; height: 38px; font-size: 14px;">
+                <select v-model="filter.salaryMax" @change="searchJobs" class="form-select ms-2" style="border-radius: 10px; height: 38px; font-size: 14px;">
                   <option value="">สูงสุด</option>
                   <option value="500">500</option>
                   <option value="1000">1000</option>
@@ -68,12 +61,10 @@
                 </select>
               </div>
             </div>
-
-            <!-- ผู้ว่าจ้าง -->
+            <!-- Employer Type -->
             <div>
               <label class="form-label mb-1 fw-semibold text-dark">ผู้ว่าจ้าง</label>
-              <select v-model="filter.employerType" @change="searchJobs" class="form-select mb-2"
-                style="border-radius: 10px; height: 38px; font-size: 14px;">
+              <select v-model="filter.employerType" @change="searchJobs" class="form-select mb-2" style="border-radius: 10px; height: 38px; font-size: 14px;">
                 <option value="">ทั้งหมด</option>
                 <option value="บริษัท">บริษัท</option>
                 <option value="ร้านค้า">ร้านค้า</option>
@@ -85,12 +76,9 @@
                 <option value="ฟรีแลนซ์">ฟรีแลนซ์</option>
               </select>
             </div>
-
-            <!-- ปุ่มค้นหา -->
+            <!-- Submit -->
             <div class="text-center">
-              <button class="btn text-white fw-bold"
-                style="width: 100%; background: linear-gradient(135deg,#ff6600,#e55d00); border-radius: 10px; height: 40px; font-size: 14px; box-shadow: 0 2px 10px rgba(255, 102, 0, 0.3);"
-                type="submit">
+              <button class="btn text-white fw-bold" style="width: 100%; background: linear-gradient(135deg,#ff6600,#e55d00); border-radius: 10px; height: 40px; font-size: 14px; box-shadow: 0 2px 10px rgba(255, 102, 0, 0.3);" type="submit">
                 ค้นหา
               </button>
             </div>
@@ -104,66 +92,40 @@
         <section class="job-results">
           <h5 class="mb-2 text-orange">พบ {{ filteredJobs.length }} งาน</h5>
 
-          <!-- Header Filter Row -->
-<!-- Header Filter Row -->
-<div class="d-flex justify-content-between align-items-center flex-wrap mb-3 gap-3">
-  <!-- Left: Summary -->
-  <p class="mb-0 text-muted flex-grow-1" style="min-width: 200px;">
-    ผลการค้นหา:
-    <template v-if="!filter.title && !filter.type && !filter.salaryMin && !filter.salaryMax && !filter.employerType">
-      ทั้งหมด
-    </template>
-    <template v-else>
-      <span v-if="filter.title"> | คำค้น: "{{ filter.title }}"</span>
-      <span v-if="filter.type"> | ประเภทงาน: {{ filter.type }}</span>
-      <span v-if="filter.salaryMin || filter.salaryMax">
-        | ค่าจ้าง:
-        {{ filter.salaryMin ? Number(filter.salaryMin).toLocaleString() : 'ต่ำสุด' }} -
-        {{ filter.salaryMax ? Number(filter.salaryMax).toLocaleString() : 'สูงสุด' }}
-      </span>
-      <span v-if="filter.employerType"> | ผู้ว่าจ้าง: {{ filter.employerType }}</span>
-    </template>
-  </p>
-
-  <!-- Right: Sort -->
-  <div class="d-flex align-items-center gap-2 flex-nowrap">
-    <label class="form-label fw-semibold mb-0 text-secondary" style="white-space: nowrap;">เรียงตาม:</label>
-    <div class="position-relative">
-      <select v-model="filter.sort" @change="searchJobs" class="form-select custom-select">
-        <option value="">ทั้งหมด</option>
-        <option value="latest">วันที่โพสต์ล่าสุด</option>
-        <option value="salary">ค่าจ้างสูงสุด</option>
-        <option value="deadline">หมดเขตเร็วที่สุด</option>
-      </select>
-    </div>
-  </div>
-</div>
-
-
+          <!-- Job Cards -->
           <div class="job-grid">
-            <div class="job-card p-4 bg-white border rounded-3 shadow-sm position-relative" v-for="job in filteredJobs" :key="job.job_id">
-              <span class="badge bg-warning text-dark position-absolute top-0 end-0 mt-2 me-2" style="font-size: 0.75rem;">ใหม่</span>
-              <h6 class="fw-bold text-orange mb-2">
-                <i class="bi bi-briefcase-fill me-2"></i> {{ job.j_title }}
-              </h6>
-               <p class="mb-1 text-muted"><i class="bi bi-tags-fill me-1"></i> ประเภทงาน: {{ job.j_type }}</p>
-<p class="mb-1 text-muted"><i class="bi bi-cash-coin me-1"></i> ค่าจ้าง: {{ job.j_salary.toLocaleString() }} บาท</p>
-<p class="mb-1 text-muted"><i class="bi bi-person-badge me-1"></i> ผู้ว่าจ้าง: {{ job.employer_type || 'ไม่ระบุ' }}</p>
-<p class="mb-1 text-muted"><i class="bi bi-clock me-1"></i> โพสต์เมื่อ: {{ new Date(job.j_posted_at).toLocaleDateString('th-TH') }}</p>
-<p class="mb-1 text-muted"><i class="bi bi-calendar-event me-1"></i> หมดเขต: {{ new Date(job.j_appdeadline).toLocaleDateString('th-TH') }}</p>
-
-              <div class="d-flex justify-content-between mt-3">
-                <router-link :to="getJobDetailLink(job.job_id)" class="btn btn-sm btn-outline-primary rounded-pill px-3">
-  ดูรายละเอียด
-</router-link>
-
+            <div class="job-card p-4 bg-white border rounded-4 shadow-sm position-relative d-flex flex-column gap-2" v-for="job in filteredJobs" :key="job.job_id">
+              <!-- Logo -->
+              <div class="d-flex align-items-center gap-3 mb-2">
+                <img :src="job.e_profile_img_url ? 'http://localhost:3001' + job.e_profile_img_url : '/default-profile.jpg'" alt="logo" class="rounded-circle" style="width: 48px; height: 48px; object-fit: cover;" />
                 <div>
-                  <button class="btn btn-sm btn-outline-secondary rounded-pill me-1" @click="bookmarkJob(job)">
-                    <i class="bi bi-bookmark"></i>
-                  </button>
-                  <button class="btn btn-sm btn-outline-secondary rounded-pill" @click="shareJob(job)">
-                    <i class="bi bi-share"></i>
-                  </button>
+                  <h6 class="mb-0 fw-bold text-dark">
+  {{ job.e_company_name || 'ไม่ระบุชื่อบริษัท' }}
+</h6>
+
+                </div>
+              </div>
+
+              <!-- Title -->
+              <h5 class="fw-bold text-dark">{{ job.j_title }}</h5>
+
+              <!-- Tags -->
+              <div class="d-flex gap-2 flex-wrap mb-2">
+                <span class="badge bg-success text-white px-3 py-1 rounded-pill">งาน{{ job.j_type || 'ไม่ระบุ' }}</span>
+                <span class="badge bg-danger text-white px-3 py-1 rounded-pill">สัมภาษณ์ออนไลน์</span>
+              </div>
+
+              <!-- Info -->
+              <p class="mb-1 text-muted"><strong>หมวดหมู่ :</strong> {{ job.j_category || 'ไม่ระบุ' }}</p>
+              <p class="mb-1 text-muted"><strong>จำนวนรับสมัคร :</strong> {{ job.j_amount || '-' }} อัตรา</p>
+              <p class="mb-0 text-muted"><strong>เงินเดือน :</strong> <span class="fw-bold text-dark">{{ job.j_salary.toLocaleString() }} บาท</span></p>
+
+              <!-- Actions -->
+              <div class="d-flex justify-content-between mt-3">
+                <router-link :to="getJobDetailLink(job.job_id)" class="btn btn-sm btn-outline-primary rounded-pill px-3">ดูรายละเอียด</router-link>
+                <div>
+                  <button class="btn btn-sm btn-outline-secondary rounded-pill me-1" @click="bookmarkJob(job)"><i class="bi bi-bookmark"></i></button>
+                  <button class="btn btn-sm btn-outline-secondary rounded-pill" @click="shareJob(job)"><i class="bi bi-share"></i></button>
                 </div>
               </div>
             </div>
@@ -171,20 +133,8 @@
         </section>
       </div>
     </div>
-
-    <!-- Login Popup -->
-    <div v-if="showLoginPopup" class="popup-overlay">
-      <div class="popup-content text-center popup-centered">
-        <p class="mb-4 fw-bold">กรุณาเข้าสู่ระบบ<br />เพื่อบันทึกงานที่สนใจ</p>
-        <div class="d-flex justify-content-center gap-3">
-          <button class="btn btn-outline-secondary px-4" @click="showLoginPopup = false">ยกเลิก</button>
-          <router-link to="/login" class="btn px-4" style="background-color: #ff6600; color: white;">เข้าสู่ระบบ</router-link>
-        </div>
-      </div>
-    </div>
   </div>
 </template>
-
 
 <script>
 import NavbarHome from '@/components/NavbarHome.vue';
@@ -219,6 +169,7 @@ export default {
   mounted() {
     axios.get('http://localhost:3001/api/jobs')
       .then((res) => {
+        console.log(res.data)
         this.jobs = res.data;
         this.searchJobs();
       })
@@ -279,6 +230,10 @@ export default {
 
 
 <style scoped>
+.badge {
+  font-size: 0.75rem;
+  font-weight: 500;
+}
 
 .custom-select {
   border-radius: 999px;

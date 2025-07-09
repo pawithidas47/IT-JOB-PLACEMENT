@@ -1,26 +1,23 @@
 <template>
   <div>
     <NavbarHome />
-    
+
     <div class="d-flex justify-content-center align-items-center py-5 px-3"
       style="background-color: #f7f8fa; min-height: calc(100vh - 80px);">
       <div class="card p-5 shadow-lg border-0 rounded-4 w-100" style="max-width: 540px;">
         <div class="text-center mb-4">
           <h4 class="fw-bold mb-0 text-orange">สมัครสมาชิกผู้สมัครงาน</h4>
-
         </div>
 
         <form @submit.prevent="submitForm" class="needs-validation">
-
-          <div class="mb-3">
-            <label class="form-label">ชื่อผู้ใช้งาน<span class="text-danger"> *</span></label>
-            <input v-model.trim="form.a_username" class="form-control rounded-3" placeholder="ชื่อผู้ใช้" required />
+          <div class="mb-4">
+            <label class="form-label">อีเมล<span class="text-danger"> *</span></label>
+            <input type="email" v-model.trim="form.a_email" class="form-control rounded-3" placeholder="example@email.com" required />
           </div>
-
+          
           <div class="mb-3">
             <label class="form-label">รหัสผ่าน<span class="text-danger"> *</span></label>
-            <input type="password" v-model.trim="form.a_password" class="form-control rounded-3" placeholder="รหัสผ่าน"
-              required />
+            <input type="password" v-model.trim="form.a_password" class="form-control rounded-3" placeholder="รหัสผ่าน" required />
           </div>
 
           <div class="mb-3">
@@ -52,7 +49,7 @@
             <div class="col">
               <label class="form-label">เพศ<span class="text-danger"> *</span></label>
               <select v-model="form.a_gender" class="form-select rounded-3" required>
-                <option value="" class="text-center">-- เพศ --</option>
+                <option value="">-- เพศ --</option>
                 <option value="ชาย">ชาย</option>
                 <option value="หญิง">หญิง</option>
                 <option value="อื่น ๆ">อื่น ๆ</option>
@@ -63,7 +60,7 @@
           <div class="mb-3">
             <label class="form-label">คณะ<span class="text-danger"> *</span></label>
             <select v-model="form.a_faculty" class="form-select rounded-3" required>
-              <option value="" class="text-center">----------------- กรุณาเลือกคณะ -----------------</option>
+              <option value="">----------------- กรุณาเลือกคณะ -----------------</option>
               <option value="วิทยาศาสตร์">วิทยาศาสตร์</option>
               <option value="วิศวกรรมศาสตร์">วิศวกรรมศาสตร์</option>
               <option value="มนุษยศาสตร์">มนุษยศาสตร์</option>
@@ -91,11 +88,7 @@
             <input v-model.trim="form.a_phone" class="form-control rounded-3" placeholder="0812345678" required />
           </div>
 
-          <div class="mb-4">
-            <label class="form-label">อีเมล<span class="text-danger"> *</span></label>
-            <input type="email" v-model.trim="form.a_email" class="form-control rounded-3"
-              placeholder="example@email.com" required />
-          </div>
+          
 
           <button type="submit" class="btn btn-orange w-100 fw-bold py-2 rounded-3 fs-6">
             สมัครสมาชิก
@@ -124,7 +117,6 @@ export default {
   data() {
     return {
       form: {
-        a_username: "",
         a_password: "",
         confirm_password: "",
         a_firstname: "",
@@ -139,59 +131,65 @@ export default {
     };
   },
   methods: {
-   submitForm() {
-  const f = this.form;
-  if (!f.a_username || !f.a_password || !f.confirm_password || !f.a_firstname || !f.a_lastname || !f.a_studentid || !f.a_faculty || !f.a_birthdate || !f.a_gender || !f.a_email || !f.a_phone) {
-    Swal.fire({
-      icon: 'error',
-      title: 'เกิดข้อผิดพลาด',
-      text: 'กรุณากรอกข้อมูลให้ครบทุกช่อง',
-    });
-    return;
-  }
-  if (f.a_password !== f.confirm_password) {
-    Swal.fire({
-      icon: 'error',
-      title: 'รหัสผ่านไม่ตรงกัน',
-      text: 'โปรดตรวจสอบรหัสผ่านอีกครั้ง',
-    });
-    return;
-  }
+    submitForm() {
+      const f = this.form;
 
-  axios.post("http://localhost:3001/api/auth/register/applicant", f)
-    .then(() => {
-      Swal.fire({
-  title: '🎉 สมัครสมาชิกสำเร็จ!',
-  text: 'ระบบกำลังนำคุณไปยังหน้าล็อกอิน...',
-  icon: 'success',
-  iconColor: '#10b981',
-  showConfirmButton: false,
-  timer: 2000,
-  timerProgressBar: true,
-  background: '#ffffff',
-  color: '#333',
-  customClass: {
-    popup: 'rounded-4 animated-popup shadow',
-    title: 'fw-bold fs-5',
-    htmlContainer: 'fs-6',
-  },
-  willClose: () => {
-    this.$router.push("/login");
-  }
-})
-.then(() => {
-        this.$router.push("/login");
-      });
-    })
-    .catch((err) => {
-      console.error("❌ สมัครไม่สำเร็จ:", err);
-      Swal.fire({
-        icon: 'error',
-        title: 'เกิดข้อผิดพลาด',
-        text: 'กรุณาตรวจสอบข้อมูลอีกครั้ง',
-      });
-    });
-}
+      // ตรวจสอบว่ากรอกครบ
+      if (
+        !f.a_password || !f.confirm_password || !f.a_firstname || !f.a_lastname ||
+        !f.a_studentid || !f.a_faculty || !f.a_birthdate || !f.a_gender ||
+        !f.a_email || !f.a_phone
+      ) {
+        Swal.fire({
+          icon: 'error',
+          title: 'เกิดข้อผิดพลาด',
+          text: 'กรุณากรอกข้อมูลให้ครบทุกช่อง',
+        });
+        return;
+      }
+
+      // ตรวจสอบรหัสผ่านตรงกัน
+      if (f.a_password !== f.confirm_password) {
+        Swal.fire({
+          icon: 'error',
+          title: 'รหัสผ่านไม่ตรงกัน',
+          text: 'โปรดตรวจสอบรหัสผ่านอีกครั้ง',
+        });
+        return;
+      }
+
+      // ส่งข้อมูลไป backend
+      axios.post("http://localhost:3001/api/auth/register/applicant", f)
+        .then(() => {
+          Swal.fire({
+            title: '🎉 สมัครสมาชิกสำเร็จ!',
+            text: 'ระบบกำลังนำคุณไปยังหน้าล็อกอิน...',
+            icon: 'success',
+            iconColor: '#10b981',
+            showConfirmButton: false,
+            timer: 2000,
+            timerProgressBar: true,
+            background: '#ffffff',
+            color: '#333',
+            customClass: {
+              popup: 'rounded-4 animated-popup shadow',
+              title: 'fw-bold fs-5',
+              htmlContainer: 'fs-6',
+            },
+            willClose: () => {
+              this.$router.push("/login");
+            }
+          });
+        })
+        .catch((err) => {
+          console.error("❌ สมัครไม่สำเร็จ:", err);
+          Swal.fire({
+            icon: 'error',
+            title: 'เกิดข้อผิดพลาด',
+            text: 'กรุณาตรวจสอบข้อมูลอีกครั้ง',
+          });
+        });
+    }
   }
 };
 </script>

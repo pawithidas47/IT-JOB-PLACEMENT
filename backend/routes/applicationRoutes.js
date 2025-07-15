@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const appCtrl = require("../controllers/applicationController");
 const db = require("../models/db");
-
+const connection = db.promise();
 router.delete("/:id", (req, res) => {
   const applicationId = req.params.id;
   const sql = "DELETE FROM applications WHERE application_id = ?";
@@ -54,33 +54,36 @@ router.get("/check-status/:job_id/:applicant_id", (req, res) => {
 });
 
 // ✅ ดึงรายการสมัครงานทั้งหมดของผู้สมัคร
-router.get("/:applicant_id", (req, res) => {
-  const applicantId = req.params.applicant_id;
+router.get("/:id", async (req, res) => {
+  const applicant_id = req.params.id;
 
-  const sql = `
-    SELECT 
-      applications.application_id AS application_id,
-      jobs.j_title AS job_name,
-      jobs.j_type AS job_type,
-      jobs.j_salary AS job_wage,
-      CONCAT(employers.e_firstname, ' ', employers.e_lastname) AS employer_name,
-      applications.app_date AS applied_at,
-      applications.app_status AS status
-    FROM applications
-    JOIN jobs ON applications.job_id = jobs.job_id
-    JOIN employers ON jobs.employer_id = employers.employer_id
-    WHERE applications.applicant_id = ?
-    ORDER BY applications.app_date DESC
-  `;
+const sql = `
+  SELECT 
+    a.application_id,
+    a.app_date AS applied_at,
+    a.app_status AS status,
+    a.app_portfolio_url,
+    j.j_title AS job_name,
+    j.j_type AS job_type,
+    j.j_amount AS job_wage,
+    e.e_company_name AS employer_name
+  FROM applications a
+  JOIN jobs j ON a.job_id = j.job_id
+  JOIN employers e ON j.employer_id = e.employer_id
+  WHERE a.applicant_id = ?
+  ORDER BY a.app_date DESC
+`;
 
-  db.query(sql, [applicantId], (err, results) => {
-    if (err) {
-      console.error("❌ ดึงข้อมูลการสมัครล้มเหลว:", err);
-      return res.status(500).json({ message: "ดึงข้อมูลไม่สำเร็จ" });
-    }
 
-    res.json(results);
-  });
+
+  try {
+    const [rows] = await connection.query(sql, [applicant_id]); // ✅ ใช้ promise
+    res.json(rows);
+  } catch (err) {
+    console.error("❌ Error fetching applications:", err);
+    res.status(500).json({ message: "Internal server error" });
+  }
 });
+
 
 module.exports = router;

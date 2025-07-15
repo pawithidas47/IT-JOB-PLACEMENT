@@ -25,9 +25,10 @@ app.use("/uploads", express.static("uploads")); // ให้ frontend เรี�
 // ✅ Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/jobs", jobRoutes);
-app.use("/api/applications", applicationRoutes);
+//app.use("/api/applications", applicationRoutes);
 app.use("/api/applicants", applicantRoutes);
 app.use("/api/employers", employerRoutes);
+app.use("/api/applications", require("./routes/applicationRoutes"));
 
 
 // ✅ DELETE กรณีจำเป็น (ลบการสมัคร)

@@ -144,7 +144,7 @@ export default {
   },
     async fetchProfile(id) {
       try {
-        const res = await axios.get(`${BASE_URL}/api/applicant/${id}`);
+        const res = await axios.get(`${BASE_URL}/api/applicants/${id}`);
         this.user = res.data.user;
         this.skills = res.data.skills;
         this.portfolios = res.data.portfolios;

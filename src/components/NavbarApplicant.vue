@@ -8,7 +8,8 @@
       <router-link to="/applicant/jobapplications" class="top-link" exact-active-class="active-link">ตรวจสอบงาน</router-link>
       <div class="dropdown" @click="toggleDropdown">
         <button class="btn btn-user dropdown-toggle" type="button">
-          👤 {{ user?.a_username || 'guest' }}
+          👤 {{ user?.a_firstname  || 'guest' }}
+
         </button>
         <ul class="dropdown-menu" :class="{ show: showDropdown }">
           <li>
@@ -38,9 +39,16 @@ export default {
   name: "NavbarApplicant",
   data() {
     return {
-      user: JSON.parse(localStorage.getItem("user")),
+      user: null,
       showDropdown: false
     };
+  },
+  mounted() {
+    const savedUser = localStorage.getItem("user");
+    if (savedUser) {
+      this.user = JSON.parse(savedUser);
+      console.log("✅ user from storage:", this.user);
+    }
   },
   methods: {
     toggleDropdown() {
@@ -53,6 +61,7 @@ export default {
     },
   },
 };
+
 </script>
 
 <style scoped>

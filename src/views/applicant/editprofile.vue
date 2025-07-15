@@ -164,7 +164,7 @@ export default {
         }
 
         alert("✅ บันทึกโปรไฟล์เรียบร้อยแล้ว");
-        this.$router.push("/applicants/userprofile");
+        this.$router.push("/applicant/userprofile");
       } catch (err) {
         console.error("❌ saveProfile error:", err);
         alert("เกิดข้อผิดพลาดในการบันทึกข้อมูล");

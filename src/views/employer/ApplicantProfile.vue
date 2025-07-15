@@ -6,7 +6,7 @@
         <i class="bi bi-journal-text me-2"></i> โปรไฟล์ผู้สมัคร
       </h4>
 
-      <div class="card p-4 shadow rounded-4">
+      <div class="card p-4 shadow rounded-4" v-if="applicant">
         <div class="row">
           <!-- ภาพ -->
           <div class="col-md-3 text-center border-end pe-4">
@@ -16,9 +16,15 @@
               style="max-height: 250px; object-fit: cover"
             />
             <div class="text-start small">
-              <p class="mb-1"><i class="bi bi-telephone-fill text-danger me-2"></i> {{ user.a_phone }}</p>
-              <p class="mb-1"><i class="bi bi-envelope-at-fill text-primary me-2"></i> {{ user.a_email }}</p>
-              <p class="mb-1"><i class="bi bi-chat-dots text-muted me-2"></i> {{ user.a_contact || '-' }}</p>
+              <p class="mb-1">
+                <i class="bi bi-telephone-fill text-danger me-2"></i> {{ applicant.a_phone || '-' }}
+              </p>
+              <p class="mb-1">
+                <i class="bi bi-envelope-at-fill text-primary me-2"></i> {{ applicant.a_email || '-' }}
+              </p>
+              <p class="mb-1">
+                <i class="bi bi-chat-dots text-muted me-2"></i> {{ applicant.a_contact || '-' }}
+              </p>
             </div>
           </div>
 
@@ -27,33 +33,32 @@
             <div class="row g-3">
               <div class="col-md-6">
                 <label>ชื่อ</label>
-                <input class="form-control bg-light" :value="user.a_firstname" readonly />
+                <input class="form-control bg-light" :value="applicant.a_firstname" readonly />
               </div>
               <div class="col-md-6">
                 <label>นามสกุล</label>
-                <input class="form-control bg-light" :value="user.a_lastname" readonly />
+                <input class="form-control bg-light" :value="applicant.a_lastname" readonly />
               </div>
               <div class="col-md-6">
                 <label>รหัสนิสิต</label>
-                <input class="form-control bg-light" :value="user.a_studentid" readonly />
+                <input class="form-control bg-light" :value="applicant.a_studentid" readonly />
               </div>
               <div class="col-md-6">
                 <label>คณะ</label>
-                <input class="form-control bg-light" :value="user.a_faculty" readonly />
+                <input class="form-control bg-light" :value="applicant.a_faculty" readonly />
               </div>
               <div class="col-md-6">
                 <label>อายุ</label>
-                <input class="form-control bg-light" :value="calculateAge(user.a_birthdate)" readonly />
+                <input class="form-control bg-light" :value="calculateAge(applicant.a_birthdate)" readonly />
               </div>
               <div class="col-md-6">
                 <label>เพศ</label>
-                <input class="form-control bg-light" :value="user.a_gender" readonly />
+                <input class="form-control bg-light" :value="applicant.a_gender" readonly />
               </div>
 
               <div class="col-12">
                 <label>แนะนำตัวเอง (Bio)</label>
-               <textarea class="form-control" rows="2" :value="user.a_bio" readonly></textarea>
-
+                <textarea class="form-control" rows="2" :value="applicant.a_bio" readonly></textarea>
               </div>
 
               <div class="col-12">
@@ -77,6 +82,10 @@
           </div>
         </div>
       </div> <!-- card -->
+
+      <div v-else class="text-center text-muted py-5">
+        กำลังโหลดข้อมูลผู้สมัคร...
+      </div>
     </div>
   </div>
 </template>
@@ -90,7 +99,7 @@ export default {
   components: { NavbarEmployer },
   data() {
     return {
-      user: {},
+      applicant: null,
       skills: [],
       portfolios: [],
       profileImage: null,
@@ -98,20 +107,20 @@ export default {
     };
   },
   mounted() {
-    const query = this.$route.query;
-    if (query && query.applicant_id) {
-      this.fetchProfile(query.applicant_id);
+    const applicant_id = this.$route.params.id;
+    if (applicant_id) {
+      this.fetchProfile(applicant_id);
     }
   },
   methods: {
     async fetchProfile(applicant_id) {
       try {
-        const res = await axios.get(`http://localhost:3001/api/applicant/${applicant_id}`);
-        this.user = res.data.user;
+        const res = await axios.get(`http://localhost:3001/api/applicants/${applicant_id}`);
+        this.applicant = res.data.user;
         this.skills = res.data.skills;
         this.portfolios = res.data.portfolios;
-        if (res.data.user.profile_img_url) {
-          this.profileImage = `http://localhost:3001${res.data.user.profile_img_url}`;
+        if (this.applicant.profile_img_url) {
+          this.profileImage = `http://localhost:3001${this.applicant.profile_img_url}`;
         }
       } catch (err) {
         console.error("❌ โหลดโปรไฟล์ผิดพลาด:", err);

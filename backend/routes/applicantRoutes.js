@@ -10,6 +10,16 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 
+router.get("/", async (req, res) => {
+  try {
+    const [rows] = await db.promise().query("SELECT * FROM applicants");
+    res.status(200).json(rows);
+  } catch (err) {
+    console.error("❌ FETCH APPLICANTS ERROR:", err);
+    res.status(500).json({ message: "ไม่สามารถดึงข้อมูลผู้สมัครได้", error: err });
+  }
+});
+
 /** ✅ ดึงข้อมูลโปรไฟล์ผู้สมัคร */
 router.get("/:id", async (req, res) => {
   const { id } = req.params;
@@ -66,36 +76,26 @@ router.put("/:id/bio", async (req, res) => {
   }
 });
 
-/** ✅ อัปเดตข้อมูลทั่วไป + ลบ/เพิ่ม Portfolio ใหม่ */
+/** ✅ อัปเดตข้อมูลทั่วไป + Portfolio */
 router.put("/:id", async (req, res) => {
   const { id } = req.params;
   const {
-    a_firstname,
-    a_lastname,
-    a_faculty,
-    a_gender,
-    a_birthdate,
-    a_contact,
-    a_phone,
-    a_email,
-    portfolios = [] // ✅ fallback ถ้าไม่ได้ส่งมา
+    a_firstname, a_lastname, a_faculty, a_gender,
+    a_birthdate, a_contact, a_phone, a_email,
+    portfolios = []
   } = req.body;
 
   try {
-    // ✅ อัปเดตข้อมูลทั่วไป
     await db.promise().query(
       `UPDATE applicants SET 
         a_firstname = ?, a_lastname = ?, a_faculty = ?, 
-        a_gender = ?, a_birthdate = ?, 
-        a_contact = ?, a_phone = ?, a_email = ?
-       WHERE applicant_id = ?`,
+        a_gender = ?, a_birthdate = ?, a_contact = ?, 
+        a_phone = ?, a_email = ? WHERE applicant_id = ?`,
       [a_firstname, a_lastname, a_faculty, a_gender, a_birthdate, a_contact, a_phone, a_email, id]
     );
 
-    // ✅ ลบ portfolio เดิมทั้งหมด
     await db.promise().query("DELETE FROM portfolios WHERE applicant_id = ?", [id]);
 
-    // ✅ เพิ่มใหม่
     for (const url of portfolios) {
       await db.promise().query(
         "INSERT INTO portfolios (applicant_id, portfolio_url) VALUES (?, ?)",
@@ -148,7 +148,8 @@ router.put("/:id/skills", async (req, res) => {
     res.status(500).json({ message: "เกิดข้อผิดพลาด", error: err });
   }
 });
-// เพิ่ม route นี้ไว้ใน applicantRoutes.js (หลัง require และ router = express.Router())
+
+/** ✅ เพิ่ม Portfolio ใหม่แยก (POST /:id/portfolio) */
 router.post("/:id/portfolio", async (req, res) => {
   const { id } = req.params;
   const { portfolio_url } = req.body;
@@ -168,39 +169,17 @@ router.post("/:id/portfolio", async (req, res) => {
     res.status(500).json({ message: "เกิดข้อผิดพลาด", error: err });
   }
 });
-router.get("/:id", async (req, res) => {
-  const id = req.params.id;
-  try {
-    const [user] = await db.promise().query("SELECT * FROM applicants WHERE applicant_id = ?", [id]);
-    const [portfolios] = await db.promise().query("SELECT * FROM portfolios WHERE applicant_id = ?", [id]);
-    const [skills] = await db.promise().query(`
-      SELECT s.skill_id, s.skill_name
-      FROM user_skills us
-      JOIN skills s ON us.skill_id = s.skill_id
-      WHERE us.applicant_id = ?
-    `, [id]);
 
-    res.json({ user: user[0], portfolios, skills });
-  } catch (err) {
-    res.status(500).json({ error: err });
-  }
-});
-
-
-// ✅ ลบ portfolio ทั้งหมดของผู้ใช้
+/** ✅ ลบ portfolio ทั้งหมดของผู้สมัคร */
 router.delete("/:id/portfolio/all", async (req, res) => {
   const { id } = req.params;
   try {
-    await db.promise().query(
-      "DELETE FROM portfolios WHERE applicant_id = ?",
-      [id]
-    );
+    await db.promise().query("DELETE FROM portfolios WHERE applicant_id = ?", [id]);
     res.json({ message: "ลบ portfolio ทั้งหมดเรียบร้อยแล้ว" });
   } catch (err) {
     console.error("❌ ลบ portfolio ล้มเหลว:", err);
     res.status(500).json({ message: "เกิดข้อผิดพลาด", error: err });
   }
 });
-
 
 module.exports = router;

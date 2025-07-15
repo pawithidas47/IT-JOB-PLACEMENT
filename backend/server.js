@@ -16,6 +16,7 @@ const employerRoutes = require("./routes/employerRoutes");
 
 const app = express();
 
+
 // ✅ Middleware
 app.use(cors());
 app.use(bodyParser.json());
@@ -25,8 +26,9 @@ app.use("/uploads", express.static("uploads")); // ให้ frontend เรี�
 app.use("/api/auth", authRoutes);
 app.use("/api/jobs", jobRoutes);
 app.use("/api/applications", applicationRoutes);
-app.use("/api/applicant", applicantRoutes);
+app.use("/api/applicants", applicantRoutes);
 app.use("/api/employers", employerRoutes);
+
 
 // ✅ DELETE กรณีจำเป็น (ลบการสมัคร)
 app.delete("/api/applications/:id", (req, res) => {
@@ -199,6 +201,25 @@ app.put('/api/employer/applications/:id/status', async (req, res) => {
   }
 });
 
+app.get('/api/applicants/:id', async (req, res) => {
+  const applicantId = req.params.id;
+
+  try {
+    const [rows] = await connection.execute(
+      "SELECT * FROM applicants WHERE applicant_id = ?",
+      [applicantId]
+    );
+
+    if (rows.length === 0) {
+      return res.status(404).json({ message: "ไม่พบผู้สมัคร" });
+    }
+
+    res.json(rows[0]); // ✅ ส่งผู้สมัครเพียงคนเดียวกลับไป
+  } catch (err) {
+    console.error("❌ ดึงข้อมูลผู้สมัครผิดพลาด:", err);
+    res.status(500).json({ message: "เกิดข้อผิดพลาดในเซิร์ฟเวอร์" });
+  }
+});
 
 
 // ✅ Start server

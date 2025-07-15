@@ -4,15 +4,20 @@
       IT job placement <span class="text-highlight">@Mor-Nor</span>
     </router-link>
     <div class="nav-top-right">
+      
+
       <router-link to="/employer/dashboard" class="top-link" exact-active-class="active-link">จัดการงาน</router-link>
       <router-link to="/employer/applicants" class="top-link" exact-active-class="active-link">ตรวจสอบผู้สมัครงาน</router-link>
-      
+      <router-link to="/employer/search-applicants" class="top-link" exact-active-class="active-link">
+  ค้นหาผู้หางาน
+</router-link>
       <!-- เพิ่มปุ่มลงประกาศงาน -->
       <router-link to="/employer/post-job" class="top-link btn-add-job">ลงประกาศงาน</router-link>
 
       <div class="dropdown" @click="toggleDropdown">
         <button class="btn btn-user dropdown-toggle" type="button">
-          👤 {{ user?.e_username || 'guest' }}
+          👤 {{ user?.e_company_name || user?.e_contact || 'ผู้ว่าจ้าง' }}
+
         </button>
         <ul class="dropdown-menu" :class="{ show: showDropdown }">
   <li>

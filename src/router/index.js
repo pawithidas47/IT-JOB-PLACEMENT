@@ -53,10 +53,12 @@ const routes = [
 
   },
   {
-  path: "/employer/applicant",
+  path: "/employer/applicant/:id",
   name: "EmployerApplicantProfile",
   component: () => import("@/views/employer/ApplicantProfile.vue"),
-},
+  props: true
+}
+,
    {
       path: "/employer/profile",
       name: "EmployerProfile",
@@ -67,6 +69,12 @@ const routes = [
       name: "EmployerEditProfile",
       component: EditProfile,
     },
+    {
+  path: '/employer/search-applicants',
+  name: 'SearchApplicants',
+  component: () => import('@/views/employer/SearchApplicants.vue')
+}
+,
 
 
   // Applicant
@@ -120,13 +128,7 @@ const routes = [
     path: "/jobs/:id",
     name: "PublicJobDetail",
     component: () => import("@/views/JobDetail.vue"),
-  },
-{
-  path: "/employer/applicant",
-  name: "EmployerApplicantProfile",
-  component: () => import("@/views/employer/ApplicantProfile.vue")
-}
-
+  }
 
 ,
 

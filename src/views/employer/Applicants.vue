@@ -66,18 +66,16 @@
             <option value="rejected">ปฏิเสธ</option>
           </select>
 
-          <router-link
-            :to="{
-              name: 'EmployerApplicantProfile',
-              query: {
-                applicant_id: app.applicant_id,
-                application_id: app.application_id
-              }
-            }"
-            class="btn btn-sm btn-outline-primary rounded-pill mt-1"
-          >
-            ดูโปรไฟล์
-          </router-link>
+         <router-link
+  :to="{
+    name: 'EmployerApplicantProfile',
+    params: { id: app.applicant_id }
+  }"
+  class="btn btn-sm btn-outline-primary rounded-pill mt-1"
+>
+  ดูโปรไฟล์
+</router-link>
+
         </div>
       </div>
     </div>

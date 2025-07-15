@@ -118,7 +118,7 @@ export default {
       return `${age} ปี`;
     },
     async fetchProfile(id) {
-      const res = await axios.get(`${BASE_URL}/api/applicant/${id}`);
+      const res = await axios.get(`${BASE_URL}/api/applicants/${id}`);
       this.user = res.data.user;
       if (res.data.user.profile_img_url) {
         this.profileImage = `${BASE_URL}${res.data.user.profile_img_url}`;
@@ -131,7 +131,7 @@ export default {
       const form = new FormData();
       form.append("image", file);
       const id = localStorage.getItem("user_id");
-      const res = await axios.post(`${BASE_URL}/api/applicant/${id}/upload`, form);
+      const res = await axios.post(`${BASE_URL}/api/applicants/${id}/upload`, form);
       this.profileImage = `${BASE_URL}${res.data.url}`;
     },
     async saveProfile() {
@@ -154,17 +154,17 @@ export default {
       };
 
       try {
-        await axios.put(`${BASE_URL}/api/applicant/${id}`, updateData);
-        await axios.put(`${BASE_URL}/api/applicant/${id}/bio`, { a_bio: this.user.a_bio });
-        await axios.put(`${BASE_URL}/api/applicant/${id}/skills`, { skills });
+        await axios.put(`${BASE_URL}/api/applicants/${id}`, updateData);
+        await axios.put(`${BASE_URL}/api/applicants/${id}/bio`, { a_bio: this.user.a_bio });
+        await axios.put(`${BASE_URL}/api/applicants/${id}/skills`, { skills });
 
-        await axios.delete(`${BASE_URL}/api/applicant/${id}/portfolio/all`);
+        await axios.delete(`${BASE_URL}/api/applicants/${id}/portfolio/all`);
         for (const url of portfolios) {
-          await axios.post(`${BASE_URL}/api/applicant/${id}/portfolio`, { portfolio_url: url });
+          await axios.post(`${BASE_URL}/api/applicants/${id}/portfolio`, { portfolio_url: url });
         }
 
         alert("✅ บันทึกโปรไฟล์เรียบร้อยแล้ว");
-        this.$router.push("/applicant/userprofile");
+        this.$router.push("/applicants/userprofile");
       } catch (err) {
         console.error("❌ saveProfile error:", err);
         alert("เกิดข้อผิดพลาดในการบันทึกข้อมูล");

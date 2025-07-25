@@ -6,6 +6,7 @@ const upload = multer({ dest: "uploads/" });
 const jobCtrl = require("../controllers/jobController");
 
 // ✅ โพสต์งานใหม่ (แบบ formData)
+// ✅ โพสต์งานใหม่
 router.post("/", upload.none(), async (req, res) => {
   try {
     const {
@@ -15,28 +16,27 @@ router.post("/", upload.none(), async (req, res) => {
       j_type,
       j_salary,
       j_amount,
-      j_duration,
       j_worktime,
       j_location,
-      j_welfare,
       j_deliverable,
       j_contact,
-      j_appdeadline,
       j_qualification
     } = req.body;
 
     const db = require("../models/db");
+
     const sql = `
       INSERT INTO jobs (
-        employer_id, j_title, j_description, j_type, j_salary, j_amount,
-        j_duration, j_worktime, j_location, j_welfare, j_deliverable,
-        j_contact, j_appdeadline, j_qualification
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        employer_id, j_title, j_description, j_type, j_salary,
+        j_amount, j_worktime, j_location, j_deliverable,
+        j_contact, j_qualification
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
+
     await db.promise().execute(sql, [
-      employer_id, j_title, j_description, j_type, j_salary, j_amount,
-      j_duration, j_worktime, j_location, j_welfare, j_deliverable,
-      j_contact, j_appdeadline, j_qualification
+      employer_id, j_title, j_description, j_type, j_salary,
+      j_amount, j_worktime, j_location, j_deliverable,
+      j_contact, j_qualification
     ]);
 
     res.status(200).json({ message: "โพสต์งานสำเร็จ" });

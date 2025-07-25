@@ -55,18 +55,29 @@ exports.updateJob = (req, res) => {
   const q = `
     UPDATE jobs SET 
       j_title = ?, j_description = ?, j_type = ?, 
-      j_salary = ?, j_appdeadline = ? 
+      j_salary = ?, j_amount = ?, j_worktime = ?, 
+      j_location = ?, j_deliverable = ?, j_contact = ?, 
+      j_qualification = ?
     WHERE job_id = ?
   `;
+
   db.query(q, [
     d.j_title,
     d.j_description,
     d.j_type,
     d.j_salary,
-    d.j_appdeadline,
+    d.j_amount,
+    d.j_worktime,
+    d.j_location,
+    d.j_deliverable,
+    d.j_contact,
+    d.j_qualification,
     jobId,
   ], (err) => {
-    if (err) return res.status(500).json({ message: "แก้ไขงานไม่สำเร็จ" });
+    if (err) {
+      console.error("❌ แก้ไขงานล้มเหลว:", err);
+      return res.status(500).json({ message: "แก้ไขงานไม่สำเร็จ" });
+    }
     res.status(200).json({ message: "แก้ไขงานสำเร็จ" });
   });
 };

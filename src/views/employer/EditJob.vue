@@ -62,16 +62,11 @@
 
             <!-- เงินเดือน -->
             <div class="mb-3">
-              <label class="fw-bold text-dark mb-2">เงินเดือน/ค่าตอบแทน</label>
+              <label class="fw-bold text-dark mb-2">ค่าตอบแทน</label>
               <input v-model.number="job.j_salary" type="number" class="form-control" required />
             </div>
 
-            <!-- สวัสดิการ -->
-            <div class="mb-3">
-              <label class="fw-bold text-dark mb-2">สวัสดิการ</label>
-              <textarea v-model="job.j_welfare" rows="3" class="form-control" />
-            </div>
-
+           
             <!-- สิ่งที่ต้องส่ง -->
             <div class="mb-3">
               <label class="fw-bold text-dark mb-2">สิ่งที่ต้องส่ง</label>
@@ -96,12 +91,7 @@
               <input v-model="job.j_contact" class="form-control" />
             </div>
 
-            <!-- วันปิดรับสมัคร -->
-            <div class="mb-3">
-              <label class="fw-bold text-dark mb-2">วันปิดรับสมัคร</label>
-              <input v-model="job.j_appdeadline" type="date" class="form-control" required />
-            </div>
-
+          
             <!-- ปุ่มบันทึก + ยกเลิก -->
             <div class="d-flex justify-content-end gap-2 mt-4">
               <button type="button" class="btn btn-outline-secondary px-4 py-2 rounded-pill" @click="cancelEdit">

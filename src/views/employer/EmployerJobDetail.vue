@@ -40,14 +40,10 @@
           </div>
 
           <!-- เงินเดือน -->
-          <h5 class="fw-bold text-dark mb-2">เงินเดือน/ค่าตอบแทน</h5>
+          <h5 class="fw-bold text-dark mb-2">ค่าตอบแทน</h5>
           <p class="mb-4 text-dark">{{ formatSalary(job?.j_salary) }} บาท</p>
 
-          <!-- สวัสดิการ -->
-          <h5 class="fw-bold text-dark mb-2">สวัสดิการ</h5>
-          <div class="mb-4">
-            <div class="text-dark mb-1" v-for="line in splitLines(job?.j_welfare)" :key="line">{{ line }}</div>
-          </div>
+         
 
           <!-- สิ่งที่ต้องส่ง -->
           <h5 class="fw-bold text-dark mb-2">สิ่งที่ต้องส่ง</h5>

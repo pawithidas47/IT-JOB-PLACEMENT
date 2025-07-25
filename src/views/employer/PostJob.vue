@@ -49,7 +49,7 @@
 
   <!-- 6. ค่าตอบแทน -->
   <div class="col-md-6">
-    <label class="form-label fw-bold">ค่าตอบแทน / รายได้</label>
+    <label class="form-label fw-bold">ค่าตอบแทน</label>
     <input v-model="job.salary" class="form-control rounded-3" placeholder="เช่น 50 บาท/ชม." required />
   </div>
 
@@ -71,11 +71,7 @@
     <input v-model="job.location" class="form-control rounded-3" placeholder="เช่น ออนไลน์ / กรุงเทพฯ" />
   </div>
 
-  <!-- 10. สวัสดิการ -->
-  <div class="col-md-6">
-    <label class="form-label fw-bold">สวัสดิการ (ถ้ามี)</label>
-    <input v-model="job.welfare" class="form-control rounded-3" placeholder="เช่น ค่าอาหาร / เบี้ยขยัน" />
-  </div>
+
 
   <!-- 11. สิ่งที่ต้องส่ง -->
   <div class="col-12">

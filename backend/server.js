@@ -202,23 +202,130 @@ app.put('/api/employer/applications/:id/status', async (req, res) => {
   }
 });
 
+// ✅ GET: ดึงข้อมูลโปรไฟล์รวม education, experience
 app.get('/api/applicants/:id', async (req, res) => {
   const applicantId = req.params.id;
 
   try {
-    const [rows] = await connection.execute(
+    const [[user]] = await connection.execute(
       "SELECT * FROM applicants WHERE applicant_id = ?",
       [applicantId]
     );
 
-    if (rows.length === 0) {
+    if (!user) {
       return res.status(404).json({ message: "ไม่พบผู้สมัคร" });
     }
 
-    res.json(rows[0]); // ✅ ส่งผู้สมัครเพียงคนเดียวกลับไป
+    const [skills] = await connection.execute(
+      "SELECT skill_name FROM user_skills WHERE applicant_id = ?",
+      [applicantId]
+    );
+
+    const [portfolios] = await connection.execute(
+      "SELECT * FROM portfolios WHERE applicant_id = ?",
+      [applicantId]
+    );
+
+    const [education] = await connection.execute(
+      "SELECT * FROM educations WHERE applicant_id = ?",
+      [applicantId]
+    );
+
+    const [experience] = await connection.execute(
+      "SELECT * FROM experiences WHERE applicant_id = ?",
+      [applicantId]
+    );
+
+    res.json({ user: { ...user, education, experience }, skills, portfolios });
+
   } catch (err) {
     console.error("❌ ดึงข้อมูลผู้สมัครผิดพลาด:", err);
     res.status(500).json({ message: "เกิดข้อผิดพลาดในเซิร์ฟเวอร์" });
+  }
+});
+
+// ✅ PUT: อัปเดตโปรไฟล์ พร้อมลบ/เพิ่ม education, experience, skills
+app.put('/api/applicants/:id', async (req, res) => {
+  const applicantId = req.params.id;
+  const {
+    a_firstname,
+    a_lastname,
+    a_email,
+    a_phone,
+    a_faculty,
+    a_gender,
+    a_birthdate,
+    a_nationality,
+    a_position,
+    a_salary,
+    a_province,
+    a_interest,
+    a_computer_level,
+    a_computer_stars,
+    a_bio,
+    a_contact,
+    education,
+    experience,
+    skills,
+  } = req.body;
+
+  const conn = await connection.getConnection();
+  await conn.beginTransaction();
+
+  try {
+    // 1) UPDATE applicants
+    await conn.execute(
+      `UPDATE applicants SET 
+        a_firstname=?, a_lastname=?, a_email=?, a_phone=?, a_faculty=?, 
+        a_gender=?, a_birthdate=?, a_nationality=?, a_position=?, a_salary=?, 
+        a_province=?, a_interest=?, a_computer_level=?, a_computer_stars=?, 
+        a_bio=?, a_contact=?, a_updated=NOW()
+        WHERE applicant_id=?`,
+      [
+        a_firstname, a_lastname, a_email, a_phone, a_faculty,
+        a_gender, a_birthdate, a_nationality, a_position, a_salary,
+        a_province, a_interest, a_computer_level, a_computer_stars,
+        a_bio, a_contact, applicantId
+      ]
+    );
+
+    // 2) Education
+    await conn.execute("DELETE FROM educations WHERE applicant_id = ?", [applicantId]);
+    for (const edu of education || []) {
+      await conn.execute(
+        `INSERT INTO educations (applicant_id, start_year, university, level, degree, major, gpa)
+         VALUES (?, ?, ?, ?, ?, ?, ?)`,
+        [applicantId, edu.start_year, edu.university, edu.level, edu.degree, edu.major, edu.gpa]
+      );
+    }
+
+    // 3) Experience
+    await conn.execute("DELETE FROM experiences WHERE applicant_id = ?", [applicantId]);
+    for (const job of experience || []) {
+      await conn.execute(
+        `INSERT INTO experiences (applicant_id, title, start_date, end_date, duration, description)
+         VALUES (?, ?, ?, ?, ?, ?)`,
+        [applicantId, job.title, job.start_date, job.end_date, job.duration, job.description]
+      );
+    }
+
+    // 4) Skills
+    await conn.execute("DELETE FROM user_skills WHERE applicant_id = ?", [applicantId]);
+    for (const skillName of skills || []) {
+      await conn.execute(
+        `INSERT INTO user_skills (applicant_id, skill_name) VALUES (?, ?)`,
+        [applicantId, skillName]
+      );
+    }
+
+    await conn.commit();
+    res.sendStatus(200);
+  } catch (err) {
+    await conn.rollback();
+    console.error("❌ บันทึกโปรไฟล์ล้มเหลว:", err);
+    res.status(500).json({ message: "เกิดข้อผิดพลาดในการอัปเดตข้อมูล" });
+  } finally {
+    conn.release();
   }
 });
 

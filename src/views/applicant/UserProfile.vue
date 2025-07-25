@@ -35,7 +35,6 @@
                   <i class="bi bi-envelope-fill"></i> <span>{{ user.a_email }}</span>
                 </li>
               </ul>
-            
             </div>
           </div>
 
@@ -45,7 +44,7 @@
               <h5 class="fw-bold">ตำแหน่งงาน ที่สนใจ</h5>
               <p class="mb-1 text-primary fw-bold">{{ user.a_position || 'ยังไม่ระบุ' }}</p>
               <p class="text-muted small">ค่าจ้างที่ต้องการ : {{ user.a_salary || '-' }} บาท</p>
-              <p class="text-muted small">จังหวัดที่สนใจทำงาน : {{ user.a_province || 'ยังไม่ระบุ' }}</p>
+              
             </section>
 
             <section class="mb-4">
@@ -68,14 +67,22 @@
               <p class="mb-0">{{ user.a_interest || '-' }}</p>
             </section>
 
-            <section class="mb-4">
-              <h5 class="fw-bold">ประวัติการศึกษา</h5>
-              <p class="fw-semibold">{{ user.a_study_year || '2564' }} - {{ user.a_university || 'มหาวิทยาลัยนเรศวร' }}</p>
-              <p class="mb-1">ระดับการศึกษา : {{ user.a_education_level || '-' }}</p>
-              <p class="mb-1">คณะ : {{ user.a_faculty || '-' }}</p>
-              <p class="mb-1">สาขาวิชา : {{ user.a_major || '-' }}</p>
-              <p class="mb-1">เกรดเฉลี่ย : {{ user.a_gpa || '-' }}</p>
-            </section>
+           <section class="mb-4">
+  <h5 class="fw-bold">ประวัติการศึกษา</h5>
+  <div v-if="user.education && user.education.length > 0">
+    <div v-for="(edu, index) in user.education" :key="index" class="mb-3">
+      <p class="fw-semibold">{{ edu.start_year }} - {{ edu.university }}</p>
+      <p class="mb-1">ระดับการศึกษา : {{ edu.level || '-' }}</p>
+      <p class="mb-1">วุฒิการศึกษา : {{ edu.degree || '-' }}</p>
+      <p class="mb-1">สาขาวิชา : {{ edu.major || '-' }}</p>
+      <p class="mb-1">เกรดเฉลี่ย : {{ edu.gpa || '-' }}</p>
+    </div>
+  </div>
+  <div v-else>
+    <p class="text-muted">ยังไม่มีข้อมูลประวัติการศึกษา</p>
+  </div>
+</section>
+
 
             <section class="mb-4">
               <h5 class="fw-bold">ประวัติการทำงาน</h5>
@@ -116,7 +123,10 @@ export default {
   components: { NavbarApplicant },
   data() {
     return {
-      user: {},
+      user: {
+        education: [],
+        experiences: [],
+      },
       skills: [],
       portfolios: [],
       profileImage: null,
@@ -137,19 +147,6 @@ export default {
       if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) age--;
       return `${age} ปี`;
     },
-    async fetchProfile(id) {
-      try {
-        const res = await axios.get(`${BASE_URL}/api/applicants/${id}`);
-        this.user = res.data.user;
-        this.skills = res.data.skills;
-        this.portfolios = res.data.portfolios;
-        if (res.data.user.profile_img_url) {
-          this.profileImage = `${BASE_URL}${res.data.user.profile_img_url}`;
-        }
-      } catch (err) {
-        console.error("❌ fetchProfile failed", err);
-      }
-    },
     formatDate(dateStr) {
       const date = new Date(dateStr);
       if (isNaN(date)) return "-";
@@ -157,6 +154,24 @@ export default {
       const month = String(date.getMonth() + 1).padStart(2, "0");
       const day = String(date.getDate()).padStart(2, "0");
       return `${day}/${month}/${thYear}`;
+    },
+    async fetchProfile(id) {
+      try {
+        const res = await axios.get(`${BASE_URL}/api/applicants/${id}`);
+        this.user = {
+          ...res.data.user,
+          education: res.data.education || [],
+          experiences: res.data.experience || [],
+        };
+        this.skills = res.data.skills || [];
+        this.portfolios = res.data.portfolios || [];
+
+        if (res.data.user.profile_img_url) {
+          this.profileImage = `${BASE_URL}${res.data.user.profile_img_url}`;
+        }
+      } catch (err) {
+        console.error("❌ fetchProfile failed", err.response?.data || err.message);
+      }
     },
   },
 };

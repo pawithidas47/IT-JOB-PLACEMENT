@@ -17,9 +17,12 @@
 
           <!-- หมวดหมู่ -->
           <div class="mb-4">
-            <span class="badge bg-warning text-dark rounded-pill px-3 py-2">
-              หมวดหมู่: {{ job?.j_type || '-' }}
-            </span>
+              <span
+  v-if="job.j_type"
+  style="background-color: #fff3cd; color: #212529; padding: 6px 14px; border-radius: 999px; font-weight: 500; font-size: 0.85rem;"
+>
+  {{ job.j_type }}
+</span>
           </div>
 
           <!-- จำนวนที่รับ -->
@@ -58,21 +61,32 @@
           <p class="mb-4 text-dark">{{ job?.j_worktime || 'ไม่ระบุ' }}</p>
 
        
-  
+ <!-- ปุ่ม 3 ปุ่ม เรียงแนวนอนแบบสวยเท่ากัน -->
+<div class="d-flex flex-wrap gap-2 mt-4 justify-content-end">
+  <!-- ปิดรับสมัคร -->
+  <button
+    type="button"
+    class="btn btn-warning rounded-pill d-flex align-items-center justify-content-center px-4 py-2"
+    @click="closeJob"
+    :disabled="job.j_status === 'closed'"
+  >
+    <i class="bi bi-lock-fill me-2"></i> ปิดรับสมัคร
+  </button>
 
-          <!-- ปุ่มแก้ไข + ลบ -->
-          <div class="d-flex justify-content-end gap-2 mt-4">
-            <router-link :to="`/employer/edit-job/${job?.job_id}`">
-              <button class="btn btn-outline-primary px-4 py-2 rounded-pill">
-                <i class="bi bi-pencil-square me-1"></i> แก้ไขงานนี้
-              </button>
-            </router-link>
+  <!-- แก้ไข -->
+  <router-link :to="`/employer/edit-job/${job?.job_id}`" class="text-decoration-none">
+    <button class="btn btn-outline-primary rounded-pill d-flex align-items-center justify-content-center px-4 py-2">
+      <i class="bi bi-pencil-square me-2"></i> แก้ไขงานนี้
+    </button>
+  </router-link>
 
-            <button class="btn btn-danger px-4 py-2 rounded-pill" @click="confirmDelete">
-              <i class="bi bi-trash me-1"></i> ลบงานนี้
-            </button>
-          </div>
+  <!-- ลบ -->
+  <button class="btn btn-danger rounded-pill d-flex align-items-center justify-content-center px-4 py-2"
+    @click="confirmDelete">
+    <i class="bi bi-trash me-2"></i> ลบงานนี้
+  </button>
 
+</div>
         </div>
       </div>
     </div>

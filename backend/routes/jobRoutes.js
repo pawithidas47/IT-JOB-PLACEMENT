@@ -19,7 +19,7 @@ router.post("/", upload.none(), async (req, res) => {
       j_worktime,
       j_location,
       j_deliverable,
-      j_contact,
+     
       j_qualification
     } = req.body;
 
@@ -29,7 +29,7 @@ router.post("/", upload.none(), async (req, res) => {
       INSERT INTO jobs (
         employer_id, j_title, j_description, j_type, j_salary,
         j_amount, j_worktime, j_location, j_deliverable,
-        j_contact, j_qualification
+        j_qualification
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
 

@@ -158,41 +158,47 @@
 </div>
 
 
-        <div v-for="job in filteredJobs" :key="job.job_id" class="job-card border rounded-4 bg-white shadow-sm p-4 mb-4"
-          @click="$router.push(`/employer/jobs/${job.job_id}`)" style="cursor: pointer">
-          <div class="d-flex justify-content-between align-items-start">
-            <div>
-              <h6 class="fw-bold mb-1 text-dark">{{ job.j_title }}</h6>
-              <p class="text-muted small mb-1">
-                <i class="bi bi-cash-coin me-1"></i> ค่าจ้าง: <span class="text-success">{{
-                  parseFloat(job.j_salary).toLocaleString() }} บาท</span>
-              </p>
-              <p class="text-muted small mb-1">
-                <i class="bi bi-calendar3 me-1"></i> หมดเขต: {{ formatDate(job.j_appdeadline) }}
-              </p>
-              <p class="text-muted small">
-                <i class="bi bi-person-lines-fill me-1"></i>
-                อัตราที่รับ: {{ job.j_amount ? job.j_amount + ' คน' : 'ยังไม่ระบุ' }}
-              </p>
+   <div v-for="job in filteredJobs" :key="job.job_id" class="job-card border rounded-4 bg-white shadow-sm p-4 mb-4"
+  @click="$router.push(`/employer/jobs/${job.job_id}`)" style="cursor: pointer">
 
+  <!-- ชื่องาน -->
+  <h5 class="fw-bold text-dark mb-2">{{ job.j_title }}</h5>
 
+  <!-- หมวดหมู่ badge แยกด้านล่าง -->
+  <div class="mb-3">
+    <span
+  v-if="job.j_type"
+  style="background-color: #fff3cd; color: #212529; padding: 6px 14px; border-radius: 999px; font-weight: 500; font-size: 0.85rem;"
+>
+  {{ job.j_type }}
+</span>
 
+  </div>
 
-              <div class="d-flex flex-wrap gap-2 mt-2">
-                <span class="badge rounded-pill bg-success">งานพาร์ทไทม์</span>
-                <span class="badge rounded-pill bg-danger">สัมภาษณ์ออนไลน์</span>
-              </div>
-            </div>
-          </div>
-        </div>
+  <!-- ค่าจ้าง -->
+  <p class="text-muted small mb-1">
+    <i class="bi bi-cash-coin me-1"></i>
+    ค่าจ้าง: <span class="text-success">{{ parseFloat(job.j_salary).toLocaleString() }} บาท</span>
+  </p>
+
+  <!-- จำนวนที่รับ -->
+  <p class="text-muted small mb-0">
+    <i class="bi bi-person-lines-fill me-1"></i>
+    จำนวนที่รับ: {{ job.j_amount ? job.j_amount + ' คน' : 'ยังไม่ระบุ' }}
+  </p>
+</div>
+
+      
+    </div>
+  </div>
+</div>
+
 
         <div v-if="filteredJobs.length === 0" class="text-center text-muted py-5">
           <i class="bi bi-emoji-frown fs-1"></i>
           <p class="mt-3">ไม่พบงานที่ตรงกับคำค้น</p>
         </div>
-      </div>
-    </div>
-  </div>
+    
 </template>
 <script>
 import axios from "axios";

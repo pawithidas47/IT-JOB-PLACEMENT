@@ -62,7 +62,7 @@
 
             <!-- เงินเดือน -->
             <div class="mb-3">
-              <label class="fw-bold text-dark mb-2">ค่าตอบแทน</label>
+              <label class="fw-bold text-dark mb-2">ค่าจ้าง</label>
               <input v-model.number="job.j_salary" type="number" class="form-control" required />
             </div>
 
@@ -85,12 +85,7 @@
               <input v-model="job.j_worktime" class="form-control" />
             </div>
 
-            <!-- ช่องทางติดต่อ -->
-            <div class="mb-3">
-              <label class="fw-bold text-dark mb-2">ช่องทางติดต่อ</label>
-              <input v-model="job.j_contact" class="form-control" />
-            </div>
-
+           
           
             <!-- ปุ่มบันทึก + ยกเลิก -->
             <div class="d-flex justify-content-end gap-2 mt-4">

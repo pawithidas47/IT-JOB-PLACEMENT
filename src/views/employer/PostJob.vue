@@ -49,7 +49,7 @@
 
   <!-- 6. ค่าตอบแทน -->
   <div class="col-md-6">
-    <label class="form-label fw-bold">ค่าตอบแทน</label>
+    <label class="form-label fw-bold">ค่าจ้าง</label>
     <input v-model="job.salary" class="form-control rounded-3" placeholder="เช่น 50 บาท/ชม." required />
   </div>
 

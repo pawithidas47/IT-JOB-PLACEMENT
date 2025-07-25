@@ -95,10 +95,7 @@
 </div>
 
     <!-- Loading -->
-    <div v-else class="text-center text-muted py-5">
-      <i class="bi bi-hourglass-split fs-2"></i>
-      <p class="mt-3">กำลังโหลดข้อมูลงาน...</p>
-    </div>
+   
   </div>
 </template>
 

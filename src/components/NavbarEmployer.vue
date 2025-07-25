@@ -7,7 +7,7 @@
       
 
       <router-link to="/employer/dashboard" class="top-link" exact-active-class="active-link">จัดการงาน</router-link>
-      <router-link to="/employer/applicants" class="top-link" exact-active-class="active-link">ตรวจสอบผู้สมัครงาน</router-link>
+      <router-link to="/employer/applicants" class="top-link" exact-active-class="active-link">ผู้สมัครงาน</router-link>
       <router-link to="/employer/search-applicants" class="top-link" exact-active-class="active-link">
   ค้นหาผู้หางาน
 </router-link>

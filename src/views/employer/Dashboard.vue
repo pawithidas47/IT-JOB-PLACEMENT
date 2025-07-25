@@ -147,16 +147,26 @@
           <span class="text-muted small" style="font-size: 1rem">{{ filteredJobs.length }} ตำแหน่ง</span>
 
         </div>
-<div class="position-relative mb-4">
-  <input
-    type="text"
-    class="form-control ps-5 py-2 rounded-pill shadow-sm"
-    placeholder="ค้นหาชื่องานที่คุณโพสต์ไว้..."
-    v-model="search"
-  />
-  <i class="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
+<div class="d-flex align-items-center gap-2 mb-4">
+          <div class="position-relative flex-grow-1">
+            <input
+              type="text"
+              class="form-control ps-5 py-2 rounded-pill shadow-sm"
+              placeholder="ค้นหาชื่องาน..."
+              v-model="search"
+            />
+            <i class="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
+          </div>
+        <select
+    v-model="filterStatus"
+    class="form-select form-select-sm rounded-pill shadow-sm"
+    style="height: 38px; padding-inline: 14px; width: fit-content; min-width: 120px"
+  >
+    <option value="all">ทั้งหมด</option>
+    <option value="open">เปิดรับสมัคร</option>
+    <option value="closed">ปิดรับสมัคร</option>
+  </select>
 </div>
-
 
    <div v-for="job in filteredJobs" :key="job.job_id" class="job-card border rounded-4 bg-white shadow-sm p-4 mb-4"
   @click="$router.push(`/employer/jobs/${job.job_id}`)" style="cursor: pointer">
@@ -213,6 +223,7 @@ export default {
         e_gallery: [],   // กำหนดค่าเริ่มต้นภายในเดียวกัน
       },
       search: "",
+      filterStatus: "all",
       jobs: [],
       editingJob: {},
       showModal: false,
@@ -223,13 +234,19 @@ export default {
     };
   }
   ,
-  computed: {
-    filteredJobs() {
-      return this.jobs.filter((job) =>
-        job.j_title.toLowerCase().includes(this.search.toLowerCase())
-      );
-    },
+ computed: {
+  filteredJobs() {
+    return this.jobs.filter((job) => {
+      const matchSearch = job.j_title.toLowerCase().includes(this.search.toLowerCase());
+      const matchStatus =
+        this.filterStatus === "all" ||
+        (this.filterStatus === "open" && job.j_status !== "closed") ||
+        (this.filterStatus === "closed" && job.j_status === "closed");
+      return matchSearch && matchStatus;
+    });
   },
+}
+,
   mounted() {
     const userStr = localStorage.getItem("user");
     if (!userStr) return this.$router.push("/login");

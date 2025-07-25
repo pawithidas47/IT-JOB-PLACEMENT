@@ -78,11 +78,15 @@
               <button @click="addExperience" class="btn btn-outline-primary btn-sm">เพิ่มประวัติการทำงาน</button>
             </div>
 
-            <div class="text-end">
-              <button @click="saveProfile" class="btn btn-success px-4 py-2 rounded-pill">
-                <i class="bi bi-check-circle me-1"></i> บันทึกข้อมูล
-              </button>
-            </div>
+            <div class="text-end mt-3 d-flex justify-content-end gap-2">
+  <button @click="$router.push('/applicant/userprofile')" class="btn btn-outline-secondary px-4 py-2 rounded-pill">
+    <i class="bi bi-x-circle me-1"></i> ยกเลิก
+  </button>
+  <button @click="saveProfile" class="btn btn-success px-4 py-2 rounded-pill">
+    <i class="bi bi-check-circle me-1"></i> บันทึกข้อมูล
+  </button>
+</div>
+
           </div>
         </div>
       </div>
@@ -116,23 +120,28 @@ export default {
   },
   methods: {
     async fetchProfile(id) {
-      try {
-        const res = await axios.get(`${BASE_URL}/api/applicants/${id}`);
-        this.user = res.data.user || {};
-        this.skills = res.data.skills || [];
-        this.portfolios = res.data.portfolios || [];
+  try {
+    const res = await axios.get(`${BASE_URL}/api/applicants/${id}`);
+    const { user, skills, portfolios, education, experience } = res.data;
 
-        this.skillsText = this.skills.map(s => s.skill_name).join(', ');
-        if (!this.user.education) this.user.education = [];
-        if (!this.user.experience) this.user.experience = [];
+    this.user = {
+      ...user,
+      education: education || [],
+      experience: experience || [],
+    };
 
-        if (this.user.profile_img_url) {
-          this.profileImage = `${BASE_URL}${this.user.profile_img_url}`;
-        }
-      } catch (err) {
-        console.error("❌ fetchProfile failed", err.response?.data || err.message);
-      }
-    },
+    this.skills = skills || [];
+    this.portfolios = portfolios || [];
+    this.skillsText = this.skills.map(s => s.skill_name).join(', ');
+
+    if (this.user.profile_img_url) {
+      this.profileImage = `${BASE_URL}${this.user.profile_img_url}`;
+    }
+  } catch (err) {
+    console.error("❌ fetchProfile failed", err.response?.data || err.message);
+  }
+}
+,
     calculateAge(dateStr) {
       const birthDate = new Date(dateStr);
       if (isNaN(birthDate)) return "-";

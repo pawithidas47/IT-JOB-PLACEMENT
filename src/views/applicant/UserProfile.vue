@@ -2,100 +2,97 @@
   <div>
     <NavbarApplicant />
     <div class="container py-5">
-      <!-- Header -->
       <div class="text-center mb-4">
         <h2 class="fw-bold text-orange">
           <i class="bi bi-person-circle me-2"></i> โปรไฟล์ของคุณ
         </h2>
       </div>
 
-      <div class="card shadow rounded-4 p-4 bg-white">
+      <div class="card shadow rounded-4 p-4 bg-white mx-auto" style="max-width: 980px">
         <div class="row g-4">
-          <!-- รูปภาพโปรไฟล์และข้อมูลติดต่อ -->
-          <div class="col-md-3 d-flex flex-column align-items-center">
-            <img
-              :src="profileImage || defaultImage"
-              class="rounded shadow border mb-3"
-              style="width: 100%; max-width: 220px; height: 280px; object-fit: cover"
-              alt="profile"
-            />
-            <div class="w-100 border-top pt-3 mt-2 text-start">
-              <h6 class="fw-bold text-center">ข้อมูลติดต่อ</h6>
-              <div class="mb-2">
-                <label class="form-label small text-muted">เบอร์โทรศัพท์</label>
-                <p class="form-control form-control-sm bg-light mb-1">{{ user.a_phone }}</p>
-              </div>
-              <div class="mb-2">
-                <label class="form-label small text-muted">อีเมล</label>
-                <p class="form-control form-control-sm bg-light mb-1">{{ user.a_email }}</p>
-              </div>
-              <div class="mb-2">
-  <label class="form-label small text-muted">ช่องทางติดต่อเพิ่มเติม</label>
-  <p class="form-control form-control-sm bg-light mb-1">{{ user.a_contact || '-' }}</p>
-</div>
-
+          <!-- ซ้าย: รูปภาพและข้อมูลติดต่อ -->
+          <div class="col-md-4">
+            <div class="text-center">
+              <img
+                :src="profileImage || defaultImage"
+                class="rounded-4 shadow-sm border mb-3"
+                style="width: 100%; max-width: 220px; height: 280px; object-fit: cover"
+                alt="profile"
+              />
+            </div>
+            <div class="border-top pt-3 mt-2">
+              <h6 class="fw-bold mb-3 text-center">ข้อมูลติดต่อ</h6>
+              <ul class="list-unstyled small">
+                <li class="mb-1 fw-semibold">ชื่อ : {{ user.a_firstname }} {{ user.a_lastname }}</li>
+                <li class="mb-1">เพศ : {{ user.a_gender }}</li>
+                <li class="mb-1">อายุ : {{ calculateAge(user.a_birthdate) }}</li>
+                <li class="mb-1">คณะ : {{ user.a_faculty }}</li>
+                <li class="mb-1">สัญชาติ : {{ user.a_nationality || '-' }}</li>
+                <li class="mb-1 d-flex gap-2 align-items-center">
+                  <i class="bi bi-telephone-fill"></i> <span>{{ user.a_phone }}</span>
+                </li>
+                <li class="mb-1 d-flex gap-2 align-items-center">
+                  <i class="bi bi-envelope-fill"></i> <span>{{ user.a_email }}</span>
+                </li>
+              </ul>
+            
             </div>
           </div>
 
-          <!-- ข้อมูลรายละเอียด -->
-          <div class="col-md-9">
-            <div class="row g-3 border-start ps-4">
-              <div class="col-md-6">
-                <label class="form-label">ชื่อ</label>
-                <p class="form-control bg-light">{{ user.a_firstname }}</p>
+          <!-- ขวา: รายละเอียดโปรไฟล์ -->
+          <div class="col-md-8">
+            <section class="mb-4">
+              <h5 class="fw-bold">ตำแหน่งงาน ที่สนใจ</h5>
+              <p class="mb-1 text-primary fw-bold">{{ user.a_position || 'ยังไม่ระบุ' }}</p>
+              <p class="text-muted small">ค่าจ้างที่ต้องการ : {{ user.a_salary || '-' }} บาท</p>
+              <p class="text-muted small">จังหวัดที่สนใจทำงาน : {{ user.a_province || 'ยังไม่ระบุ' }}</p>
+            </section>
+
+            <section class="mb-4">
+              <h5 class="fw-bold">ทักษะและความสามารถ</h5>
+              <ul class="ps-3 mb-0">
+                <li v-for="skill in skills" :key="skill.skill_id">{{ skill.skill_name }}</li>
+              </ul>
+            </section>
+
+            <section class="mb-4">
+              <h5 class="fw-bold">ระดับความชำนาญด้านคอมพิวเตอร์</h5>
+              <p class="mb-1">
+                <span v-html="user.a_computer_stars || '⭐ ⭐ ⭐ ☆ ☆'"></span>
+                <span class="ms-2">{{ user.a_computer_level || 'ปานกลาง' }}</span>
+              </p>
+            </section>
+
+            <section class="mb-4">
+              <h5 class="fw-bold">ความสนใจอื่น ๆ</h5>
+              <p class="mb-0">{{ user.a_interest || '-' }}</p>
+            </section>
+
+            <section class="mb-4">
+              <h5 class="fw-bold">ประวัติการศึกษา</h5>
+              <p class="fw-semibold">{{ user.a_study_year || '2564' }} - {{ user.a_university || 'มหาวิทยาลัยนเรศวร' }}</p>
+              <p class="mb-1">ระดับการศึกษา : {{ user.a_education_level || '-' }}</p>
+              <p class="mb-1">คณะ : {{ user.a_faculty || '-' }}</p>
+              <p class="mb-1">สาขาวิชา : {{ user.a_major || '-' }}</p>
+              <p class="mb-1">เกรดเฉลี่ย : {{ user.a_gpa || '-' }}</p>
+            </section>
+
+            <section class="mb-4">
+              <h5 class="fw-bold">ประวัติการทำงาน</h5>
+              <div v-for="(job, index) in user.experiences || []" :key="index" class="mb-3">
+                <p class="fw-semibold">ตำแหน่ง : {{ job.title }}</p>
+                <p class="mb-1">{{ formatDate(job.start_date) }} - {{ job.end_date ? formatDate(job.end_date) : 'ปัจจุบัน' }}</p>
+                <p class="mb-1">ประสบการณ์ : {{ job.duration }}</p>
+                <ul class="mb-1 ps-3">
+                  <li v-for="(desc, idx) in job.description.split('\n')" :key="idx">{{ desc }}</li>
+                </ul>
               </div>
-              <div class="col-md-6">
-                <label class="form-label">นามสกุล</label>
-                <p class="form-control bg-light">{{ user.a_lastname }}</p>
-              </div>
-              <div class="col-md-6">
-                <label class="form-label">รหัสนิสิต</label>
-                <p class="form-control bg-light">{{ user.a_studentid }}</p>
-              </div>
-              <div class="col-md-6">
-                <label class="form-label">คณะ</label>
-                <p class="form-control bg-light">{{ user.a_faculty }}</p>
-              </div>
-              <div class="col-md-6">
-  <label class="form-label">อายุ</label>
-  <p class="form-control bg-light">{{ calculateAge(user.a_birthdate) }}</p>
-</div>
-              <div class="col-md-6">
-                <label class="form-label">เพศ</label>
-                <p class="form-control bg-light">{{ user.a_gender }}</p>
-              </div>
-              <div class="col-md-6">
-                <label class="form-label">แนะนำตัวเอง (Bio)</label>
-                <p class="form-control bg-light" style="height: 120px">{{ user.a_bio || '-' }}</p>
-              </div>
-              <div class="col-md-6">
-                <label class="form-label">ผลงาน (Portfolio)</label>
-                <div class="form-control bg-light" style="height: 120px; overflow: auto">
-                  <ul class="mb-0 ps-3">
-                    <li v-for="item in portfolios" :key="item.portfolio_id">
-                      <a :href="item.portfolio_url" target="_blank">{{ item.portfolio_url }}</a>
-                    </li>
-                  </ul>
-                </div>
-              </div>
-              <div class="col-12">
-                <label class="form-label">ทักษะและเครื่องมือ (Skills & Tools)</label>
-                <div class="d-flex flex-wrap gap-2">
-                  <span
-                    v-for="skill in skills"
-                    :key="skill.skill_id"
-                    class="badge rounded-pill bg-success px-3 py-2"
-                  >
-                    ✅ {{ skill.skill_name }}
-                  </span>
-                </div>
-              </div>
-            </div>
+            </section>
+
             <div class="text-end mt-4">
               <router-link
                 to="/applicant/editprofile"
-                class="btn px-4 py-2 rounded-pill text-white"
-                style="background-color: #ff6600"
+                class="btn btn-warning rounded-pill px-4 py-2 text-white fw-semibold"
               >
                 แก้ไขโปรไฟล์
               </router-link>
@@ -112,7 +109,6 @@ import axios from "axios";
 import NavbarApplicant from "@/components/NavbarApplicant.vue";
 import DefaultProfile from "@/assets/default-profile.png";
 
-
 const BASE_URL = "http://localhost:3001";
 
 export default {
@@ -127,21 +123,20 @@ export default {
       defaultImage: DefaultProfile,
     };
   },
- mounted() {
-  const id = this.$route.params.id || localStorage.getItem("user_id");
-  if (id) this.fetchProfile(id);
-}
-,
+  mounted() {
+    const id = this.$route.params.id || localStorage.getItem("user_id");
+    if (id) this.fetchProfile(id);
+  },
   methods: {
     calculateAge(dateStr) {
-    const birthDate = new Date(dateStr);
-    if (isNaN(birthDate)) return "-";
-    const today = new Date();
-    let age = today.getFullYear() - birthDate.getFullYear();
-    const m = today.getMonth() - birthDate.getMonth();
-    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) age--;
-    return `${age} ปี`;
-  },
+      const birthDate = new Date(dateStr);
+      if (isNaN(birthDate)) return "-";
+      const today = new Date();
+      let age = today.getFullYear() - birthDate.getFullYear();
+      const m = today.getMonth() - birthDate.getMonth();
+      if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) age--;
+      return `${age} ปี`;
+    },
     async fetchProfile(id) {
       try {
         const res = await axios.get(`${BASE_URL}/api/applicants/${id}`);
@@ -155,16 +150,14 @@ export default {
         console.error("❌ fetchProfile failed", err);
       }
     },
-   formatDate(dateStr) {
-  const date = new Date(dateStr);
-  if (isNaN(date)) return "-";
-  const thYear = date.getFullYear() + 543;
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-  return `${day}/${month}/${thYear}`; // ✅ เช่น 10/03/2548
-}
-
-,
+    formatDate(dateStr) {
+      const date = new Date(dateStr);
+      if (isNaN(date)) return "-";
+      const thYear = date.getFullYear() + 543;
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const day = String(date.getDate()).padStart(2, "0");
+      return `${day}/${month}/${thYear}`;
+    },
   },
 };
 </script>
@@ -172,5 +165,9 @@ export default {
 <style scoped>
 .text-orange {
   color: #ff6600;
+}
+ul {
+  list-style: disc;
+  padding-left: 1.25rem;
 }
 </style>

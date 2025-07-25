@@ -81,3 +81,13 @@ exports.updateJob = (req, res) => {
     res.status(200).json({ message: "แก้ไขงานสำเร็จ" });
   });
 };
+// ใน controllers/jobController.js
+exports.closeJob = (req, res) => {
+  const jobId = req.params.id;
+  const q = `UPDATE jobs SET j_status = 'closed' WHERE job_id = ?`;
+  db.query(q, [jobId], (err) => {
+    if (err) return res.status(500).json({ message: "ปิดรับสมัครไม่สำเร็จ" });
+    res.status(200).json({ message: "ปิดรับสมัครสำเร็จ" });
+  });
+};
+

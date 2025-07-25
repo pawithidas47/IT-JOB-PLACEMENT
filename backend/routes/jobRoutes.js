@@ -45,6 +45,18 @@ router.post("/", upload.none(), async (req, res) => {
     res.status(500).json({ error: "โพสต์ไม่สำเร็จ", detail: err.message });
   }
 });
+router.put("/:id/close", async (req, res) => {
+  const db = require("../models/db");
+  const jobId = req.params.id;
+  try {
+    await db.promise().execute("UPDATE jobs SET j_status = 'closed' WHERE job_id = ?", [jobId]);
+    res.status(200).json({ message: "ปิดรับสมัครสำเร็จ" });
+  } catch (err) {
+    console.error("❌ ปิดรับสมัครล้มเหลว:", err);
+    res.status(500).json({ message: "ปิดรับสมัครไม่สำเร็จ" });
+  }
+});
+
 
 // ✅ เชื่อม controller อื่น
 router.get("/", jobCtrl.getJobs);
@@ -52,5 +64,9 @@ router.get("/employer/:id", jobCtrl.getJobsByEmployer);
 router.get("/:id", jobCtrl.getJobById);
 router.put("/:id", jobCtrl.updateJob);
 router.delete("/:id", jobCtrl.deleteJob);
+// ใน routes/jobRoutes.js
+router.put("/:id/close", jobCtrl.closeJob);        // ✅ OK
+
+
 
 module.exports = router;

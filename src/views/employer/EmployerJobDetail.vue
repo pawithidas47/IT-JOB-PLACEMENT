@@ -90,6 +90,9 @@
         </div>
       </div>
     </div>
+<div v-if="job && job.j_status === 'closed'" class="alert alert-secondary rounded-pill text-center fw-bold my-3">
+  🔒 งานนี้ปิดรับสมัครแล้ว
+</div>
 
     <!-- Loading -->
     <div v-else class="text-center text-muted py-5">
@@ -147,10 +150,28 @@ export default {
             alert("เกิดข้อผิดพลาดในการลบงาน");
           });
       }
+    },
+    closeJob() {
+      const jobId = this.job?.job_id;
+      if (!jobId) return;
+
+      const confirmClose = confirm("คุณต้องการปิดรับสมัครงานนี้หรือไม่?");
+      if (!confirmClose) return;
+
+      axios.put(`http://localhost:3001/api/jobs/${jobId}/close`)
+        .then(() => {
+          alert("✅ งานนี้ถูกปิดรับสมัครแล้ว");
+          this.job.j_status = 'closed'; // อัปเดตใน UI ทันที
+        })
+        .catch((err) => {
+          console.error("❌ ปิดรับสมัครล้มเหลว:", err);
+          alert("เกิดข้อผิดพลาดในการปิดรับสมัคร");
+        });
     }
   }
 };
 </script>
+
 
 <style scoped>
 .text-orange {

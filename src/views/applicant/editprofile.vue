@@ -79,14 +79,13 @@
             </div>
 
             <div class="text-end mt-3 d-flex justify-content-end gap-2">
-  <button @click="$router.push('/applicant/userprofile')" class="btn btn-outline-secondary px-4 py-2 rounded-pill">
-    <i class="bi bi-x-circle me-1"></i> ยกเลิก
-  </button>
-  <button @click="saveProfile" class="btn btn-success px-4 py-2 rounded-pill">
-    <i class="bi bi-check-circle me-1"></i> บันทึกข้อมูล
-  </button>
-</div>
-
+              <button @click="$router.push('/applicant/userprofile')" class="btn btn-outline-secondary px-4 py-2 rounded-pill">
+                <i class="bi bi-x-circle me-1"></i> ยกเลิก
+              </button>
+              <button @click="saveProfile" class="btn btn-success px-4 py-2 rounded-pill">
+                <i class="bi bi-check-circle me-1"></i> บันทึกข้อมูล
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -120,28 +119,31 @@ export default {
   },
   methods: {
     async fetchProfile(id) {
-  try {
-    const res = await axios.get(`${BASE_URL}/api/applicants/${id}`);
-    const { user, skills, portfolios, education, experience } = res.data;
+      try {
+        const res = await axios.get(`${BASE_URL}/api/applicants/${id}`);
+        const { user, skills, portfolios, education, experience } = res.data;
 
-    this.user = {
-      ...user,
-      education: education || [],
-      experience: experience || [],
-    };
+        this.user = {
+          ...user,
+          education: education || [],
+          experience: (experience || []).map(exp => ({
+            ...exp,
+            start_date: exp.start_date ? exp.start_date.slice(0, 10) : "",
+            end_date: exp.end_date ? exp.end_date.slice(0, 10) : "",
+          }))
+        };
 
-    this.skills = skills || [];
-    this.portfolios = portfolios || [];
-    this.skillsText = this.skills.map(s => s.skill_name).join(', ');
+        this.skills = skills || [];
+        this.portfolios = portfolios || [];
+        this.skillsText = this.skills.map(s => s.skill_name).join(', ');
 
-    if (this.user.profile_img_url) {
-      this.profileImage = `${BASE_URL}${this.user.profile_img_url}`;
-    }
-  } catch (err) {
-    console.error("❌ fetchProfile failed", err.response?.data || err.message);
-  }
-}
-,
+        if (this.user.profile_img_url) {
+          this.profileImage = `${BASE_URL}${this.user.profile_img_url}`;
+        }
+      } catch (err) {
+        console.error("❌ fetchProfile failed", err.response?.data || err.message);
+      }
+    },
     calculateAge(dateStr) {
       const birthDate = new Date(dateStr);
       if (isNaN(birthDate)) return "-";

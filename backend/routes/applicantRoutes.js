@@ -3,14 +3,14 @@ const router = express.Router();
 const db = require("../models/db");
 const multer = require("multer");
 
-// 📦 ตั้งค่าการอัปโหลดไฟล์ภาพ
+//  ตั้งค่าการอัปโหลดไฟล์ภาพ
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, "uploads/"),
   filename: (req, file, cb) => cb(null, Date.now() + "-" + file.originalname),
 });
 const upload = multer({ storage });
 
-/** ✅ ดึงผู้สมัครทั้งหมด */
+/**  ดึงผู้สมัครทั้งหมด */
 router.get("/", async (req, res) => {
   try {
     const [rows] = await db.promise().query("SELECT * FROM applicants");
@@ -21,7 +21,7 @@ router.get("/", async (req, res) => {
   }
 });
 
-/** ✅ ดึงข้อมูลโปรไฟล์ผู้สมัคร */
+/**  ดึงข้อมูลโปรไฟล์ผู้สมัคร */
 router.get("/:id", async (req, res) => {
   const { id } = req.params;
   try {

@@ -39,7 +39,7 @@
             </div>
 
             <div class="mb-3">
-              <label class="form-label">ระดับความชำนาญด้านคอมพิวเตอร์</label>
+              <label class="form-label">ความชำนาญด้านคอมพิวเตอร์</label>
               <div class="mt-2">
                 <span v-for="n in 5" :key="n" @click="user.a_computer_stars = n" style="cursor:pointer" class="me-1">
                   <i class="bi" :class="n <= user.a_computer_stars ? 'bi-star-fill text-warning' : 'bi-star text-muted'"></i>

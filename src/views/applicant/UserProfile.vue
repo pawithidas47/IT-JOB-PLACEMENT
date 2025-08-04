@@ -21,8 +21,10 @@
               />
             </div>
             <h6 class="fw-bold text-center border-top pt-3">ข้อมูลติดต่อ</h6>
-            <ul class="list-unstyled small mt-3">
-              <li class="mb-2 fw-semibold">ชื่อ : {{ user.a_firstname }} {{ user.a_lastname }}</li>
+            <ul class="list-unstyled mt-3 contact-info">
+              <li class="mb-2 fw-bold text-dark fs-5">
+                {{ user.a_firstname }} {{ user.a_lastname }}
+              </li>
               <li class="mb-2">เพศ : {{ user.a_gender }}</li>
               <li class="mb-2">อายุ : {{ calculateAge(user.a_birthdate) }}</li>
               <li class="mb-2">คณะ : {{ user.a_faculty }}</li>
@@ -52,7 +54,7 @@
             </section>
 
             <section class="mb-4">
-              <h5 class="fw-bold mb-2">ระดับความชำนาญด้านคอมพิวเตอร์</h5>
+              <h5 class="fw-bold mb-2">ความชำนาญด้านคอมพิวเตอร์</h5>
               <div class="d-flex align-items-center">
                 <span v-for="n in 5" :key="n" style="font-size: 1.25rem; margin-right: 4px">
                   <i class="bi" :class="n <= selectedStars ? 'bi-star-fill text-warning' : 'bi-star text-muted'"></i>
@@ -187,13 +189,13 @@ export default {
 .text-orange {
   color: #ff6600;
 }
-ul {
-  list-style: none;
-  padding-left: 0;
+
+.contact-info {
+  font-size: 1rem;
+  line-height: 1.6;
 }
+
 ul li::before {
-  content: '•';
-  margin-right: 6px;
-  color: #444;
+  content: none !important; /* ยกเลิก bullet */
 }
 </style>

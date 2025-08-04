@@ -49,7 +49,7 @@
             <section class="mb-4">
               <h5 class="fw-bold mb-2">ทักษะและความสามารถ</h5>
               <ul class="ps-3">
-                <li v-for="skill in skills" :key="skill.skill_id">• {{ skill.skill_name }}</li>
+                <li v-for="skill in skills" :key="skill.skill_id"> {{ skill.skill_name }}</li>
               </ul>
             </section>
 
@@ -91,7 +91,7 @@
                 <p class="mb-1">ช่วงเวลา : {{ formatDate(job.start_date) }} - {{ job.end_date ? formatDate(job.end_date) : 'ปัจจุบัน' }}</p>
                 <p class="mb-1">ประสบการณ์ : {{ job.duration }}</p>
                 <ul class="mb-0 ps-3">
-                  <li v-for="(desc, idx) in job.description.split('\n')" :key="idx">• {{ desc }}</li>
+                  <li v-for="(desc, idx) in job.description.split('\n')" :key="idx"> {{ desc }}</li>
                 </ul>
               </div>
             </section>

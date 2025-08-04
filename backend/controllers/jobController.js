@@ -21,15 +21,25 @@ exports.getJobById = (req, res) => {
 
 exports.getJobs = (req, res) => {
   const q = `
-    SELECT jobs.*, employers.e_type AS employer_type
-    FROM jobs
-    JOIN employers ON jobs.employer_id = employers.employer_id;
-  `;
+  SELECT 
+    jobs.*, 
+    employers.e_company_name, 
+    employers.profile_img_url AS e_profile_img_url,
+    employers.e_type AS employer_type
+  FROM jobs
+  JOIN employers ON jobs.employer_id = employers.employer_id
+`;
+
+
   db.query(q, (err, results) => {
-    if (err) return res.status(500).json({ message: "ดึงข้อมูลงานล้มเหลว" });
+    if (err) {
+      console.error("❌ SQL ERROR:", err); // 🔍 เพิ่มบรรทัดนี้เพื่อตรวจสอบ Error
+      return res.status(500).json({ message: "ดึงข้อมูลงานล้มเหลว" });
+    }
     res.json(results);
   });
 };
+
 
 exports.getJobsByEmployer = (req, res) => {
   const employerId = req.params.id;

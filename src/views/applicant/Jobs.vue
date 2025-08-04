@@ -124,9 +124,10 @@
 
             <!-- หมวดหมู่วงรี -->
             <div v-if="job.j_type" class="mb-2">
-              <span class="badge rounded-pill bg-light text-dark border" style="font-size: 13px; padding: 6px 12px;">
-                {{ job.j_type }}
-              </span>
+             <span class="badge-category">
+  {{ job?.j_type || '-' }}
+</span>
+
             </div>
 
           <p class="mb-1 text-muted">
@@ -330,6 +331,17 @@ export default {
 
 
 <style scoped>
+.badge-category {
+  background-color: #fff5e6;
+  color: #ff6600;
+  border: 1px solid #ff6600;
+  border-radius: 999px;
+  font-weight: 500;
+  padding: 0.15rem 0.6rem;
+  font-size: 15px;
+}
+
+
 .custom-select {
   border-radius: 999px;
   padding: 0.45rem 1.25rem;

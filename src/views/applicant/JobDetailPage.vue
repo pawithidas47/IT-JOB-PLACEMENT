@@ -12,9 +12,11 @@
         <p class="text-muted mb-3">{{ job?.e_company_name || '-' }}</p>
 
         <div class="mb-4">
-          <span class="badge bg-warning text-dark rounded-pill px-3 py-2">
-            หมวดหมู่: {{ job?.j_type || '-' }}
-          </span>
+         <span class="badge-category">
+  {{ job?.j_type || '-' }}
+</span>
+
+
         </div>
 
         <p class="fw-bold text-dark mb-4">
@@ -261,6 +263,15 @@ export default {
 
 
 <style scoped>
+.badge-category {
+  background-color: #fff5e6;
+  color: #ff6600;
+  border: 1px solid #ff6600;
+  border-radius: 999px;
+  font-weight: bold;
+  padding: 0.25rem 0.75rem;
+}
+
 .btn-orange {
   background-color: #ff6600;
   color: white;

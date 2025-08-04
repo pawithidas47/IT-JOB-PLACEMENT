@@ -70,7 +70,10 @@
           style="cursor: pointer"
         >
           <h6 class="fw-bold text-dark mb-1">{{ job.j_title }}</h6>
-          <span class="badge bg-light text-dark border mb-2">{{ job.j_type }}</span>
+          <span class="badge-category">
+  {{ job?.j_type || '-' }}
+</span>
+
           <p class="mb-1 text-muted">
             <i class="bi bi-cash-coin me-1"></i> ค่าจ้าง: {{ Number(job.j_salary).toLocaleString() }} บาท
           </p>
@@ -146,6 +149,16 @@ export default {
 </script>
 
 <style scoped>
+.badge-category {
+  background-color: #fff5e6;
+  color: #ff6600;
+  border: 1px solid #ff6600;
+  border-radius: 999px;
+  font-weight: 500;
+  padding: 0.1rem 0.5rem;
+  font-size: 12px;
+}
+
 .modal-backdrop {
   position: fixed;
   inset: 0;

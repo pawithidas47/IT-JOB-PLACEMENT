@@ -2,89 +2,101 @@
   <div>
     <NavbarEmployer />
     <div class="container py-5">
-      <h4 class="fw-bold text-orange mb-4">
-        <i class="bi bi-journal-text me-2"></i> โปรไฟล์ผู้สมัคร
-      </h4>
+      <div class="text-center mb-5">
+        <h2 class="fw-bold text-orange">
+          <i class="bi bi-person-circle me-2"></i> โปรไฟล์ผู้สมัคร
+        </h2>
+      </div>
 
-      <div class="card p-4 shadow rounded-4" v-if="applicant">
-        <div class="row">
-          <!-- ภาพ -->
-          <div class="col-md-3 text-center border-end pe-4">
-            <img
-              :src="profileImage || defaultImage"
-              class="img-fluid rounded shadow mb-3"
-              style="max-height: 250px; object-fit: cover"
-            />
-            <div class="text-start small">
-              <p class="mb-1">
-                <i class="bi bi-telephone-fill text-danger me-2"></i> {{ applicant.a_phone || '-' }}
-              </p>
-              <p class="mb-1">
-                <i class="bi bi-envelope-at-fill text-primary me-2"></i> {{ applicant.a_email || '-' }}
-              </p>
-              <p class="mb-1">
-                <i class="bi bi-chat-dots text-muted me-2"></i> {{ applicant.a_contact || '-' }}
-              </p>
+      <div class="card shadow rounded-4 p-5 bg-white mx-auto" style="max-width: 1080px">
+        <div class="row g-5">
+          <!-- ซ้าย -->
+          <div class="col-md-4 border-end pe-md-4">
+            <div class="text-center mb-3">
+              <img
+                :src="profileImage || defaultImage"
+                class="rounded-4 shadow-sm border"
+                style="width: 100%; max-width: 240px; height: 300px; object-fit: cover"
+                alt="profile"
+              />
             </div>
+            <h6 class="fw-bold text-center border-top pt-3">ข้อมูลติดต่อ</h6>
+            <ul class="list-unstyled mt-3 contact-info">
+              <li class="mb-2 fw-bold text-dark fs-5">
+                {{ applicant.a_firstname }} {{ applicant.a_lastname }}
+              </li>
+              <li class="mb-2">เพศ : {{ applicant.a_gender }}</li>
+              <li class="mb-2">อายุ : {{ calculateAge(applicant.a_birthdate) }}</li>
+              <li class="mb-2">คณะ : {{ applicant.a_faculty }}</li>
+              <li class="mb-2">สัญชาติ : {{ applicant.a_nationality || '-' }}</li>
+              <li class="mb-2 d-flex align-items-center gap-2">
+                <i class="bi bi-telephone-fill text-success"></i> <span>{{ applicant.a_phone }}</span>
+              </li>
+              <li class="mb-2 d-flex align-items-center gap-2">
+                <i class="bi bi-envelope-fill text-primary"></i> <span>{{ applicant.a_email }}</span>
+              </li>
+            </ul>
           </div>
 
-          <!-- ข้อมูล -->
-          <div class="col-md-9 ps-4">
-            <div class="row g-3">
-              <div class="col-md-6">
-                <label>ชื่อ</label>
-                <input class="form-control bg-light" :value="applicant.a_firstname" readonly />
-              </div>
-              <div class="col-md-6">
-                <label>นามสกุล</label>
-                <input class="form-control bg-light" :value="applicant.a_lastname" readonly />
-              </div>
-              <div class="col-md-6">
-                <label>รหัสนิสิต</label>
-                <input class="form-control bg-light" :value="applicant.a_studentid" readonly />
-              </div>
-              <div class="col-md-6">
-                <label>คณะ</label>
-                <input class="form-control bg-light" :value="applicant.a_faculty" readonly />
-              </div>
-              <div class="col-md-6">
-                <label>อายุ</label>
-                <input class="form-control bg-light" :value="calculateAge(applicant.a_birthdate)" readonly />
-              </div>
-              <div class="col-md-6">
-                <label>เพศ</label>
-                <input class="form-control bg-light" :value="applicant.a_gender" readonly />
-              </div>
+          <!-- ขวา -->
+          <div class="col-md-8">
+            <section class="mb-4">
+              <h5 class="fw-bold mb-2">ตำแหน่งงานที่สนใจ</h5>
+              <p class="mb-1 text-primary fw-bold">{{ applicant.a_position || 'ยังไม่ระบุ' }}</p>
+              <p class="text-muted small">ค่าจ้างที่ต้องการ : {{ applicant.a_salary || '-' }} บาท</p>
+            </section>
 
-              <div class="col-12">
-                <label>แนะนำตัวเอง (Bio)</label>
-                <textarea class="form-control" rows="2" :value="applicant.a_bio" readonly></textarea>
-              </div>
+            <section class="mb-4">
+              <h5 class="fw-bold mb-2">ทักษะและความสามารถ</h5>
+              <ul class="ps-3">
+                <li v-for="skill in skills" :key="skill.skill_id"> {{ skill.skill_name }}</li>
+              </ul>
+            </section>
 
-              <div class="col-12">
-                <label>Portfolio</label>
-                <ul class="list-unstyled bg-light rounded p-3">
-                  <li v-for="item in portfolios" :key="item.portfolio_id">
-                    <a :href="item.portfolio_url" target="_blank">{{ item.portfolio_url }}</a>
-                  </li>
-                </ul>
+            <section class="mb-4">
+              <h5 class="fw-bold mb-2">ความชำนาญด้านคอมพิวเตอร์</h5>
+              <div class="d-flex align-items-center">
+                <span v-for="n in 5" :key="n" style="font-size: 1.25rem; margin-right: 4px">
+                  <i class="bi" :class="n <= selectedStars ? 'bi-star-fill text-warning' : 'bi-star text-muted'"></i>
+                </span>
+                <span class="ms-2 text-muted">ระดับ: {{ computerLevelLabel }}</span>
               </div>
+            </section>
 
-              <div class="col-12">
-                <label>ทักษะ (Skills)</label>
-                <div class="d-flex flex-wrap gap-2">
-                  <span v-for="s in skills" :key="s.skill_id" class="badge bg-success px-3 py-2">
-                    {{ s.skill_name }}
-                  </span>
+            <section class="mb-4">
+              <h5 class="fw-bold mb-2">ความสนใจอื่น ๆ</h5>
+              <p class="mb-0">{{ applicant.a_interest || '-' }}</p>
+            </section>
+
+            <section class="mb-4">
+              <h5 class="fw-bold mb-2">ประวัติการศึกษา</h5>
+              <div v-if="applicant.education && applicant.education.length > 0">
+                <div v-for="(edu, index) in applicant.education" :key="index" class="mb-3">
+                  <p class="fw-semibold">{{ edu.start_year }} - {{ edu.university }}</p>
+                  <p class="mb-1">ระดับการศึกษา : {{ edu.level || '-' }}</p>
+                  <p class="mb-1">วุฒิการศึกษา : {{ edu.degree || '-' }}</p>
+                  <p class="mb-1">สาขาวิชา : {{ edu.major || '-' }}</p>
+                  <p class="mb-1">เกรดเฉลี่ย : {{ edu.gpa || '-' }}</p>
                 </div>
               </div>
-            </div>
+              <div v-else>
+                <p class="text-muted">ยังไม่มีข้อมูลประวัติการศึกษา</p>
+              </div>
+            </section>
+
+            <section class="mb-4">
+              <h5 class="fw-bold mb-2">ประวัติการทำงาน</h5>
+              <div v-for="(job, index) in applicant.experiences || []" :key="index" class="mb-3 border-bottom pb-2">
+                <p class="fw-semibold">💼ตำแหน่ง : {{ job.title }}</p>
+                <p class="mb-1">ช่วงเวลา : {{ formatDate(job.start_date) }} - {{ job.end_date ? formatDate(job.end_date) : 'ปัจจุบัน' }}</p>
+                <p class="mb-1">ประสบการณ์ : {{ job.duration }}</p>
+                <ul class="mb-0 ps-3">
+                  <li v-for="(desc, idx) in job.description.split('\n')" :key="idx"> {{ desc }}</li>
+                </ul>
+              </div>
+            </section>
           </div>
         </div>
-      </div> <!-- card -->
-
-      <div v-else class="text-center text-muted py-5">
-        กำลังโหลดข้อมูลผู้สมัคร...
       </div>
     </div>
   </div>
@@ -99,12 +111,26 @@ export default {
   components: { NavbarEmployer },
   data() {
     return {
-      applicant: null,
+      applicant: {
+        education: [],
+        experiences: [],
+        a_computer_level: '',
+        a_computer_stars: '',
+      },
       skills: [],
       portfolios: [],
       profileImage: null,
       defaultImage: DefaultImage,
     };
+  },
+  computed: {
+    selectedStars() {
+      return parseInt(this.applicant?.a_computer_stars || 3);
+    },
+    computerLevelLabel() {
+      const levels = ['เริ่มต้น', 'พอใช้', 'ปานกลาง', 'ดี', 'ดีมาก'];
+      return levels[this.selectedStars - 1] || 'ปานกลาง';
+    }
   },
   mounted() {
     const applicant_id = this.$route.params.id;
@@ -116,11 +142,15 @@ export default {
     async fetchProfile(applicant_id) {
       try {
         const res = await axios.get(`http://localhost:3001/api/applicants/${applicant_id}`);
-        this.applicant = res.data.user;
-        this.skills = res.data.skills;
-        this.portfolios = res.data.portfolios;
-        if (this.applicant.profile_img_url) {
-          this.profileImage = `http://localhost:3001${this.applicant.profile_img_url}`;
+        this.applicant = {
+          ...res.data.user,
+          education: res.data.education || [],
+          experiences: res.data.experience || []
+        };
+        this.skills = res.data.skills || [];
+        this.portfolios = res.data.portfolios || [];
+        if (res.data.user.profile_img_url) {
+          this.profileImage = `http://localhost:3001${res.data.user.profile_img_url}`;
         }
       } catch (err) {
         console.error("❌ โหลดโปรไฟล์ผิดพลาด:", err);
@@ -134,6 +164,14 @@ export default {
       if (m < 0 || (m === 0 && today.getDate() < b.getDate())) age--;
       return isNaN(age) ? "-" : `${age} ปี`;
     },
+    formatDate(dateStr) {
+      const date = new Date(dateStr);
+      if (isNaN(date)) return "-";
+      const thYear = date.getFullYear() + 543;
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const day = String(date.getDate()).padStart(2, "0");
+      return `${day}/${month}/${thYear}`;
+    },
   },
 };
 </script>
@@ -141,5 +179,14 @@ export default {
 <style scoped>
 .text-orange {
   color: #ff6600;
+}
+
+.contact-info {
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+ul li::before {
+  content: none !important;
 }
 </style>

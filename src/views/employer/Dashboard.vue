@@ -176,12 +176,10 @@
 
   <!-- หมวดหมู่ badge แยกด้านล่าง -->
   <div class="mb-3">
-    <span
-  v-if="job.j_type"
-  style="background-color: #fff3cd; color: #212529; padding: 6px 14px; border-radius: 999px; font-weight: 500; font-size: 0.85rem;"
->
-  {{ job.j_type }}
+   <span class="badge-category">
+  {{ job?.j_type || '-' }}
 </span>
+
 
   </div>
 
@@ -381,6 +379,15 @@ export default {
 </script>
 
 <style scoped>
+.badge-category {
+  background-color: #fff5e6;
+  color: #ff6600;
+  border: 1px solid #ff6600;
+  border-radius: 999px;
+  font-weight: 500;
+  padding: 0.1rem 0.5rem;
+  font-size: 12px;
+}
 .modal-backdrop {
   position: fixed;
   inset: 0;

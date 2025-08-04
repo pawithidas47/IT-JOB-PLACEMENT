@@ -20,14 +20,34 @@ const upload = multer({ storage });
 /* -------------------------------
 ✅ GET ผู้สมัครของ employer
 -------------------------------- */
+// ✅ ใช้อันนี้พอ
+router.delete("/applications/:id", async (req, res) => {
+  const applicationId = req.params.id;
+
+  try {
+    const [result] = await db.promise().query(
+      "DELETE FROM applications WHERE application_id = ?",
+      [applicationId]
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: "ไม่พบข้อมูลผู้สมัคร" });
+    }
+
+    res.json({ message: "ลบผู้สมัครสำเร็จ" });
+  } catch (err) {
+    console.error("❌ ลบผู้สมัครล้มเหลว:", err);
+    res.status(500).json({ error: "เกิดข้อผิดพลาด" });
+  }
+});
+
 router.get("/:id/applicants", async (req, res) => {
   const employerId = req.params.id;
-
   try {
     const [rows] = await db.promise().query(
       `SELECT 
         a.application_id, 
-        a.app_status AS status,     -- ✅ เปลี่ยนชื่อฟิลด์
+        a.app_status AS status,
         a.app_date AS applied_at,
         j.j_title,
         u.applicant_id, 
@@ -43,11 +63,29 @@ router.get("/:id/applicants", async (req, res) => {
        ORDER BY a.app_date DESC`,
       [employerId]
     );
-    res.json(rows);
+
+    // ✅ ห่อข้อมูลกลับมาให้ frontend ใช้งานง่าย
+    const result = rows.map(app => ({
+      application_id: app.application_id,
+      status: app.status,
+      applied_at: app.applied_at,
+      j_title: app.j_title,
+      applicant: {
+        applicant_id: app.applicant_id,
+        a_firstname: app.a_firstname,
+        a_lastname: app.a_lastname,
+        a_email: app.a_email,
+        a_phone: app.a_phone,
+        profile_img_url: app.profile_img_url,
+      }
+    }));
+
+    res.json(result);
   } catch (err) {
     console.error("❌ [GET /:id/applicants] Failed:", err);
     res.status(500).json({ error: "ไม่สามารถโหลดข้อมูลผู้สมัครได้" });
   }
+
 });
 router.post("/:id/upload-gallery", upload.array("gallery", 10), async (req, res) => {
   const employerId = req.params.id;

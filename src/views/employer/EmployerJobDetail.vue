@@ -17,12 +17,10 @@
 
           <!-- หมวดหมู่ -->
           <div class="mb-4">
-              <span
-  v-if="job.j_type"
-  style="background-color: #fff3cd; color: #212529; padding: 6px 14px; border-radius: 999px; font-weight: 500; font-size: 0.85rem;"
->
-  {{ job.j_type }}
+             <span class="badge-category">
+  {{ job?.j_type || '-' }}
 </span>
+
           </div>
 
           <!-- จำนวนที่รับ -->
@@ -173,5 +171,13 @@ export default {
 <style scoped>
 .text-orange {
   color: #ff6600;
+}
+.badge-category {
+  background-color: #fff5e6;
+  color: #ff6600;
+  border: 1px solid #ff6600;
+  border-radius: 999px;
+  font-weight: bold;
+  padding: 0.25rem 0.75rem;
 }
 </style>

@@ -59,6 +59,7 @@ const routes = [
   props: true
 }
 ,
+
    {
       path: "/employer/profile",
       name: "EmployerProfile",
@@ -131,7 +132,14 @@ const routes = [
   }
 
 ,
+// ✅ เพิ่มในหมวด Job detail (public) หรือแยกหมวด Public Employer Profile ก็ได้
+{
+  path: '/employer/profile/:id',
+  name: 'EmployerPublicProfile',
+  component: () => import('@/views/applicant/EmployerPublicProfile.vue'),
+}
 
+,
 ];
 
 const router = createRouter({

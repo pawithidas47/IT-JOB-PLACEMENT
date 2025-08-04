@@ -129,8 +129,14 @@
               </span>
             </div>
 
-            <p class="mb-1 text-muted"><i class="bi bi-cash-coin me-1"></i> ค่าจ้าง: {{ job.j_salary.toLocaleString() }} บาท</p>
-            <p class="mb-1 text-muted"><i class="bi bi-person-badge me-1"></i> ผู้ว่าจ้าง: {{ job.employer_type || 'ไม่ระบุ' }}</p>
+          <p class="mb-1 text-muted">
+  <i class="bi bi-people-fill me-1"></i>
+  รับจำนวน: {{ job.j_amount || '-' }} คน
+</p>
+<p class="mb-1 text-muted">
+  <i class="bi bi-cash-coin me-1"></i>
+  ค่าจ้าง: {{ Number(job.j_salary).toLocaleString() }} บาท
+</p>
 
             <div class="d-flex justify-content-between mt-3">
               <router-link :to="`/applicant/jobs/${job.job_id}`" class="btn btn-sm btn-outline-primary rounded-pill px-3">

@@ -1,6 +1,6 @@
-// backend/controllers/adminAuthController.js
 const db = require("../models/db");
 
+// ✅ loginAdmin: เข้าสู่ระบบแอดมิน
 exports.loginAdmin = async (req, res) => {
   const { username, password } = req.body;
 
@@ -16,9 +16,10 @@ exports.loginAdmin = async (req, res) => {
 
     return res.status(200).json({
       message: "เข้าสู่ระบบสำเร็จ",
-      token: "admin_dummy_token",
+      token: "admin_dummy_token", // ในอนาคตอาจเปลี่ยนเป็น JWT
     });
   } catch (error) {
-    return res.status(500).json({ message: "เกิดข้อผิดพลาด", error });
+    console.error("❌ Error during admin login:", error);
+    return res.status(500).json({ message: "เกิดข้อผิดพลาดในระบบ", error });
   }
 };

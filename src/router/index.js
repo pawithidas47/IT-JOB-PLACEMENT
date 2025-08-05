@@ -19,6 +19,19 @@ import AdminDashboard from "@/views/admin/AdminDashboard.vue";
 
 const routes = [
   {
+  path: "/admin/users",
+  component: () => import("@/views/admin/AdminUsers.vue")
+},
+{
+  path: "/admin/jobs",
+  component: () => import("@/views/admin/AdminJobs.vue")
+},
+{
+  path: "/admin/uploads",
+  component: () => import("@/views/admin/AdminUploads.vue")
+}
+,
+  {
   path: "/admin/login",
   component: AdminLogin,
 },

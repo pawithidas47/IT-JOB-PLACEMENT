@@ -14,8 +14,19 @@ import JobApplications from "@/views/applicant/JobApplications.vue";
 // ✅ General views
 import HomePage from "@/views/Home.vue";
 import Login from "@/views/Login.vue";
+import AdminLogin from "@/views/admin/AdminLogin.vue";
+import AdminDashboard from "@/views/admin/AdminDashboard.vue";
 
 const routes = [
+  {
+  path: "/admin/login",
+  component: AdminLogin,
+},
+{
+  path: "/admin/dashboard",
+  component: AdminDashboard,
+},
+
   // หน้าหลัก
   { path: "/", component: HomePage },
 

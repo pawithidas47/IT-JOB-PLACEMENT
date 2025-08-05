@@ -13,7 +13,7 @@ const jobRoutes = require("./routes/jobRoutes");
 const applicationRoutes = require("./routes/applicationRoutes");
 const applicantRoutes = require("./routes/applicantRoutes");
 const employerRoutes = require("./routes/employerRoutes");
-
+const adminRoutes = require("./routes/adminRoutes");
 const app = express();
 
 
@@ -29,7 +29,7 @@ app.use("/api/jobs", jobRoutes);
 app.use("/api/applicants", applicantRoutes);
 app.use("/api/employers", employerRoutes);
 app.use("/api/applications", require("./routes/applicationRoutes"));
-
+app.use("/api/admin", adminRoutes);
 
 // ✅ DELETE กรณีจำเป็น (ลบการสมัคร)
 app.delete("/api/applications/:id", (req, res) => {

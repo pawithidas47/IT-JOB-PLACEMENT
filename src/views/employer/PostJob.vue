@@ -35,16 +35,18 @@
     <textarea v-model="job.description" class="form-control rounded-3" rows="4" placeholder="อธิบายลักษณะงานโดยรวม" required></textarea>
   </div>
 
-  <!-- 3. จำนวนที่รับ -->
+ 
+
+  <!-- 4. คุณสมบัติผู้สมัคร -->
+  <!-- 4. คุณสมบัติผู้สมัคร -->
+<div class="col-12">
+  <label class="form-label fw-bold">คุณสมบัติผู้สมัคร</label>
+  <textarea v-model="job.qualification" class="form-control rounded-3" rows="4" placeholder="เช่น มีโน้ตบุ๊ก, ใช้ Photoshop ได้\n- เรียนสาย IT\n- ทำงานเป็นทีมได้ดี"></textarea>
+</div>
+ <!-- 3. จำนวนที่รับ -->
   <div class="col-md-6">
     <label class="form-label fw-bold">จำนวนที่รับ</label>
     <input v-model="job.vacancy" class="form-control rounded-3" placeholder="เช่น 3 อัตรา" />
-  </div>
-
-  <!-- 4. คุณสมบัติผู้สมัคร -->
-  <div class="col-md-6">
-    <label class="form-label fw-bold">คุณสมบัติผู้สมัคร</label>
-    <input v-model="job.qualification" class="form-control rounded-3" placeholder="เช่น มีโน้ตบุ๊ก, ใช้ Photoshop ได้" />
   </div>
 
   <!-- 6. ค่าตอบแทน -->

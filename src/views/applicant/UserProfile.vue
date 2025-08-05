@@ -97,12 +97,15 @@
             </section>
 
             <div class="text-end mt-4">
-              <router-link
-                to="/applicant/editprofile"
-                class="btn btn-warning rounded-pill px-4 py-2 text-white fw-semibold"
-              >
-                แก้ไขโปรไฟล์
-              </router-link>
+            <router-link
+  to="/applicant/editprofile"
+  class="btn border border-2 border-warning text-warning rounded-pill px-4 py-2 fw-semibold"
+  style="background-color: white;"
+>
+  แก้ไขโปรไฟล์
+</router-link>
+
+
             </div>
           </div>
         </div>

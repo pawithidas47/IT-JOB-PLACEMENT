@@ -1,4 +1,4 @@
-<template>
+<template> 
   <div>
     <NavbarApplicant />
 
@@ -11,10 +11,10 @@
         <p class="text-muted mb-0 small">พบ {{ filteredJobs.length }} งาน</p>
         <div class="d-flex gap-2">
           <input v-model="filter.title" class="form-control rounded-pill" placeholder="ค้นหาตามชื่อ..." @input="applyFilter" />
-          <select v-model="filter.status" class="form-select custom-select" @change="applyFilter">
-            <option value="">ทั้งหมด</option>
-            <option value="active">ยังเปิดรับสมัคร</option>
-            <option value="expired">ปิดรับสมัครแล้ว</option>
+          <select v-model="filter.sort" class="form-select custom-select" @change="applyFilter">
+            <option value="latest">วันที่โพสต์ (ใหม่สุด)</option>
+            <option value="salaryHigh">ค่าจ้าง (มากไปน้อย)</option>
+            <option value="salaryLow">ค่าจ้าง (น้อยไปมาก)</option>
           </select>
         </div>
       </div>
@@ -23,20 +23,44 @@
 
       <div v-else class="job-grid">
         <div
-          class="job-card p-4 bg-white border rounded-4 shadow-sm d-flex flex-column justify-content-between"
+          class="job-card position-relative"
           v-for="job in filteredJobs"
           :key="job.job_id"
         >
-          <div>
-            <h6 class="fw-bold text-orange mb-2">
-              <i class="bi bi-briefcase-fill me-2"></i> {{ job.j_title }}
-            </h6>
-            <p class="mb-1 text-muted"><i class="bi bi-tags-fill me-1"></i> ประเภทงาน: {{ job.j_type }}</p>
-            <p class="mb-1 text-muted"><i class="bi bi-cash-coin me-1"></i> ค่าจ้าง: {{ job.j_salary.toLocaleString() }} บาท</p>
-            <p class="mb-1 text-muted"><i class="bi bi-person-badge me-1"></i> ผู้ว่าจ้าง: {{ job.employer_type || 'ไม่ระบุ' }}</p>
-            <p class="mb-1 text-muted"><i class="bi bi-clock me-1"></i> โพสต์เมื่อ: {{ new Date(job.j_posted_at).toLocaleDateString('th-TH') }}</p>
-            <p class="mb-1 text-muted"><i class="bi bi-calendar-event me-1"></i> หมดเขต: {{ new Date(job.j_appdeadline).toLocaleDateString('th-TH') }}</p>
+          <span class="posted-date">
+            {{ new Date(job.j_posted_at).toLocaleDateString('th-TH') }}
+          </span>
+
+          <div class="d-flex align-items-center mb-3">
+            <img
+              :src="job.e_profile_img_url ? `http://localhost:3001${job.e_profile_img_url}` : '/default-profile.jpg'"
+              alt="โลโก้บริษัท"
+              class="rounded-circle shadow-sm me-3"
+              style="width: 42px; height: 42px; object-fit: cover"
+            />
+            <div>
+              <div class="fw-semibold">{{ job.e_company_name || 'ชื่อบริษัทไม่ระบุ' }}</div>
+            </div>
           </div>
+
+          <h5 class="fw-bold text-orange mb-2">
+            {{ job.j_title }}
+          </h5>
+
+          <div v-if="job.j_type" class="mb-2">
+            <span class="badge-category">
+              {{ job?.j_type || '-' }}
+            </span>
+          </div>
+
+          <p class="mb-1 text-muted">
+            <i class="bi bi-people-fill me-1"></i>
+            รับจำนวน: {{ job.j_amount || '-' }} คน
+          </p>
+          <p class="mb-1 text-muted">
+            <i class="bi bi-cash-coin me-1"></i>
+            ค่าจ้าง: {{ Number(job.j_salary).toLocaleString() }} บาท
+          </p>
 
           <div class="d-flex justify-content-between align-items-end mt-3">
             <router-link
@@ -72,7 +96,7 @@ export default {
       user: JSON.parse(localStorage.getItem("user")),
       filter: {
         title: "",
-        status: ""
+        sort: "latest"
       }
     };
   },
@@ -82,22 +106,27 @@ export default {
       const saved = localStorage.getItem(key);
       if (saved) {
         this.savedJobs = JSON.parse(saved);
-        this.filteredJobs = [...this.savedJobs];
+        this.applyFilter();
       }
     }
   },
   methods: {
     applyFilter() {
-      const { title, status } = this.filter;
-      const now = new Date();
-      this.filteredJobs = this.savedJobs.filter((job) => {
-        const titleMatch = title === "" || job.j_title?.toLowerCase().includes(title.toLowerCase());
-        const statusMatch =
-          status === "" ||
-          (status === "active" && new Date(job.j_appdeadline) >= now) ||
-          (status === "expired" && new Date(job.j_appdeadline) < now);
-        return titleMatch && statusMatch;
+      const { title, sort } = this.filter;
+      let filtered = this.savedJobs.filter((job) => {
+        return title === "" || job.j_title?.toLowerCase().includes(title.toLowerCase());
       });
+
+      // Sorting
+      if (sort === "latest") {
+        filtered.sort((a, b) => new Date(b.j_posted_at) - new Date(a.j_posted_at));
+      } else if (sort === "salaryHigh") {
+        filtered.sort((a, b) => b.j_salary - a.j_salary);
+      } else if (sort === "salaryLow") {
+        filtered.sort((a, b) => a.j_salary - b.j_salary);
+      }
+
+      this.filteredJobs = filtered;
     },
     removeJob(jobId) {
       const key = `bookmarkedJobs_${this.user.applicant_id}`;
@@ -126,7 +155,7 @@ export default {
 
 .job-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
   gap: 24px;
   align-items: stretch;
 }
@@ -135,17 +164,37 @@ export default {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-          /* ความสูงขั้นต่ำเท่ากันทุกใบ */
   background: white;
   border: 1px solid #eee;
   border-radius: 1rem;
   padding: 1.5rem;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
   transition: all 0.2s ease-in-out;
+  min-height: 320px;
+  max-width: 100%;
+  position: relative;
 }
 
 .job-card:hover {
   transform: translateY(-5px);
   box-shadow: 0 8px 24px rgba(255, 102, 0, 0.15);
+}
+
+.posted-date {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  font-size: 0.75rem;
+  color: #666;
+}
+
+.badge-category {
+  background-color: #fff5e6;
+  color: #ff6600;
+  border: 1px solid #ff6600;
+  border-radius: 999px;
+  font-weight: 500;
+  padding: 0.15rem 0.6rem;
+  font-size: 15px;
 }
 </style>

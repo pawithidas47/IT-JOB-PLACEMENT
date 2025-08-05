@@ -51,11 +51,12 @@
         <p class="mb-4 text-dark">{{ job?.j_worktime || 'ไม่ระบุ' }}</p>
 
         <div class="text-center">
-          <button :class="alreadyApplied ? 'btn btn-secondary w-100 fw-bold' : 'btn btn-orange w-100 fw-bold'"
-            :disabled="alreadyApplied" @click="confirmApply">
-            <i class="bi" :class="alreadyApplied ? 'bi-check-circle' : 'bi-check-circle-fill'"></i>
-            {{ alreadyApplied ? 'สมัครแล้ว' : 'สมัครงาน' }}
-          </button>
+          <button :class="alreadyApplied ? 'btn btn-success w-100 fw-bold' : 'btn btn-orange w-100 fw-bold'"
+  :disabled="alreadyApplied" @click="confirmApply">
+  <i class="bi" :class="alreadyApplied ? 'bi-check-circle' : 'bi-check-circle-fill'"></i>
+  {{ alreadyApplied ? 'สมัครแล้ว' : 'สมัครงาน' }}
+</button>
+
         </div>
       </div>
 

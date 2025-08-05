@@ -13,9 +13,9 @@
         <p class="text-muted mb-3">{{ job?.e_company_name || '-' }}</p>
 
         <div class="mb-4">
-          <span class="badge bg-warning text-dark rounded-pill px-3 py-2">
-            หมวดหมู่: {{ job?.j_type || '-' }}
-          </span>
+          <span class="badge-category">
+  {{ job?.j_type || '-' }}
+</span>
         </div>
 
         <p class="fw-bold text-dark mb-4">
@@ -277,14 +277,36 @@ components: { NavbarHome },
     },
 
     saveJob() {
-      if (!this.isLoggedIn) {
-        this.showPopup = true;
-        return;
+  if (!this.isLoggedIn) {
+    Swal.fire({
+      icon: 'warning',
+      title: 'กรุณาเข้าสู่ระบบก่อน',
+      text: 'คุณต้องเข้าสู่ระบบเพื่อบันทึกงานที่สนใจ',
+      showCancelButton: true,
+      confirmButtonText: 'เข้าสู่ระบบ',
+      cancelButtonText: 'ยกเลิก',
+      confirmButtonColor: '#6a5acd',
+      cancelButtonColor: '#aaa'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.$router.push('/login');
       }
+    });
+    return;
+  }
 
-      // TODO: เพิ่ม logic การบันทึกงานจริงที่นี่
-      console.log("บันทึกงานสำเร็จ");
-    },
+  // ✅ เพิ่ม logic การบันทึกงานจริงตรงนี้หากต้องการ
+  console.log("บันทึกงานสำเร็จแล้ว ✅");
+  Swal.fire({
+    toast: true,
+    position: 'bottom-end',
+    icon: 'success',
+    title: 'บันทึกงานเรียบร้อย',
+    showConfirmButton: false,
+    timer: 1500
+  });
+}
+,
 
     shareJob() {
       navigator.clipboard.writeText(window.location.href);
@@ -336,7 +358,14 @@ components: { NavbarHome },
 
 
 <style scoped>
-
+.badge-category {
+  background-color: #fff5e6;
+  color: #ff6600;
+  border: 1px solid #ff6600;
+  border-radius: 999px;
+  font-weight: bold;
+  padding: 0.25rem 0.75rem;
+}
 .btn-orange {
   background-color: #ff6600;
   color: white;

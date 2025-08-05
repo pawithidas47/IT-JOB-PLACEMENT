@@ -2,28 +2,61 @@
   <div>
     <NavbarEmployer />
 
-    <div class="container-fluid px-4 py-5">
-      <h2 class="fw-bold mb-4 text-orange">รายชื่อผู้หางาน</h2>
+    <div class="container-fluid px-4 py-4">
+      <div class="main-layout d-flex align-items-start">
+        <!-- Sidebar Filter -->
+        <aside class="filter-panel shadow-popup text-start bg-white me-4"
+          style="padding: 24px; border-radius: 12px; width: 280px; box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);">
+          <form class="d-flex flex-column gap-3" @submit.prevent>
+            <div>
+              <label class="form-label mb-1 fw-semibold text-dark">ชื่อผู้สมัคร</label>
+              <input v-model="filters.name" type="text" class="form-control" placeholder="เช่น สมรักษ์" />
+            </div>
 
-      <div class="row">
-        <!-- 🔍 Sidebar Filter -->
-        <div class="col-lg-3 mb-4">
-          <div class="bg-white shadow-sm p-4 rounded-4">
-            <h6 class="fw-bold mb-3 text-orange">ค้นหาผู้สมัคร</h6>
-            <input
-              v-model="searchQuery"
-              type="text"
-              class="form-control mb-3 rounded-pill"
-              placeholder="เช่น สมรักษ์ หรือ นักออกแบบ"
-            />
-            <button @click="searchApplicants" class="btn btn-sm btn-primary rounded-pill w-100">
-              ค้นหา
-            </button>
-          </div>
-        </div>
+            <div>
+              <label class="form-label mb-1 fw-semibold text-dark">ตำแหน่งที่สนใจ</label>
+              <input v-model="filters.position" type="text" class="form-control" placeholder="เช่น นักออกแบบ" />
+            </div>
+
+            <div>
+              <label class="form-label mb-1 fw-semibold text-dark">คณะ/สาขา</label>
+              <input v-model="filters.faculty" type="text" class="form-control" placeholder="เช่น วิทยาศาสตร์" />
+            </div>
+
+            <div>
+              <label class="form-label mb-1 fw-semibold text-dark">เพศ</label>
+              <select v-model="filters.gender" class="form-select" style="height: 38px; font-size: 14px; border-radius: 10px;">
+                <option value="">ทั้งหมด</option>
+                <option value="ชาย">ชาย</option>
+                <option value="หญิง">หญิง</option>
+                <option value="อื่น ๆ">อื่น ๆ</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="form-label mb-1 fw-semibold text-dark">เบอร์โทร</label>
+              <input v-model="filters.phone" type="text" class="form-control" placeholder="เช่น 090..." />
+            </div>
+
+            <div>
+              <label class="form-label mb-1 fw-semibold text-dark">อีเมล</label>
+              <input v-model="filters.email" type="text" class="form-control" placeholder="@gmail.com" />
+            </div>
+
+            <div class="text-center d-flex justify-content-between">
+              <button class="btn w-50 me-1 fw-bold text-white" style="background: #6c757d; border-radius: 10px; height: 40px; font-size: 14px;" type="button" @click="clearFilters">
+                ล้างคำค้น
+              </button>
+              <button class="btn w-50 ms-1 fw-bold text-white" style="background: linear-gradient(135deg,#ff6600,#e55d00); border-radius: 10px; height: 40px; font-size: 14px;" type="button">
+                ค้นหา
+              </button>
+            </div>
+          </form>
+        </aside>
 
         <!-- 📋 ผู้สมัคร -->
-        <div class="col-lg-9">
+        <section class="job-results flex-grow-1">
+          <h5 class="mb-2 text-orange">พบ {{ filteredApplicants.length }} ผู้สมัคร</h5>
           <div class="row g-4">
             <div
               class="col-md-6 col-lg-4"
@@ -58,6 +91,9 @@
                     คณะ: {{ applicant.a_faculty || "ไม่ระบุ" }}
                   </div>
                   <div class="mb-1">
+                    เพศ: {{ applicant.a_gender || "ไม่ระบุ" }}
+                  </div>
+                  <div class="mb-1">
                     เบอร์โทร: {{ applicant.a_phone || "ไม่ระบุ" }}
                   </div>
                   <div class="mb-1">
@@ -74,7 +110,7 @@
           <div v-if="filteredApplicants.length === 0" class="text-muted mt-4">
             ไม่พบข้อมูลผู้สมัครที่ตรงกับเงื่อนไข
           </div>
-        </div>
+        </section>
       </div>
     </div>
   </div>
@@ -90,18 +126,28 @@ export default {
   data() {
     return {
       applicants: [],
-      searchQuery: ""
+      filters: {
+        name: "",
+        position: "",
+        faculty: "",
+        gender: "",
+        phone: "",
+        email: ""
+      }
     };
   },
   computed: {
     filteredApplicants() {
-      if (!this.searchQuery) return this.applicants;
-
-      const keyword = this.searchQuery.toLowerCase();
       return this.applicants.filter((a) => {
-        const name = `${a.a_firstname} ${a.a_lastname}`.toLowerCase();
-        const position = (a.a_position || "").toLowerCase();
-        return name.includes(keyword) || position.includes(keyword);
+        const fullName = `${a.a_firstname} ${a.a_lastname}`.toLowerCase();
+        return (
+          fullName.includes(this.filters.name.toLowerCase()) &&
+          (a.a_position || "").toLowerCase().includes(this.filters.position.toLowerCase()) &&
+          (a.a_faculty || "").toLowerCase().includes(this.filters.faculty.toLowerCase()) &&
+          (a.a_gender || "").toLowerCase().includes(this.filters.gender.toLowerCase()) &&
+          (a.a_phone || "").toLowerCase().includes(this.filters.phone.toLowerCase()) &&
+          (a.a_email || "").toLowerCase().includes(this.filters.email.toLowerCase())
+        );
       });
     }
   },
@@ -124,8 +170,15 @@ export default {
         ? `http://localhost:3001${path}`
         : "https://cdn-icons-png.flaticon.com/512/921/921347.png";
     },
-    searchApplicants() {
-      // ไม่ต้องทำอะไร เพราะใช้ computed filter แล้ว
+    clearFilters() {
+      this.filters = {
+        name: "",
+        position: "",
+        faculty: "",
+        gender: "",
+        phone: "",
+        email: ""
+      };
     }
   }
 };

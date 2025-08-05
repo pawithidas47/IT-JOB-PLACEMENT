@@ -211,47 +211,55 @@ export default {
       return this.bookmarkedIds.includes(jobId);
     },
     bookmarkJob(job) {
-      if (!this.isLoggedIn || !this.user) {
-        Swal.fire({
-          icon: 'warning',
-          title: 'กรุณาเข้าสู่ระบบก่อน',
-          text: 'คุณต้องเข้าสู่ระบบเพื่อบันทึกงาน',
-          confirmButtonText: 'เข้าสู่ระบบ'
-        }).then(() => {
-          this.$router.push('/login');
-        });
-        return;
+  if (!this.isLoggedIn || !this.user) {
+    Swal.fire({
+      icon: 'warning',
+      title: 'กรุณาเข้าสู่ระบบก่อน',
+      text: 'คุณต้องเข้าสู่ระบบเพื่อบันทึกงาน',
+      showCancelButton: true,
+      confirmButtonText: 'เข้าสู่ระบบ',
+      cancelButtonText: 'ยกเลิก',
+      confirmButtonColor: '#6a5acd',
+      cancelButtonColor: '#aaa'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.$router.push('/login');
       }
+    });
+    return;
+  }
 
-      const key = `bookmarkedJobs_${this.user.applicant_id}`;
-      let existing = JSON.parse(localStorage.getItem(key)) || [];
-      const index = existing.findIndex(j => j.job_id === job.job_id);
+  const key = `bookmarkedJobs_${this.user.applicant_id}`;
+  let existing = JSON.parse(localStorage.getItem(key)) || [];
+  const index = existing.findIndex(j => j.job_id === job.job_id);
 
-      if (index !== -1) {
-        existing.splice(index, 1);
-        this.bookmarkedIds = this.bookmarkedIds.filter(id => id !== job.job_id);
-        Swal.fire({
-          toast: true,
-          position: 'bottom-end',
-          icon: 'info',
-          title: 'ยกเลิกบันทึกงานแล้ว',
-          showConfirmButton: false,
-          timer: 1500
-        });
-      } else {
-        existing.push(job);
-        this.bookmarkedIds.push(job.job_id);
-        Swal.fire({
-          toast: true,
-          position: 'bottom-end',
-          icon: 'success',
-          title: 'บันทึกงานเรียบร้อย',
-          showConfirmButton: false,
-          timer: 1500
-        });
-      }
-      localStorage.setItem(key, JSON.stringify(existing));
-    },
+  if (index !== -1) {
+    existing.splice(index, 1);
+    this.bookmarkedIds = this.bookmarkedIds.filter(id => id !== job.job_id);
+    Swal.fire({
+      toast: true,
+      position: 'bottom-end',
+      icon: 'info',
+      title: 'ยกเลิกบันทึกงานแล้ว',
+      showConfirmButton: false,
+      timer: 1500
+    });
+  } else {
+    existing.push(job);
+    this.bookmarkedIds.push(job.job_id);
+    Swal.fire({
+      toast: true,
+      position: 'bottom-end',
+      icon: 'success',
+      title: 'บันทึกงานเรียบร้อย',
+      showConfirmButton: false,
+      timer: 1500
+    });
+  }
+
+  localStorage.setItem(key, JSON.stringify(existing));
+}
+,
     shareJob(job) {
       const shareUrl = `${window.location.origin}/jobs/${job.job_id}`;
       const message = `ดูงานนี้: ${job.j_title}\n${shareUrl}`;

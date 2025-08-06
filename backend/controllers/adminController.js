@@ -52,15 +52,3 @@ exports.getAllJobs = async (req, res) => {
 };
 
 
-// ✅ ดึงข้อมูลไฟล์ที่อัปโหลด
-exports.getAllUploads = async (req, res) => {
-  try {
-    const [uploads] = await db.promise().query(`
-      SELECT * FROM uploads ORDER BY uploaded_at DESC
-    `);
-    res.json(uploads);
-  } catch (err) {
-    console.error("❌ Error fetching uploads:", err);
-    res.status(500).json({ message: "เกิดข้อผิดพลาดในการดึงไฟล์อัปโหลด" });
-  }
-};

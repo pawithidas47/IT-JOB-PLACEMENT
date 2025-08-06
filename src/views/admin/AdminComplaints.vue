@@ -6,28 +6,28 @@
 
       <div class="p-4" style="flex: 1;">
         <h4 class="fw-bold text-orange mb-4">
-          <i class="bi bi-folder-fill me-2"></i> ไฟล์ที่อัปโหลด
+          <i class="bi bi-exclamation-diamond-fill me-2"></i> ข้อร้องเรียน
         </h4>
 
         <table class="table table-bordered">
           <thead>
             <tr>
               <th>#</th>
-              <th>ชื่อไฟล์</th>
-              <th>ประเภท</th>
-              <th>วันที่อัปโหลด</th>
-              <th>ดู</th>
+              <th>ชื่อผู้ส่ง</th>
+              <th>อีเมล</th>
+              <th>เรื่อง</th>
+              <th>รายละเอียด</th>
+              <th>วันที่</th>
             </tr>
           </thead>
           <tbody>
-            <tr v-for="(file, index) in uploads" :key="file.id">
+            <tr v-for="(item, index) in complaints" :key="item.id">
               <td>{{ index + 1 }}</td>
-              <td>{{ file.file_name }}</td>
-              <td>{{ file.file_type }}</td>
-              <td>{{ formatDate(file.uploaded_at) }}</td>
-              <td>
-                <a :href="`/uploads/${file.file_name}`" target="_blank" class="btn btn-sm btn-outline-primary">เปิด</a>
-              </td>
+              <td>{{ item.name }}</td>
+              <td>{{ item.email }}</td>
+              <td>{{ item.subject }}</td>
+              <td>{{ item.message }}</td>
+              <td>{{ formatDate(item.created_at) }}</td>
             </tr>
           </tbody>
         </table>
@@ -45,19 +45,19 @@ export default {
   components: { AdminNavbar, AdminSidebar },
   data() {
     return {
-      uploads: [],
+      complaints: [],
     };
   },
   created() {
-    this.fetchUploads();
+    this.fetchComplaints();
   },
   methods: {
-    async fetchUploads() {
+    async fetchComplaints() {
       try {
-        const res = await axios.get("/api/admin/uploads");
-        this.uploads = res.data;
+        const res = await axios.get("/api/admin/complaints");
+        this.complaints = res.data;
       } catch (err) {
-        console.error("เกิดข้อผิดพลาดในการโหลดไฟล์:", err);
+        console.error("โหลดข้อร้องเรียนไม่สำเร็จ:", err);
       }
     },
     formatDate(date) {

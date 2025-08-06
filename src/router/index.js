@@ -33,9 +33,14 @@ const routes = [
   component: () => import("@/views/admin/AdminJobs.vue")
 },
 {
-  path: "/admin/uploads",
-  component: () => import("@/views/admin/AdminUploads.vue")
+  path: '/admin/uploads',
+  component: () => import('@/views/admin/AdminUploads.vue'),
+},
+{
+  path: '/admin/complaints',
+  component: () => import('@/views/admin/AdminComplaints.vue'),
 }
+
 ,
   {
   path: "/admin/login",

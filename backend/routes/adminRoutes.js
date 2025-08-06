@@ -43,7 +43,7 @@ router.get("/users", async (req, res) => {
 
 // ✅ ดึงงาน/ไฟล์ (ตามเดิม)
 router.get("/jobs", adminCtrl.getAllJobs);
-router.get("/uploads", adminCtrl.getAllUploads);
+
 
 // ✅ แก้สถานะผู้ใช้ (แบน / ยกเลิกแบน)
 router.put('/users/:id/status', async (req, res) => {

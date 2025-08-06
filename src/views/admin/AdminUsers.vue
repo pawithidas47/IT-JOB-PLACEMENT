@@ -1,12 +1,24 @@
-
 <template>
   <div>
     <AdminNavbar />
     <div class="d-flex">
       <AdminSidebar />
       <div class="p-4" style="flex: 1;">
-        <h4 class="fw-bold text-orange mb-3"><i class="bi bi-people-fill me-2"></i> ผู้ใช้ทั้งหมด</h4>
+        <h4 class="fw-bold text-orange mb-3">
+          <i class="bi bi-people-fill me-2"></i> ผู้ใช้ทั้งหมด
+        </h4>
 
+        <!-- ✅ ตัวกรอง -->
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <input v-model="searchQuery" class="form-control w-50 me-3" placeholder="🔍 ค้นหาชื่อ/อีเมล/เบอร์โทร" />
+          <select v-model="userTypeFilter" class="form-select w-auto">
+            <option value="">ผู้ใช้ทั้งหมด</option>
+            <option value="applicant">ผู้สมัครงาน</option>
+            <option value="employer">ผู้ว่าจ้าง</option>
+          </select>
+        </div>
+
+        <!-- ✅ ตารางผู้ใช้ -->
         <table class="table table-bordered table-hover">
           <thead class="table-light">
             <tr>
@@ -19,7 +31,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="(user, index) in users" :key="index">
+            <tr v-for="(user, index) in filteredUsers" :key="user.id">
               <td>{{ index + 1 }}</td>
               <td>{{ user.name }}</td>
               <td>{{ user.email }}</td>
@@ -37,13 +49,13 @@
                 <button class="btn btn-sm btn-danger" @click="confirmDelete(user)">ลบ</button>
               </td>
             </tr>
-            <tr v-if="users.length === 0">
+            <tr v-if="filteredUsers.length === 0">
               <td colspan="6" class="text-muted text-center">ไม่มีข้อมูลผู้ใช้</td>
             </tr>
           </tbody>
         </table>
 
-        <!-- Modal ดูโปรไฟล์ -->
+        <!-- ✅ Modal ดูโปรไฟล์ -->
         <div class="modal fade" id="viewUserModal" tabindex="-1">
           <div class="modal-dialog modal-lg">
             <div class="modal-content p-3">
@@ -78,12 +90,27 @@ export default {
     return {
       users: [],
       selectedUser: {},
+      searchQuery: "",
+      userTypeFilter: "", // "", "applicant", "employer"
     };
+  },
+  computed: {
+    filteredUsers() {
+      return this.users.filter((user) => {
+        const matchType = this.userTypeFilter === "" || user.role === this.userTypeFilter;
+        const keyword = this.searchQuery.toLowerCase();
+        const matchSearch =
+          user.name?.toLowerCase().includes(keyword) ||
+          user.email?.toLowerCase().includes(keyword) ||
+          user.phone?.includes(keyword);
+        return matchType && matchSearch;
+      });
+    },
   },
   async mounted() {
     try {
       const res = await fetch("http://localhost:3001/api/admin/users", {
-        headers: { Authorization: localStorage.getItem("admin_token") }
+        headers: { Authorization: localStorage.getItem("admin_token") },
       });
       this.users = await res.json();
     } catch (err) {
@@ -97,7 +124,7 @@ export default {
         const res = await fetch(`http://localhost:3001/api/admin/users/${user.id}/status`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ status: newStatus })
+          body: JSON.stringify({ status: newStatus, role: user.role }),
         });
         if (res.ok) user.status = newStatus;
       } catch (err) {
@@ -112,10 +139,10 @@ export default {
     async deleteUser(userId) {
       try {
         const res = await fetch(`http://localhost:3001/api/admin/users/${userId}`, {
-          method: "DELETE"
+          method: "DELETE",
         });
         if (res.ok) {
-          this.users = this.users.filter(u => u.id !== userId);
+          this.users = this.users.filter((u) => u.id !== userId);
         }
       } catch (err) {
         console.error("ลบผู้ใช้ล้มเหลว:", err);
@@ -123,10 +150,10 @@ export default {
     },
     viewUser(user) {
       this.selectedUser = user;
-      const modal = new bootstrap.Modal(document.getElementById('viewUserModal'));
+      const modal = new bootstrap.Modal(document.getElementById("viewUserModal"));
       modal.show();
-    }
-  }
+    },
+  },
 };
 </script>
 

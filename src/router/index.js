@@ -19,6 +19,12 @@ import AdminDashboard from "@/views/admin/AdminDashboard.vue";
 
 const routes = [
   {
+  path: '/employer/profile/:id',
+  name: 'EmployerProfilePublic',
+  component: () => import('@/views/EmployerProfilePublic.vue') // ชื่อไฟล์ตามที่คุณตั้ง
+}
+,
+  {
   path: "/admin/users",
   component: () => import("@/views/admin/AdminUsers.vue")
 },

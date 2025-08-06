@@ -15,6 +15,11 @@ const applicantRoutes = require("./routes/applicantRoutes");
 const employerRoutes = require("./routes/employerRoutes");
 const adminRoutes = require("./routes/adminRoutes");
 const app = express();
+app.use(cors({
+  origin: "http://localhost:8080", // หรือใช้ "*" ชั่วคราวถ้าทดสอบหลายเครื่อง
+  credentials: true
+}));
+app.use('/api/employers', employerRoutes);
 
 
 // ✅ Middleware

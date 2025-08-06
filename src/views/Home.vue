@@ -111,7 +111,9 @@
             </div>
             <h5 class="fw-bold text-orange mb-2">{{ job.j_title }}</h5>
             <div v-if="job.j_type" class="mb-2">
-              <span class="badge-category">{{ job.j_type }}</span>
+              <span class="badge-category">
+  {{ job?.j_type || '-' }}
+</span>
             </div>
             <p class="mb-1 text-muted">
               <i class="bi bi-people-fill me-1"></i>

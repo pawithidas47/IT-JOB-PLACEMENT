@@ -40,7 +40,7 @@ exports.getAllJobs = async (req, res) => {
     const [jobs] = await db.promise().query(`
       SELECT 
         jobs.*, 
-        employers.e_company_name 
+        employers.e_company_name AS employer_name
       FROM jobs
       LEFT JOIN employers ON jobs.employer_id = employers.employer_id
     `);
@@ -50,6 +50,7 @@ exports.getAllJobs = async (req, res) => {
     res.status(500).json({ message: "เกิดข้อผิดพลาดในการดึงข้อมูลงาน" });
   }
 };
+
 
 // ✅ ดึงข้อมูลไฟล์ที่อัปโหลด
 exports.getAllUploads = async (req, res) => {

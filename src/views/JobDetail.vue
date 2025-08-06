@@ -2,7 +2,6 @@
   <div>
     <NavbarHome />
     <div v-if="job" class="container py-5 d-flex flex-column flex-lg-row gap-4" style="max-width: 1140px">
-      
       <!-- ซ้าย: รายละเอียดงาน -->
       <div class="card shadow rounded-4 p-5 border-0 bg-white w-100" style="flex: 2">
         <p class="text-muted small mb-2">
@@ -13,14 +12,10 @@
         <p class="text-muted mb-3">{{ job?.e_company_name || '-' }}</p>
 
         <div class="mb-4">
-          <span class="badge-category">
-  {{ job?.j_type || '-' }}
-</span>
+          <span class="badge-category">{{ job?.j_type || '-' }}</span>
         </div>
 
-        <p class="fw-bold text-dark mb-4">
-          จำนวนที่รับ: {{ job?.j_amount || '-' }} อัตรา
-        </p>
+        <p class="fw-bold text-dark mb-4">จำนวนที่รับ: {{ job?.j_amount || '-' }} อัตรา</p>
 
         <h5 class="fw-bold text-dark mb-2">ลักษณะงาน</h5>
         <div class="mb-4">
@@ -35,11 +30,6 @@
         <h5 class="fw-bold text-dark mb-2">เงินเดือน/ค่าตอบแทน</h5>
         <p class="mb-4 text-dark">{{ formatSalary(job?.j_salary) }} บาท</p>
 
-        <h5 class="fw-bold text-dark mb-2">สวัสดิการ</h5>
-        <div class="mb-4">
-          <div class="text-dark mb-1" v-for="line in splitLines(job?.j_welfare)" :key="line">{{ line }}</div>
-        </div>
-
         <h5 class="fw-bold text-dark mb-2">สิ่งที่ต้องส่ง</h5>
         <p class="mb-4 text-dark">{{ job?.j_deliverable || 'ไม่ระบุ' }}</p>
 
@@ -53,21 +43,11 @@
         <div class="mt-4 d-flex flex-column align-items-center gap-2">
           <div class="w-100 d-flex justify-content-center">
             <button
-              v-if="!isLoggedIn"
               class="btn text-white fw-bold d-inline-flex align-items-center justify-content-center"
               style="background: linear-gradient(135deg,#ff6600,#e55d00); border-radius: 12px; height: 48px; font-size: 16px; padding: 0 24px; box-shadow: 0 2px 10px rgba(255, 102, 0, 0.3); width: 100%;"
-              @click="showLoginPopup = true"
-            >
-              สมัครงาน
-            </button>
-            <button
-              v-else
-              class="btn text-white fw-bold d-inline-flex align-items-center justify-content-center"
-              style="background: linear-gradient(135deg,#ff6600,#e55d00); border-radius: 12px; height: 48px; font-size: 16px; padding: 0 24px; box-shadow: 0 2px 10px rgba(255, 102, 0, 0.3); min-width: 200px; max-width: 220px;"
               @click="applyJob"
             >
-              <i class="bi bi-check2-circle me-2"></i>
-              สมัครงาน
+              <i class="bi bi-check2-circle me-2"></i> สมัครงาน
             </button>
           </div>
           <div class="d-flex justify-content-end w-100 gap-2 text-end">
@@ -126,37 +106,23 @@
             <span v-else>-</span>
           </li>
         </ul>
-      </div>
-    </div>
-
-    <!-- Popups -->
-    <div v-if="showPopup" class="popup-overlay">
-      <div class="popup-content text-center">
-        <p class="mb-4 fw-bold">กรุณาเข้าสู่ระบบ<br />เพื่อบันทึกงานที่สนใจ</p>
-        <div class="d-flex justify-content-center gap-3">
-          <button class="btn btn-outline-secondary px-4" @click="closePopup">ยกเลิก</button>
-          <router-link to="/login" class="btn px-4" style="background-color: #ff6600; color: white;">เข้าสู่ระบบ</router-link>
-        </div>
+        <!-- ✅ ปุ่มดูข้อมูลบริษัท -->
+<div class="text-center mt-4">
+  <router-link
+    :to="`/employer/profile/${job.employer_id}`"
+    class="btn btn-outline-success w-100 rounded-pill"
+  >
+    ดูข้อมูลบริษัท
+  </router-link>
+</div>
       </div>
     </div>
 
     <div v-if="sharePopup" class="popup-overlay">
       <div class="popup-content">
-        <p class="mb-3 fw-bold text-center">
-          📋 คัดลอกลิงก์งานเรียบร้อยแล้ว คุณสามารถนำไปแชร์ต่อได้เลย!
-        </p>
+        <p class="mb-3 fw-bold text-center">📋 คัดลอกลิงก์งานเรียบร้อยแล้ว คุณสามารถนำไปแชร์ต่อได้เลย!</p>
         <div class="d-flex justify-content-end">
           <button class="btn btn-outline-secondary" @click="sharePopup = false">ปิด</button>
-        </div>
-      </div>
-    </div>
-
-    <div v-if="showLoginPopup" class="popup-overlay">
-      <div class="popup-content text-center">
-        <p class="mb-4 fw-bold">กรุณาเข้าสู่ระบบ<br />เพื่อสมัครงาน</p>
-        <div class="d-flex justify-content-center gap-3">
-          <button class="btn btn-outline-secondary px-4" @click="showLoginPopup = false">ยกเลิก</button>
-          <router-link to="/login" class="btn px-4" style="background-color: #ff6600; color: white;">เข้าสู่ระบบ</router-link>
         </div>
       </div>
     </div>
@@ -170,7 +136,7 @@ import NavbarHome from "@/components/NavbarHome.vue";
 
 export default {
   name: "JobDetailPage",
-components: { NavbarHome },
+  components: { NavbarHome },
   data() {
     return {
       job: {},
@@ -180,15 +146,13 @@ components: { NavbarHome },
       selectedImage: null,
       currentImageIndex: 0,
       galleryArray: [],
-      showPopup: false,
       sharePopup: false,
-      showLoginPopup: false,
     };
   },
   computed: {
     isLoggedIn() {
       return !!this.user?.applicant_id;
-    }
+    },
   },
   async mounted() {
     const userData = localStorage.getItem("user");
@@ -219,12 +183,9 @@ components: { NavbarHome },
 
     async checkApplicationStatus() {
       if (!this.user?.applicant_id || !this.job?.job_id) return;
-
       try {
-        const { job_id } = this.job;
-        const { applicant_id } = this.user;
         const res = await axios.get(
-          `http://localhost:3001/api/applications/check-status/${job_id}/${applicant_id}`
+          `http://localhost:3001/api/applications/check-status/${this.job.job_id}/${this.user.applicant_id}`
         );
         this.applicationStatus = res.data.status;
         this.alreadyApplied = res.data.alreadyApplied;
@@ -235,15 +196,26 @@ components: { NavbarHome },
 
     applyJob() {
       if (!this.isLoggedIn) {
-        this.showLoginPopup = true;
+        Swal.fire({
+          icon: "warning",
+          title: "กรุณาเข้าสู่ระบบก่อน",
+          text: "คุณต้องเข้าสู่ระบบเพื่อสมัครงานที่สนใจ",
+          showCancelButton: true,
+          confirmButtonText: "เข้าสู่ระบบ",
+          cancelButtonText: "ยกเลิก",
+        }).then((result) => {
+          if (result.isConfirmed) {
+            this.$router.push("/login");
+          }
+        });
         return;
       }
+
       this.confirmApply();
     },
 
     async confirmApply() {
       if (this.alreadyApplied) return;
-
       const { job_id } = this.job;
       const { applicant_id, portfolio_url } = this.user;
 
@@ -254,7 +226,6 @@ components: { NavbarHome },
         showCancelButton: true,
         confirmButtonText: "ยืนยัน",
         cancelButtonText: "ยกเลิก",
-        reverseButtons: true,
       });
 
       if (!result.isConfirmed) return;
@@ -267,8 +238,6 @@ components: { NavbarHome },
         });
 
         Swal.fire("สมัครงานสำเร็จ!", "ระบบได้บันทึกการสมัครของคุณแล้ว", "success");
-
-        await new Promise((r) => setTimeout(r, 300));
         await this.checkApplicationStatus();
       } catch (err) {
         Swal.fire("เกิดข้อผิดพลาด", err.response?.data?.message || "ไม่สามารถสมัครงานได้", "error");
@@ -277,44 +246,35 @@ components: { NavbarHome },
     },
 
     saveJob() {
-  if (!this.isLoggedIn) {
-    Swal.fire({
-      icon: 'warning',
-      title: 'กรุณาเข้าสู่ระบบก่อน',
-      text: 'คุณต้องเข้าสู่ระบบเพื่อบันทึกงานที่สนใจ',
-      showCancelButton: true,
-      confirmButtonText: 'เข้าสู่ระบบ',
-      cancelButtonText: 'ยกเลิก',
-      confirmButtonColor: '#6a5acd',
-      cancelButtonColor: '#aaa'
-    }).then((result) => {
-      if (result.isConfirmed) {
-        this.$router.push('/login');
+      if (!this.isLoggedIn) {
+        Swal.fire({
+          icon: "warning",
+          title: "กรุณาเข้าสู่ระบบก่อน",
+          text: "คุณต้องเข้าสู่ระบบเพื่อบันทึกงานที่สนใจ",
+          showCancelButton: true,
+          confirmButtonText: "เข้าสู่ระบบ",
+          cancelButtonText: "ยกเลิก",
+        }).then((result) => {
+          if (result.isConfirmed) {
+            this.$router.push("/login");
+          }
+        });
+        return;
       }
-    });
-    return;
-  }
 
-  // ✅ เพิ่ม logic การบันทึกงานจริงตรงนี้หากต้องการ
-  console.log("บันทึกงานสำเร็จแล้ว ✅");
-  Swal.fire({
-    toast: true,
-    position: 'bottom-end',
-    icon: 'success',
-    title: 'บันทึกงานเรียบร้อย',
-    showConfirmButton: false,
-    timer: 1500
-  });
-}
-,
+      Swal.fire({
+        toast: true,
+        position: "bottom-end",
+        icon: "success",
+        title: "บันทึกงานเรียบร้อย",
+        showConfirmButton: false,
+        timer: 1500,
+      });
+    },
 
     shareJob() {
       navigator.clipboard.writeText(window.location.href);
       this.sharePopup = true;
-    },
-
-    closePopup() {
-      this.showPopup = false;
     },
 
     formatDate(dateStr) {
@@ -355,8 +315,6 @@ components: { NavbarHome },
 };
 </script>
 
-
-
 <style scoped>
 .badge-category {
   background-color: #fff5e6;
@@ -365,17 +323,6 @@ components: { NavbarHome },
   border-radius: 999px;
   font-weight: bold;
   padding: 0.25rem 0.75rem;
-}
-.btn-orange {
-  background-color: #ff6600;
-  color: white;
-  border: none;
-  border-radius: 999px;
-  padding: 0.6rem 1.5rem;
-}
-
-.btn-orange:hover {
-  background-color: #e65c00;
 }
 .popup-overlay {
   position: fixed;
@@ -389,7 +336,6 @@ components: { NavbarHome },
   justify-content: center;
   align-items: center;
 }
-
 .popup-content {
   background: white;
   border-radius: 16px;
@@ -398,7 +344,4 @@ components: { NavbarHome },
   max-width: 90%;
   width: 400px;
 }
-
 </style>
-
-

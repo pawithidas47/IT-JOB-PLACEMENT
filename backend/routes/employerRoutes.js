@@ -16,6 +16,32 @@ const storage = multer.diskStorage({
   },
 });
 const upload = multer({ storage });
+const employerController = require('../controllers/employerController');
+
+router.get('/:id/jobs', employerController.getJobsByEmployer);
+// ใน routes/employerRoutes.js
+router.get('/job-preview/:id', async (req, res) => {
+  const jobId = req.params.id;
+
+  try {
+    const [rows] = await db.promise().query(`
+      SELECT jobs.*, employers.* 
+      FROM jobs 
+      JOIN employers ON jobs.employer_id = employers.employer_id 
+      WHERE jobs.job_id = ?
+    `, [jobId]);
+
+    if (rows.length === 0) {
+      return res.status(404).json({ error: 'ไม่พบงานที่ระบุ' });
+    }
+
+    res.json(rows[0]);
+  } catch (err) {
+    console.error('❌ ดึง job-preview ผิดพลาด:', err);
+    res.status(500).json({ error: 'เกิดข้อผิดพลาดในเซิร์ฟเวอร์' });
+  }
+});
+
 
 /* -------------------------------
 ✅ GET ผู้สมัครของ employer

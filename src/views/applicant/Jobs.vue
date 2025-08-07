@@ -4,38 +4,57 @@
   <div class="container-fluid px-4 py-4">
     <div class="main-layout align-items-start">
       <!-- Sidebar Filter -->
-      <aside class="filter-panel shadow-popup text-start bg-white"
+     <aside class="filter-panel shadow-popup text-start bg-white"
         style="padding: 24px; border-radius: 12px; width: 260px; box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);">
         <form class="d-flex flex-column gap-3" @submit.prevent="searchJobs">
           <div>
             <label class="form-label mb-1 fw-semibold text-dark">คำที่ต้องการค้นหา</label>
-            <div class="position-relative">
-              <input v-model="filter.title" @input="searchJobs" type="text" class="form-control ps-4"
-                placeholder="  เช่น งานออกแบบ" style="border-radius: 10px; height: 38px; font-size: 14px;" />
-              <span class="position-absolute top-50 start-0 translate-middle-y ms-2 text-muted">
-                <i class="bi bi-search"></i>
-              </span>
-            </div>
+          <div class="position-relative">
+  <input
+    v-model="filter.keyword"
+    @input="searchJobs"
+    type="text"
+    class="form-control"
+    placeholder="เช่น เขียนโปรแกรม, บริษัท"
+    style="border-radius: 10px; height: 38px; font-size: 14px; padding-left: 2.2rem;" />
+
+  <span class="position-absolute top-50 translate-middle-y text-muted" style="left: 12px;">
+    <i class="bi bi-search"></i>
+  </span>
+</div>
           </div>
 
           <div>
             <label class="form-label mb-1 fw-semibold text-dark">ประเภทงาน</label>
-            <select v-model="filter.type" @change="searchJobs" class="form-select"
+             <select v-model="filter.type" @change="searchJobs" class="form-select"
               style="border-radius: 10px; height: 38px; font-size: 14px;">
               <option value="">ทั้งหมด</option>
-              <option value="ออกแบบและมัลติมีเดีย">ออกแบบและมัลติมีเดีย</option>
-              <option value="การตลาดดิจิทัล">การตลาดดิจิทัล</option>
-              <option value="พัฒนาเว็บไซต์">พัฒนาเว็บไซต์</option>
-              <option value="UX/UI Design">UX/UI Design</option>
-              <option value="IT Support">IT Support</option>
-              <option value="ดูแลระบบเครือข่าย">ดูแลระบบเครือข่าย</option>
-              <option value="เขียนบทความ/แปลบทความเทคโนโลยี">เขียน/แปลบทความเทคโนโลยี</option>
-              <option value="คีย์ข้อมูล / Data Entry">คีย์ข้อมูล / Data Entry</option>
-              <option value="แอดมินเพจ / ดูแลโซเชียลมีเดีย">แอดมินเพจ / โซเชียลมีเดีย</option>
-              <option value="ตัดต่อวิดีโอ / สร้างคอนเทนต์">ตัดต่อวิดีโอ / คอนเทนต์</option>
-              <option value="ที่ปรึกษาด้านเทคโนโลยี">ที่ปรึกษาด้านเทคโนโลยี</option>
+  <option value="ออกแบบกราฟิก / มัลติมีเดีย">ออกแบบกราฟิก / มัลติมีเดีย</option>
+  <option value="UX/UI Design">UX/UI Design</option>
+  <option value="พัฒนาเว็บไซต์">พัฒนาเว็บไซต์</option>
+  <option value="พัฒนาแอปพลิเคชัน">พัฒนาแอปพลิเคชัน</option>
+  <option value="เขียนโปรแกรม / Coding">เขียนโปรแกรม / Coding</option>
+  <option value="คีย์ข้อมูล / Data Entry">คีย์ข้อมูล / Data Entry</option>
+  <option value="เขียน / แปลบทความไอที">เขียน / แปลบทความไอที</option>
+  <option value="การตลาดดิจิทัล / คอนเทนต์">การตลาดดิจิทัล / คอนเทนต์</option>
+  <option value="แอดมินเพจ / โซเชียลมีเดีย">แอดมินเพจ / โซเชียลมีเดีย</option>
+  <option value="ตัดต่อวิดีโอ / สร้างคอนเทนต์">ตัดต่อวิดีโอ / สร้างคอนเทนต์</option>
+  <option value="ช่วยเหลือด้าน IT / Remote Support">ช่วยเหลือด้าน IT / Remote Support</option>
+  <option value="ติวเตอร์ / เทรนเนอร์ด้านเทคโนโลยี">ติวเตอร์ / เทรนเนอร์ด้านเทคโนโลยี</option>
+  <option value="ผู้ช่วยวิจัย / รวบรวมข้อมูล">ผู้ช่วยวิจัย / รวบรวมข้อมูล</option>
             </select>
           </div>
+<!-- ฟิลด์: ทักษะที่ใช้ -->
+<div>
+  <label class="form-label mb-1 fw-semibold text-dark">ทักษะที่ใช้</label>
+  <input
+    v-model="filter.skills"
+    @input="searchJobs"
+    type="text"
+    class="form-control"
+    placeholder="เช่น HTML, Photoshop, Python"
+    style="border-radius: 10px; height: 38px; font-size: 14px;" />
+</div>
 
           <div>
             <label class="form-label mb-1 fw-semibold text-dark">ค่าจ้าง (บาท)</label>
@@ -173,8 +192,9 @@ export default {
       showLoginPopup: false,
       isLoggedIn: localStorage.getItem('authToken') !== null,
       filter: {
-        title: '',
+        keyword: '',
         type: '',
+        skills: '',
         salaryMin: '',
         salaryMax: '',
         employerType: '',
@@ -193,7 +213,7 @@ export default {
   },
   mounted() {
     this.user = JSON.parse(localStorage.getItem("user"));
-    const key = `bookmarkedJobs_${this.user.applicant_id}`;
+    const key = `bookmarkedJobs_${this.user?.applicant_id}`;
     const saved = JSON.parse(localStorage.getItem(key)) || [];
     this.bookmarkedIds = saved.map(j => j.job_id);
 
@@ -208,16 +228,34 @@ export default {
   },
   methods: {
     searchJobs() {
+      const keyword = this.filter.keyword.toLowerCase();
+      const skillKeyword = this.filter.skills?.toLowerCase() || '';
       const salaryMin = this.filter.salaryMin ? parseInt(this.filter.salaryMin) : 0;
       const salaryMax = this.filter.salaryMax ? parseInt(this.filter.salaryMax) : Number.MAX_SAFE_INTEGER;
 
       this.filtered = this.jobs
         .filter((job) => {
-          const titleMatch = job.j_title?.toLowerCase().includes(this.filter.title.toLowerCase());
-          const typeMatch = this.filter.type === '' || job.j_type === this.filter.type;
-          const salaryMatch = job.j_salary >= salaryMin && job.j_salary <= salaryMax;
-          const employerMatch = this.filter.employerType === '' || job.employer_type === this.filter.employerType;
-          return titleMatch && typeMatch && salaryMatch && employerMatch && job.j_status === 'open';
+          const matchesKeyword =
+            job.j_title?.toLowerCase().includes(keyword) ||
+            job.j_description?.toLowerCase().includes(keyword) ||
+            job.j_type?.toLowerCase().includes(keyword) ||
+            job.e_company_name?.toLowerCase().includes(keyword);
+
+          const matchesSkills =
+            skillKeyword === '' || job.j_qualification?.toLowerCase().includes(skillKeyword);
+
+          const matchesType = this.filter.type === '' || job.j_type === this.filter.type;
+          const matchesSalary = job.j_salary >= salaryMin && job.j_salary <= salaryMax;
+          const matchesEmployer = this.filter.employerType === '' || job.employer_type === this.filter.employerType;
+
+          return (
+            matchesKeyword &&
+            matchesSkills &&
+            matchesType &&
+            matchesSalary &&
+            matchesEmployer &&
+            job.j_status === 'open'
+          );
         })
         .sort((a, b) => {
           if (this.filter.sort === 'latest') return new Date(b.j_posted_at) - new Date(a.j_posted_at);
@@ -233,7 +271,7 @@ export default {
       return this.bookmarkedIds.includes(jobId);
     },
     bookmarkJob(job) {
-      const key = `bookmarkedJobs_${this.user.applicant_id}`;
+      const key = `bookmarkedJobs_${this.user?.applicant_id}`;
       let existing = JSON.parse(localStorage.getItem(key)) || [];
       const index = existing.findIndex(j => j.job_id === job.job_id);
 
@@ -267,66 +305,37 @@ export default {
       const shareUrl = `${window.location.origin}/jobs/${job.job_id}`;
       const message = `ดูงานนี้: ${job.j_title}\n${shareUrl}`;
 
-      try {
-        if (navigator.share) {
-          navigator.share({
-            title: job.j_title,
-            text: message,
-            url: shareUrl,
-          }).catch(() => {
-            Swal.fire("ไม่สามารถแชร์ได้", "อุปกรณ์ของคุณไม่รองรับการแชร์", "info");
-          });
-        } else if (navigator.clipboard?.writeText) {
-          navigator.clipboard.writeText(shareUrl)
-            .then(() => {
-              Swal.fire({
-                toast: true,
-                position: 'bottom-end',
-                icon: 'success',
-                title: 'คัดลอกลิงก์งานเรียบร้อยแล้ว',
-                showConfirmButton: false,
-                timer: 1500
-              });
-            })
-            .catch(() => {
-              Swal.fire("เกิดข้อผิดพลาด", "ไม่สามารถคัดลอกลิงก์ได้", "error");
-            });
-        } else {
-          // fallback textarea
-          const textarea = document.createElement("textarea");
-          textarea.value = shareUrl;
-          textarea.setAttribute("readonly", "");
-          textarea.style.position = "absolute";
-          textarea.style.left = "-9999px";
-          document.body.appendChild(textarea);
-          textarea.select();
-          try {
-            const success = document.execCommand("copy");
-            if (success) {
-              Swal.fire({
-                toast: true,
-                position: 'bottom-end',
-                icon: 'success',
-                title: 'คัดลอกลิงก์งานเรียบร้อยแล้ว (fallback)',
-                showConfirmButton: false,
-                timer: 1500
-              });
-            } else {
-              throw new Error("copy command failed");
-            }
-          } catch (err) {
-            Swal.fire("ไม่สามารถแชร์ได้", "เบราว์เซอร์ของคุณไม่รองรับการแชร์หรือคัดลอก", "warning");
+      if (navigator.share) {
+        navigator.share({ title: job.j_title, text: message, url: shareUrl })
+          .catch(() => Swal.fire('ไม่สามารถแชร์ได้', 'อุปกรณ์ของคุณไม่รองรับ', 'info'));
+      } else if (navigator.clipboard?.writeText) {
+        navigator.clipboard.writeText(shareUrl)
+          .then(() => Swal.fire({ toast: true, position: 'bottom-end', icon: 'success', title: 'คัดลอกลิงก์แล้ว', showConfirmButton: false, timer: 1500 }))
+          .catch(() => Swal.fire('เกิดข้อผิดพลาด', 'ไม่สามารถคัดลอกได้', 'error'));
+      } else {
+        const textarea = document.createElement('textarea');
+        textarea.value = shareUrl;
+        textarea.setAttribute('readonly', '');
+        textarea.style.position = 'absolute';
+        textarea.style.left = '-9999px';
+        document.body.appendChild(textarea);
+        textarea.select();
+        try {
+          if (document.execCommand('copy')) {
+            Swal.fire({ toast: true, position: 'bottom-end', icon: 'success', title: 'คัดลอกลิงก์งานเรียบร้อย (fallback)', showConfirmButton: false, timer: 1500 });
+          } else {
+            throw new Error('copy failed');
           }
-          document.body.removeChild(textarea);
+        } catch {
+          Swal.fire('ไม่สามารถแชร์ได้', 'เบราว์เซอร์ของคุณไม่รองรับการแชร์', 'warning');
         }
-      } catch (err) {
-        console.error("❌ shareJob error:", err);
-        Swal.fire("เกิดข้อผิดพลาด", "ไม่สามารถดำเนินการแชร์ได้", "error");
+        document.body.removeChild(textarea);
       }
     }
   }
 };
 </script>
+
 
 
 

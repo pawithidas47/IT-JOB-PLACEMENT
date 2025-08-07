@@ -10,8 +10,7 @@
           <input v-model="searchText" class="form-control" placeholder="ค้นหาตามชื่อ..." />
           <select v-model="selectedStatus" class="form-select custom-select">
             <option value="">ทั้งหมด</option>
-            <option value="pending">รอพิจารณา</option>
-            <option value="accepted">รอการติดต่อ</option>
+            
             <option value="approved">อนุมัติแล้ว</option>
             <option value="rejected">ถูกปฏิเสธ</option>
             <option value="cancelled">ยกเลิกแล้ว</option>
@@ -95,9 +94,9 @@ export default {
   methods: {
     translateStatus(code) {
       return {
-        pending: "รอพิจารณา",
-        accepted: "รอการติดต่อ",
-        approved: "อนุมัติแล้ว",
+        
+        approved: "อนุมัติแล้ว (รอการติดต่อ)",
+
         rejected: "ถูกปฏิเสธ",
         cancelled: "ยกเลิกแล้ว",
       }[code] || code;

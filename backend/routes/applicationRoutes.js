@@ -59,6 +59,7 @@ router.get("/:id", async (req, res) => {
 
 const sql = `
   SELECT 
+  a.job_id,
     a.application_id,
     a.app_date AS applied_at,
     a.app_status AS status,

@@ -3,41 +3,38 @@
     <router-link to="/employer/dashboard" class="brand-title text-decoration-none">
       IT job placement <span class="text-highlight">@Mor-Nor</span>
     </router-link>
+
     <div class="nav-top-right">
-      
-
+      <!-- เรียงลำดับเมนูใหม่ให้เหมาะสม -->
       <router-link to="/employer/dashboard" class="top-link" exact-active-class="active-link">จัดการงาน</router-link>
+      <router-link to="/employer/post-job" class="top-link" exact-active-class="active-link">ลงประกาศงาน</router-link>
       <router-link to="/employer/applicants" class="top-link" exact-active-class="active-link">ผู้สมัครงาน</router-link>
-      <router-link to="/employer/search-applicants" class="top-link" exact-active-class="active-link">
-  ค้นหาผู้หางาน
-</router-link>
-      <!-- เพิ่มปุ่มลงประกาศงาน -->
-      <router-link to="/employer/post-job" class="top-link btn-add-job">ลงประกาศงาน</router-link>
+      <router-link to="/employer/search-applicants" class="top-link" exact-active-class="active-link">ค้นหาผู้หางาน</router-link>
 
+      <!-- Dropdown ผู้ใช้ -->
       <div class="dropdown" @click="toggleDropdown">
         <button class="btn btn-user dropdown-toggle" type="button">
           👤 {{ user?.e_company_name || user?.e_contact || 'ผู้ว่าจ้าง' }}
-
         </button>
         <ul class="dropdown-menu" :class="{ show: showDropdown }">
-  <li>
-    <div class="dropdown-item text-nowrap text-truncate text-muted" title="อีเมลของคุณ">
-      <i class="bi bi-envelope me-2"></i>
-      <span class="email-text">{{ user?.e_email || 'ไม่มีอีเมล' }}</span>
-    </div>
-  </li>
-  <li><hr class="dropdown-divider" /></li>
-  <li>
-    <button class="dropdown-item text-danger" @click="logout">
-      <i class="bi bi-box-arrow-right me-2"></i> ออกจากระบบ
-    </button>
-  </li>
-</ul>
-
+          <li>
+            <div class="dropdown-item text-nowrap text-truncate text-muted" title="อีเมลของคุณ">
+              <i class="bi bi-envelope me-2"></i>
+              <span class="email-text">{{ user?.e_email || 'ไม่มีอีเมล' }}</span>
+            </div>
+          </li>
+          <li><hr class="dropdown-divider" /></li>
+          <li>
+            <button class="dropdown-item text-danger" @click="logout">
+              <i class="bi bi-box-arrow-right me-2"></i> ออกจากระบบ
+            </button>
+          </li>
+        </ul>
       </div>
     </div>
   </div>
 </template>
+
 
 <script>
 export default {

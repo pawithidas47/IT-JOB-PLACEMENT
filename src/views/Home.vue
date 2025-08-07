@@ -55,7 +55,7 @@
     @input="searchJobs"
     type="text"
     class="form-control"
-    placeholder="เช่น HTML, Photoshop, Python"
+    placeholder="เช่น HTML, Photoshop"
     style="border-radius: 10px; height: 38px; font-size: 14px;" />
 </div>
 

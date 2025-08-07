@@ -6,7 +6,9 @@
       style="background-color: #f7f8fa; min-height: calc(100vh - 80px);">
       <div class="card p-5 shadow-lg border-0 rounded-4 w-100" style="max-width: 540px;">
         <div class="text-center mb-4">
+          
           <h4 class="fw-bold mb-0 text-orange">สมัครสมาชิกผู้สมัครงาน</h4>
+        <p class="text-muted small">ลงทะเบียนเพื่อใช้งานระบบ</p>
         </div>
 
         <form @submit.prevent="submitForm" class="needs-validation">

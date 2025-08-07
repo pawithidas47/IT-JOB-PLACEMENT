@@ -27,6 +27,12 @@
           <button type="submit" class="btn btn-orange w-100 fw-bold py-2 rounded-3 fs-6">
             สมัครสมาชิก
           </button>
+           <p class="text-center mt-3 mb-0">
+            เป็นสมาชิกอยู่แล้ว?
+            <router-link to="/login" class="fw-bold text-decoration-none" style="color: #ff6600;">
+              เข้าสู่ระบบ
+            </router-link>
+          </p>
         </form>
       </div>
     </div>

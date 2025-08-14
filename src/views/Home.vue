@@ -1,4 +1,4 @@
-<template>
+<template> 
   <NavbarHome />
   <div class="container-fluid px-4 py-4">
     <div class="main-layout align-items-start">
@@ -8,56 +8,52 @@
         <form class="d-flex flex-column gap-3" @submit.prevent="searchJobs">
           <div>
             <label class="form-label mb-1 fw-semibold text-dark">คำที่ต้องการค้นหา</label>
-          <div class="position-relative">
-  <input
-    v-model="filter.keyword"
-    @input="searchJobs"
-    type="text"
-    class="form-control"
-    placeholder="เช่น เขียนโปรแกรม, บริษัท"
-    style="border-radius: 10px; height: 38px; font-size: 14px; padding-left: 2.2rem;" />
-
-  <span class="position-absolute top-50 translate-middle-y text-muted" style="left: 12px;">
-    <i class="bi bi-search"></i>
-  </span>
-</div>
-
-
-
+            <div class="position-relative">
+              <input
+                v-model="filter.keyword"
+                @input="searchJobs"
+                type="text"
+                class="form-control"
+                placeholder="เช่น เขียนโปรแกรม, บริษัท"
+                style="border-radius: 10px; height: 38px; font-size: 14px; padding-left: 2.2rem;" />
+              <span class="position-absolute top-50 translate-middle-y text-muted" style="left: 12px;">
+                <i class="bi bi-search"></i>
+              </span>
+            </div>
           </div>
 
           <div>
             <label class="form-label mb-1 fw-semibold text-dark">หมวดหมู่งาน</label>
-
             <select v-model="filter.type" @change="searchJobs" class="form-select"
               style="border-radius: 10px; height: 38px; font-size: 14px;">
               <option value="">ทั้งหมด</option>
-  <option value="ออกแบบกราฟิก / มัลติมีเดีย">ออกแบบกราฟิก / มัลติมีเดีย</option>
-  <option value="UX/UI Design">UX/UI Design</option>
-  <option value="พัฒนาเว็บไซต์">พัฒนาเว็บไซต์</option>
-  <option value="พัฒนาแอปพลิเคชัน">พัฒนาแอปพลิเคชัน</option>
-  <option value="เขียนโปรแกรม / Coding">เขียนโปรแกรม / Coding</option>
-  <option value="คีย์ข้อมูล / Data Entry">คีย์ข้อมูล / Data Entry</option>
-  <option value="เขียน / แปลบทความไอที">เขียน / แปลบทความไอที</option>
-  <option value="การตลาดดิจิทัล / คอนเทนต์">การตลาดดิจิทัล / คอนเทนต์</option>
-  <option value="แอดมินเพจ / โซเชียลมีเดีย">แอดมินเพจ / โซเชียลมีเดีย</option>
-  <option value="ตัดต่อวิดีโอ / สร้างคอนเทนต์">ตัดต่อวิดีโอ / สร้างคอนเทนต์</option>
-  <option value="ช่วยเหลือด้าน IT / Remote Support">ช่วยเหลือด้าน IT / Remote Support</option>
-  <option value="ติวเตอร์ / เทรนเนอร์ด้านเทคโนโลยี">ติวเตอร์ / เทรนเนอร์ด้านเทคโนโลยี</option>
-  <option value="ผู้ช่วยวิจัย / รวบรวมข้อมูล">ผู้ช่วยวิจัย / รวบรวมข้อมูล</option>
+              <option value="ออกแบบกราฟิก / มัลติมีเดีย">ออกแบบกราฟิก / มัลติมีเดีย</option>
+              <option value="UX/UI Design">UX/UI Design</option>
+              <option value="พัฒนาเว็บไซต์">พัฒนาเว็บไซต์</option>
+              <option value="พัฒนาแอปพลิเคชัน">พัฒนาแอปพลิเคชัน</option>
+              <option value="เขียนโปรแกรม / Coding">เขียนโปรแกรม / Coding</option>
+              <option value="คีย์ข้อมูล / Data Entry">คีย์ข้อมูล / Data Entry</option>
+              <option value="เขียน / แปลบทความไอที">เขียน / แปลบทความไอที</option>
+              <option value="การตลาดดิจิทัล / คอนเทนต์">การตลาดดิจิทัล / คอนเทนต์</option>
+              <option value="แอดมินเพจ / โซเชียลมีเดีย">แอดมินเพจ / โซเชียลมีเดีย</option>
+              <option value="ตัดต่อวิดีโอ / สร้างคอนเทนต์">ตัดต่อวิดีโอ / สร้างคอนเทนต์</option>
+              <option value="ช่วยเหลือด้าน IT / Remote Support">ช่วยเหลือด้าน IT / Remote Support</option>
+              <option value="ติวเตอร์ / เทรนเนอร์ด้านเทคโนโลยี">ติวเตอร์ / เทรนเนอร์ด้านเทคโนโลยี</option>
+              <option value="ผู้ช่วยวิจัย / รวบรวมข้อมูล">ผู้ช่วยวิจัย / รวบรวมข้อมูล</option>
             </select>
           </div>
-<!-- ฟิลด์: ทักษะที่ใช้ -->
-<div>
-  <label class="form-label mb-1 fw-semibold text-dark">ทักษะที่ใช้</label>
-  <input
-    v-model="filter.skills"
-    @input="searchJobs"
-    type="text"
-    class="form-control"
-    placeholder="เช่น HTML, Photoshop"
-    style="border-radius: 10px; height: 38px; font-size: 14px;" />
-</div>
+
+          <!-- ฟิลด์: ทักษะที่ใช้ -->
+          <div>
+            <label class="form-label mb-1 fw-semibold text-dark">ทักษะที่ใช้</label>
+            <input
+              v-model="filter.skills"
+              @input="searchJobs"
+              type="text"
+              class="form-control"
+              placeholder="เช่น HTML, Photoshop"
+              style="border-radius: 10px; height: 38px; font-size: 14px;" />
+          </div>
 
           <div>
             <label class="form-label mb-1 fw-semibold text-dark">ค่าจ้าง (บาท)</label>
@@ -113,71 +109,73 @@
           </div>
         </form>
       </aside>
+
       <div class="vertical-divider"></div>
 
       <!-- Job Results -->
-  <section class="job-results">
-  <h5 class="mb-2 text-orange">พบ {{ filteredJobs.length }} งาน</h5>
+      <section class="job-results">
+        <h5 class="mb-2 text-orange">พบ {{ filteredJobs.length }} งาน</h5>
 
-  <div class="job-grid">
-    <div
-      class="job-card p-4 bg-white border rounded-3 shadow-sm position-relative"
-      v-for="job in filteredJobs"
-      :key="job.job_id"
-      @click="openJob(job.job_id)"
-      style="cursor:pointer"
-    >
-      <!-- meta มุมขวาบน: วันที่ + bookmark -->
-      <div class="card-meta">
-        <span class="posted-date">
-          {{ new Date(job.j_posted_at).toLocaleDateString('th-TH') }}
-        </span>
-        <button
-          class="icon-btn"
-          :class="{ saved: isBookmarked(job.job_id) }"
-          @click.stop="bookmarkJob(job)"
-          :aria-label="isBookmarked(job.job_id) ? 'ยกเลิกบันทึก' : 'บันทึกงาน'"
-          title="บันทึกงาน"
-        >
-          <i :class="isBookmarked(job.job_id) ? 'bi bi-bookmark-fill' : 'bi bi-bookmark'"></i>
-        </button>
-      </div>
+        <div class="job-grid">
+          <div
+            class="job-card p-4 bg-white border rounded-3 shadow-sm position-relative"
+            v-for="job in filteredJobs"
+            :key="job.job_id"
+            @click="openJob(job.job_id)"
+            style="cursor:pointer"
+          >
+            <!-- ปุ่มบันทึก: มุมขวาบน -->
+            <div class="card-meta">
+              <button
+                class="icon-btn"
+                :class="{ saved: isBookmarked(job.job_id) }"
+                @click.stop="bookmarkJob(job)"
+                :aria-label="isBookmarked(job.job_id) ? 'ยกเลิกบันทึก' : 'บันทึกงาน'"
+                title="บันทึกงาน"
+              >
+                <i :class="isBookmarked(job.job_id) ? 'bi bi-bookmark-fill' : 'bi bi-bookmark'"></i>
+              </button>
+            </div>
 
-      <!-- โลโก้ + บริษัท -->
-      <div class="d-flex align-items-center mb-3">
-        <img
-          :src="job.e_profile_img_url ? `http://localhost:3001${job.e_profile_img_url}` : '/default-profile.jpg'"
-          alt="โลโก้บริษัท"
-          class="rounded-circle shadow-sm me-3"
-          style="width: 42px; height: 42px; object-fit: cover"
-        />
-        <div class="text-truncate">
-          <div class="fw-semibold">{{ job.e_company_name || 'ชื่อบริษัทไม่ระบุ' }}</div>
+            <!-- โลโก้ + บริษัท -->
+            <div class="d-flex align-items-center mb-3">
+              <img
+                :src="job.e_profile_img_url ? `http://localhost:3001${job.e_profile_img_url}` : '/default-profile.jpg'"
+                alt="โลโก้บริษัท"
+                class="rounded-circle shadow-sm me-3"
+                style="width: 42px; height: 42px; object-fit: cover"
+              />
+              <div class="text-truncate">
+                <div class="fw-semibold">{{ job.e_company_name || 'ชื่อบริษัทไม่ระบุ' }}</div>
+              </div>
+            </div>
+
+            <!-- หัวข้อ -->
+            <div class="d-flex align-items-center flex-wrap gap-2 mb-2">
+              <h5 class="fw-bold text-dark mb-0">{{ job.j_title }}</h5>
+              <span v-if="isBookmarked(job.job_id)" class="chip-saved">บันทึกแล้ว</span>
+            </div>
+
+            <!-- หมวดหมู่ -->
+            <div v-if="job.j_type" class="mb-2">
+              <span class="badge-category">{{ job.j_type }}</span>
+            </div>
+
+            <!-- รายละเอียดสั้น -->
+            <p class="mb-1 text-muted">
+              <i class="bi bi-people-fill me-1"></i> รับจำนวน: {{ job.j_amount || '-' }} คน
+            </p>
+            <p class="mb-0 text-muted">
+              <i class="bi bi-cash-coin me-1"></i> ค่าจ้าง: {{ Number(job.j_salary).toLocaleString() }} บาท
+            </p>
+
+            <!-- เวลาที่ผ่านมา -->
+            <div class="ago-badge">
+              {{ timeAgo(job.j_posted_at) }}
+            </div>
+          </div>
         </div>
-      </div>
-
-      <!-- หัวข้อ -->
-      <div class="d-flex align-items-center flex-wrap gap-2 mb-2">
-        <h5 class="fw-bold text-dark mb-0">{{ job.j_title }}</h5>
-        <span v-if="isBookmarked(job.job_id)" class="chip-saved">บันทึกแล้ว</span>
-      </div>
-
-      <!-- หมวดหมู่ -->
-      <div v-if="job.j_type" class="mb-2">
-        <span class="badge-category">{{ job.j_type }}</span>
-      </div>
-
-      <!-- รายละเอียดสั้น -->
-      <p class="mb-1 text-muted">
-        <i class="bi bi-people-fill me-1"></i> รับจำนวน: {{ job.j_amount || '-' }} คน
-      </p>
-      <p class="mb-0 text-muted">
-        <i class="bi bi-cash-coin me-1"></i> ค่าจ้าง: {{ Number(job.j_salary).toLocaleString() }} บาท
-      </p>
-    </div>
-  </div>
-</section>
-
+      </section>
     </div>
   </div>
 </template>
@@ -194,15 +192,14 @@ export default {
     return {
       isLoggedIn: localStorage.getItem('authToken') !== null,
       filter: {
-  keyword: '',
-  type: '',
-  salaryMin: '',
-  salaryMax: '',
-  employerType: '',
-  sort: '',
-  skills: '',
-}
-,
+        keyword: '',
+        type: '',
+        salaryMin: '',
+        salaryMax: '',
+        employerType: '',
+        sort: '',
+        skills: '',
+      },
       jobs: [],
       filtered: [],
       bookmarkedIds: [],
@@ -232,137 +229,177 @@ export default {
       });
   },
   methods: {
-     openJob(id) {
-    const path = this.isLoggedIn ? `/applicant/jobs/${id}` : `/jobs/${id}`;
-    this.$router.push(path);
-  },
+    openJob(id) {
+      const path = this.isLoggedIn ? `/applicant/jobs/${id}` : `/jobs/${id}`;
+      this.$router.push(path);
+    },
     searchJobs() {
-  const keyword = this.filter.keyword.toLowerCase();
-  const skillKeyword = this.filter.skills?.toLowerCase() || '';
-  const salaryMin = this.filter.salaryMin ? parseInt(this.filter.salaryMin) : 0;
-  const salaryMax = this.filter.salaryMax ? parseInt(this.filter.salaryMax) : Number.MAX_SAFE_INTEGER;
+      const keyword = this.filter.keyword.toLowerCase();
+      const skillKeyword = this.filter.skills?.toLowerCase() || '';
+      const salaryMin = this.filter.salaryMin ? parseInt(this.filter.salaryMin) : 0;
+      const salaryMax = this.filter.salaryMax ? parseInt(this.filter.salaryMax) : Number.MAX_SAFE_INTEGER;
 
-  this.filtered = this.jobs.filter((job) => {
-    const matchesKeyword =
-      job.j_title?.toLowerCase().includes(keyword) ||
-      job.j_description?.toLowerCase().includes(keyword) ||
-      job.j_type?.toLowerCase().includes(keyword) ||
-      job.e_company_name?.toLowerCase().includes(keyword);
+      this.filtered = this.jobs.filter((job) => {
+        const matchesKeyword =
+          job.j_title?.toLowerCase().includes(keyword) ||
+          job.j_description?.toLowerCase().includes(keyword) ||
+          job.j_type?.toLowerCase().includes(keyword) ||
+          job.e_company_name?.toLowerCase().includes(keyword);
 
-    const matchesSkills =
-      skillKeyword === '' ||
-      job.j_qualification?.toLowerCase().includes(skillKeyword);
+        const matchesSkills =
+          skillKeyword === '' ||
+          job.j_qualification?.toLowerCase().includes(skillKeyword);
 
-    const matchesType = this.filter.type === '' || job.j_type === this.filter.type;
-    const matchesSalary = job.j_salary >= salaryMin && job.j_salary <= salaryMax;
-    const matchesEmployer = this.filter.employerType === '' || job.employer_type === this.filter.employerType;
+        const matchesType = this.filter.type === '' || job.j_type === this.filter.type;
+        const matchesSalary = job.j_salary >= salaryMin && job.j_salary <= salaryMax;
+        const matchesEmployer = this.filter.employerType === '' || job.employer_type === this.filter.employerType;
 
-    return (
-      matchesKeyword &&
-      matchesSkills &&
-      matchesType &&
-      matchesSalary &&
-      matchesEmployer &&
-      job.j_status === 'open'
-    );
-  });
-}
-
-,
-    getJobDetailLink(id) {
-      return this.isLoggedIn ? `/applicant/jobs/${id}` : `/jobs/${id}`;
+        return (
+          matchesKeyword &&
+          matchesSkills &&
+          matchesType &&
+          matchesSalary &&
+          matchesEmployer &&
+          job.j_status === 'open'
+        );
+      });
     },
     isBookmarked(jobId) {
       return this.bookmarkedIds.includes(jobId);
     },
     bookmarkJob(job) {
-  if (!this.isLoggedIn || !this.user) {
-    Swal.fire({
-      icon: 'warning',
-      title: 'กรุณาเข้าสู่ระบบก่อน',
-      text: 'คุณต้องเข้าสู่ระบบเพื่อบันทึกงาน',
-      showCancelButton: true,
-      confirmButtonText: 'เข้าสู่ระบบ',
-      cancelButtonText: 'ยกเลิก',
-      confirmButtonColor: '#6a5acd',
-      cancelButtonColor: '#aaa'
-    }).then((result) => {
-      if (result.isConfirmed) {
-        this.$router.push('/login');
-      }
-    });
-    return;
-  }
-
-  const key = `bookmarkedJobs_${this.user.applicant_id}`;
-  let existing = JSON.parse(localStorage.getItem(key)) || [];
-  const index = existing.findIndex(j => j.job_id === job.job_id);
-
-  if (index !== -1) {
-    existing.splice(index, 1);
-    this.bookmarkedIds = this.bookmarkedIds.filter(id => id !== job.job_id);
-    Swal.fire({
-      toast: true,
-      position: 'bottom-end',
-      icon: 'info',
-      title: 'ยกเลิกบันทึกงานแล้ว',
-      showConfirmButton: false,
-      timer: 1500
-    });
-  } else {
-    existing.push(job);
-    this.bookmarkedIds.push(job.job_id);
-    Swal.fire({
-      toast: true,
-      position: 'bottom-end',
-      icon: 'success',
-      title: 'บันทึกงานเรียบร้อย',
-      showConfirmButton: false,
-      timer: 1500
-    });
-  }
-
-  localStorage.setItem(key, JSON.stringify(existing));
-}
-,
-    shareJob(job) {
-      const shareUrl = `${window.location.origin}/jobs/${job.job_id}`;
-      const message = `ดูงานนี้: ${job.j_title}\n${shareUrl}`;
-
-      if (navigator.share) {
-        navigator.share({ title: job.j_title, text: message, url: shareUrl })
-          .catch(() => Swal.fire('ไม่สามารถแชร์ได้', 'อุปกรณ์ของคุณไม่รองรับ', 'info'));
-      } else if (navigator.clipboard?.writeText) {
-        navigator.clipboard.writeText(shareUrl)
-          .then(() => Swal.fire({ toast: true, position: 'bottom-end', icon: 'success', title: 'คัดลอกลิงก์แล้ว', showConfirmButton: false, timer: 1500 }))
-          .catch(() => Swal.fire('เกิดข้อผิดพลาด', 'ไม่สามารถคัดลอกได้', 'error'));
-      } else {
-        const textarea = document.createElement('textarea');
-        textarea.value = shareUrl;
-        textarea.setAttribute('readonly', '');
-        textarea.style.position = 'absolute';
-        textarea.style.left = '-9999px';
-        document.body.appendChild(textarea);
-        textarea.select();
-        try {
-          if (document.execCommand('copy')) {
-            Swal.fire({ toast: true, position: 'bottom-end', icon: 'success', title: 'คัดลอกลิงก์งานเรียบร้อย (fallback)', showConfirmButton: false, timer: 1500 });
-          } else {
-            throw new Error('copy failed');
+      if (!this.isLoggedIn || !this.user) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'กรุณาเข้าสู่ระบบก่อน',
+          text: 'คุณต้องเข้าสู่ระบบเพื่อบันทึกงาน',
+          showCancelButton: true,
+          confirmButtonText: 'เข้าสู่ระบบ',
+          cancelButtonText: 'ยกเลิก',
+          confirmButtonColor: '#6a5acd',
+          cancelButtonColor: '#aaa'
+        }).then((result) => {
+          if (result.isConfirmed) {
+            this.$router.push('/login');
           }
-        } catch {
-          Swal.fire('ไม่สามารถแชร์ได้', 'เบราว์เซอร์ของคุณไม่รองรับการแชร์', 'warning');
-        }
-        document.body.removeChild(textarea);
+        });
+        return;
       }
+
+      const key = `bookmarkedJobs_${this.user.applicant_id}`;
+      let existing = JSON.parse(localStorage.getItem(key)) || [];
+      const index = existing.findIndex(j => j.job_id === job.job_id);
+
+      if (index !== -1) {
+        existing.splice(index, 1);
+        this.bookmarkedIds = this.bookmarkedIds.filter(id => id !== job.job_id);
+        Swal.fire({
+          toast: true,
+          position: 'bottom-end',
+          icon: 'info',
+          title: 'ยกเลิกบันทึกงานแล้ว',
+          showConfirmButton: false,
+          timer: 1500
+        });
+      } else {
+        existing.push(job);
+        this.bookmarkedIds.push(job.job_id);
+        Swal.fire({
+          toast: true,
+          position: 'bottom-end',
+          icon: 'success',
+          title: 'บันทึกงานเรียบร้อย',
+          showConfirmButton: false,
+          timer: 1500
+        });
+      }
+
+      localStorage.setItem(key, JSON.stringify(existing));
+    },
+    timeAgo(input) {
+      if (!input) return '';
+      const d = new Date(input);
+      if (isNaN(d)) return '';
+
+      const now = new Date();
+      let diff = Math.floor((now - d) / 1000);
+
+      const units = [
+        { sec: 31536000, name: 'ปี' },
+        { sec: 2592000,  name: 'เดือน' },
+        { sec: 604800,   name: 'สัปดาห์' },
+        { sec: 86400,    name: 'วัน' },
+        { sec: 3600,     name: 'ชั่วโมง' },
+        { sec: 60,       name: 'นาที' },
+        { sec: 1,        name: 'วินาที' },
+      ];
+
+      for (const u of units) {
+        const val = Math.floor(diff / u.sec);
+        if (val >= 1) {
+          return `${val} ${u.name}ที่ผ่านมา`;
+        }
+      }
+      return 'เมื่อสักครู่ที่ผ่านมา';
     }
   }
 };
 </script>
-
-
 <style scoped>
-/* meta มุมขวาบน */
+/* ====== Layout เหมือนรูปเดิม ====== */
+.main-layout {
+  display: flex;
+  gap: 24px;
+  align-items: stretch;
+}
+.filter-panel {
+  width: 280px;
+  background: #fff;
+  border: none;
+  min-height: auto;
+}
+.shadow-popup { box-shadow: 0 0 30px rgba(0,0,0,0.1); }
+.vertical-divider {
+  width: 2px;
+  background-color: #000;
+  opacity: 0.08;
+  align-self: stretch;
+}
+.job-results { flex: 1; }
+
+/* ====== กริดการ์ด (เดสก์ท็อป 3 ใบ) ====== */
+.job-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+
+/* แท็บเล็ต 2 ใบ */
+@media (max-width: 1200px) {
+  .job-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* มือถือ 1 ใบ และซ่อนเส้นแบ่ง */
+@media (max-width: 768px) {
+  .main-layout { flex-direction: column; gap: 16px; }
+  .filter-panel { width: 100%; max-height: 600px; overflow-y: auto; }
+  .vertical-divider { display: none; }
+  .job-grid { grid-template-columns: 1fr; gap: 16px; }
+}
+
+/* ====== Card & Meta ====== */
+.job-card {
+  border-radius: 12px;
+  background: #fff;
+  transition: transform .2s ease, box-shadow .2s ease;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+}
+.job-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(0,0,0,0.08);
+}
+
+/* ปุ่มบันทึก: มุมขวาบน */
 .card-meta {
   position: absolute;
   top: 12px;
@@ -371,13 +408,6 @@ export default {
   align-items: center;
   gap: 10px;
 }
-
-.posted-date {
-  font-size: 12px;
-  color: #767676;
-}
-
-/* ปุ่มไอคอน (Bookmark) */
 .icon-btn {
   width: 36px;
   height: 36px;
@@ -389,27 +419,12 @@ export default {
   justify-content: center;
   transition: all .15s ease;
 }
+.icon-btn i { font-size: 16px; color: #6b7280; }
+.icon-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(0,0,0,.08); }
+.icon-btn.saved { border-color: #ffc107; background: #fff9e6; }
+.icon-btn.saved i { color: #ff9900; }
 
-.icon-btn i {
-  font-size: 16px;
-  color: #6b7280; /* เทา */
-}
-
-.icon-btn:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 16px rgba(0,0,0,.08);
-}
-
-/* สถานะเมื่อบันทึกแล้ว */
-.icon-btn.saved {
-  border-color: #ffc107;
-  background: #fff9e6;
-}
-.icon-btn.saved i {
-  color: #ff9900;
-}
-
-/* ชิป "บันทึกแล้ว" */
+/* ป้าย “บันทึกแล้ว” */
 .chip-saved {
   font-size: 12px;
   padding: 2px 8px;
@@ -419,7 +434,7 @@ export default {
   background: #fff9e6;
 }
 
-/* เดิมของคุณ (ยังใช้ได้เหมือนเดิม) */
+/* ป้ายหมวดหมู่ */
 .badge-category {
   background-color: #fff5e6;
   color: #ff6600;
@@ -430,128 +445,26 @@ export default {
   font-size: 14px;
 }
 
-.job-card { transition: transform .2s ease, box-shadow .2s ease; }
-.job-card:hover { transform: translateY(-4px); box-shadow: 0 6px 24px rgba(255, 102, 0, 0.18); }
-
-.job-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 6px 24px rgba(255, 102, 0, 0.2);
-}
-
-.badge-category {
-  background-color: #fff5e6;
-  color: #ff6600;
-  border: 1px solid #ff6600;
+/* ป้ายเวลา “…ที่ผ่านมา” ล่างขวา */
+.ago-badge {
+  position: absolute;
+  right: 12px;
+  bottom: 10px;
+  font-size: 12px;
+  color: #6b7280;
+  background: #f3f4f6;
+  padding: 4px 10px;
   border-radius: 999px;
-  font-weight: 500;
-  padding: 0.15rem 0.6rem;
-  font-size: 15px;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.6);
 }
 
-
-.custom-select {
-  border-radius: 999px;
-  padding: 0.45rem 1.25rem;
-  font-size: 0.95rem;
-  border: 1px solid #ddd;
-  background-color: #fff;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-  min-width: 160px;
-  max-width: 220px;
-  appearance: none;
-  -webkit-appearance: none;
-  -moz-appearance: none;
-
-  /* ลูกศร */
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23666' class='bi bi-chevron-down' viewBox='0 0 16 16'%3E%3Cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 1rem center;
-  background-size: 1rem;
-  padding-right: 2rem;
-}
-
-.custom-select:focus {
-  outline: none;
-  border-color: #ff6600;
-  box-shadow: 0 0 0 0.15rem rgba(255, 102, 0, 0.25);
-}
-
-
-.text-orange {
-  color: #ff6600;
-}
-
-.hover-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 6px 20px rgba(255, 102, 0, 0.2);
-  transition: 0.3s ease;
-}
-
-.main-layout {
-  display: flex;
-  gap: 2rem;
-  align-items: stretch;
-}
-
-.filter-panel {
-  width: 320px;
-  background: white;
-  border: none;
-  min-height: auto;
-}
-
-.shadow-popup {
-  box-shadow: 0 0 30px rgba(0, 0, 0, 0.1);
-}
-
-.vertical-divider {
-  width: 2px;
-  background-color: #000;
-  opacity: 0.1;
-  height: auto;
-  align-self: stretch;
-}
-
-.job-results {
-  flex: 1;
-}
-
-.job-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 20px;
-}
-
-.job-card {
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.job-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 6px 24px rgba(255, 102, 0, 0.2);
-}
-
+/* ช่องกรอง: โทนใกล้รูป */
 select,
 input.form-control {
   background-color: #fcfcfc;
   border-color: #ddd;
 }
 
-
-
-@media (max-width: 768px) {
-  .main-layout {
-    flex-direction: column;
-  }
-
-  .filter-panel {
-    width: 100%;
-    max-height: 600px;
-    overflow-y: auto;
-  }
-
-  .vertical-divider {
-    display: none;
-  }
-}
+/* สีส้มแบรนด์ */
+.text-orange { color: #ff6600; }
 </style>

@@ -3,14 +3,14 @@ const router = express.Router();
 const db = require("../models/db");
 const multer = require("multer");
 
-//  ตั้งค่าการอัปโหลดไฟล์ภาพ
+/* ---------- Upload ตั้งค่า ---------- */
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, "uploads/"),
   filename: (req, file, cb) => cb(null, Date.now() + "-" + file.originalname),
 });
 const upload = multer({ storage });
 
-/**  ดึงผู้สมัครทั้งหมด */
+/* ---------- ดึงผู้สมัครทั้งหมด ---------- */
 router.get("/", async (req, res) => {
   try {
     const [rows] = await db.promise().query("SELECT * FROM applicants");
@@ -21,7 +21,7 @@ router.get("/", async (req, res) => {
   }
 });
 
-/**  ดึงข้อมูลโปรไฟล์ผู้สมัคร */
+/* ---------- ดึงข้อมูลโปรไฟล์ผู้สมัคร ---------- */
 router.get("/:id", async (req, res) => {
   const { id } = req.params;
   try {
@@ -51,7 +51,7 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-/** ✅ อัปโหลดรูปภาพ */
+/* ---------- อัปโหลดรูปโปรไฟล์ ---------- */
 router.post("/:id/upload", upload.single("image"), async (req, res) => {
   const { id } = req.params;
   const imageUrl = `/uploads/${req.file.filename}`;
@@ -67,15 +67,12 @@ router.post("/:id/upload", upload.single("image"), async (req, res) => {
   }
 });
 
-/** ✅ อัปเดต Bio */
+/* ---------- อัปเดต Bio ---------- */
 router.put("/:id/bio", async (req, res) => {
   const { id } = req.params;
   const { a_bio } = req.body;
   try {
-    await db.promise().query(
-      "UPDATE applicants SET a_bio = ? WHERE applicant_id = ?",
-      [a_bio, id]
-    );
+    await db.promise().query("UPDATE applicants SET a_bio = ? WHERE applicant_id = ?", [a_bio, id]);
     res.json({ message: "อัปเดต Bio สำเร็จ" });
   } catch (err) {
     console.error("❌ Update bio failed:", err);
@@ -83,7 +80,7 @@ router.put("/:id/bio", async (req, res) => {
   }
 });
 
-/** ✅ อัปเดตข้อมูลผู้สมัคร */
+/* ---------- อัปเดตข้อมูลผู้สมัคร (แปลง 'ตามตกลง' -> NULL) ---------- */
 router.put("/:id", async (req, res) => {
   const { id } = req.params;
   const {
@@ -96,6 +93,13 @@ router.put("/:id", async (req, res) => {
 
   const formattedBirthdate = a_birthdate ? a_birthdate.split("T")[0] : null;
 
+  // ✅ Normalize salary
+  let salaryRaw = (a_salary ?? "").toString().trim();
+  let salaryForDb = null;
+  if (salaryRaw !== "" && !isNaN(Number(salaryRaw))) {
+    salaryForDb = Number(salaryRaw);
+  }
+
   try {
     await db.promise().query(
       `UPDATE applicants SET 
@@ -107,12 +111,13 @@ router.put("/:id", async (req, res) => {
       [
         a_firstname, a_lastname, a_faculty, a_gender,
         formattedBirthdate, a_contact, a_phone, a_email,
-        a_position, a_salary, a_computer_stars, a_interest,
+        a_position, salaryForDb, a_computer_stars, a_interest,
         a_nationality, a_studentid, a_bio,
         id
       ]
     );
 
+    // portfolios
     await db.promise().query("DELETE FROM portfolios WHERE applicant_id = ?", [id]);
     for (const url of portfolios) {
       await db.promise().query(
@@ -120,6 +125,7 @@ router.put("/:id", async (req, res) => {
       );
     }
 
+    // education
     await db.promise().query("DELETE FROM educations WHERE applicant_id = ?", [id]);
     for (const edu of education) {
       await db.promise().query(
@@ -129,6 +135,7 @@ router.put("/:id", async (req, res) => {
       );
     }
 
+    // experience
     await db.promise().query("DELETE FROM experiences WHERE applicant_id = ?", [id]);
     for (const exp of experience) {
       await db.promise().query(
@@ -145,7 +152,7 @@ router.put("/:id", async (req, res) => {
   }
 });
 
-/** ✅ อัปเดต Skills */
+/* ---------- อัปเดต Skills ---------- */
 router.put("/:id/skills", async (req, res) => {
   const { id } = req.params;
   const { skills } = req.body;
@@ -184,27 +191,7 @@ router.put("/:id/skills", async (req, res) => {
   }
 });
 
-/** ✅ เพิ่ม Portfolio ใหม่แยก */
-router.post("/:id/portfolio", async (req, res) => {
-  const { id } = req.params;
-  const { portfolio_url } = req.body;
-
-  if (!portfolio_url) {
-    return res.status(400).json({ message: "ต้องระบุ portfolio_url" });
-  }
-
-  try {
-    await db.promise().query(
-      "INSERT INTO portfolios (applicant_id, portfolio_url) VALUES (?, ?)", [id, portfolio_url]
-    );
-    res.json({ message: "เพิ่ม portfolio สำเร็จ" });
-  } catch (err) {
-    console.error("❌ เพิ่ม portfolio ล้มเหลว:", err);
-    res.status(500).json({ message: "เกิดข้อผิดพลาด", error: err });
-  }
-});
-
-/** ✅ ลบ portfolio ทั้งหมด */
+/* ---------- ลบ portfolio ทั้งหมด ---------- */
 router.delete("/:id/portfolio/all", async (req, res) => {
   const { id } = req.params;
   try {

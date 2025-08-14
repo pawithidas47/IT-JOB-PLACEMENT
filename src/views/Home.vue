@@ -116,54 +116,68 @@
       <div class="vertical-divider"></div>
 
       <!-- Job Results -->
-      <section class="job-results">
-        <h5 class="mb-2 text-orange">พบ {{ filteredJobs.length }} งาน</h5>
-        <div class="job-grid">
-          <div class="job-card p-4 bg-white border rounded-3 shadow-sm position-relative"
-               v-for="job in filteredJobs" :key="job.job_id">
-            <span class="position-absolute top-0 end-0 mt-2 me-2 text-muted small">
-              {{ new Date(job.j_posted_at).toLocaleDateString('th-TH') }}
-            </span>
-            <div class="d-flex align-items-center mb-3">
-              <img :src="job.e_profile_img_url ? `http://localhost:3001${job.e_profile_img_url}` : '/default-profile.jpg'"
-                   alt="โลโก้บริษัท" class="rounded-circle shadow-sm me-3"
-                   style="width: 42px; height: 42px; object-fit: cover" />
-              <div>
-                <div class="fw-semibold">{{ job.e_company_name || 'ชื่อบริษัทไม่ระบุ' }}</div>
-              </div>
-            </div>
-            <h5 class="fw-bold text-orange mb-2">{{ job.j_title }}</h5>
-            <div v-if="job.j_type" class="mb-2">
-              <span class="badge-category">
-  {{ job?.j_type || '-' }}
-</span>
-            </div>
-            <p class="mb-1 text-muted">
-              <i class="bi bi-people-fill me-1"></i>
-              รับจำนวน: {{ job.j_amount || '-' }} คน
-            </p>
-            <p class="mb-1 text-muted">
-              <i class="bi bi-cash-coin me-1"></i>
-              ค่าจ้าง: {{ Number(job.j_salary).toLocaleString() }} บาท
-            </p>
-            <div class="d-flex justify-content-between mt-3">
-              <router-link :to="getJobDetailLink(job.job_id)" class="btn btn-sm btn-outline-primary rounded-pill px-3">
-                ดูรายละเอียด
-              </router-link>
-              <div>
-                <button class="btn btn-sm rounded-pill me-1"
-                        :class="isBookmarked(job.job_id) ? 'btn-warning' : 'btn-outline-secondary'"
-                        @click="bookmarkJob(job)">
-                  <i :class="isBookmarked(job.job_id) ? 'bi bi-bookmark-fill' : 'bi bi-bookmark'"></i>
-                </button>
-                <button class="btn btn-sm btn-outline-secondary rounded-pill" @click="shareJob(job)">
-                  <i class="bi bi-share"></i>
-                </button>
-              </div>
-            </div>
-          </div>
+  <section class="job-results">
+  <h5 class="mb-2 text-orange">พบ {{ filteredJobs.length }} งาน</h5>
+
+  <div class="job-grid">
+    <div
+      class="job-card p-4 bg-white border rounded-3 shadow-sm position-relative"
+      v-for="job in filteredJobs"
+      :key="job.job_id"
+      @click="openJob(job.job_id)"
+      style="cursor:pointer"
+    >
+      <!-- meta มุมขวาบน: วันที่ + bookmark -->
+      <div class="card-meta">
+        <span class="posted-date">
+          {{ new Date(job.j_posted_at).toLocaleDateString('th-TH') }}
+        </span>
+        <button
+          class="icon-btn"
+          :class="{ saved: isBookmarked(job.job_id) }"
+          @click.stop="bookmarkJob(job)"
+          :aria-label="isBookmarked(job.job_id) ? 'ยกเลิกบันทึก' : 'บันทึกงาน'"
+          title="บันทึกงาน"
+        >
+          <i :class="isBookmarked(job.job_id) ? 'bi bi-bookmark-fill' : 'bi bi-bookmark'"></i>
+        </button>
+      </div>
+
+      <!-- โลโก้ + บริษัท -->
+      <div class="d-flex align-items-center mb-3">
+        <img
+          :src="job.e_profile_img_url ? `http://localhost:3001${job.e_profile_img_url}` : '/default-profile.jpg'"
+          alt="โลโก้บริษัท"
+          class="rounded-circle shadow-sm me-3"
+          style="width: 42px; height: 42px; object-fit: cover"
+        />
+        <div class="text-truncate">
+          <div class="fw-semibold">{{ job.e_company_name || 'ชื่อบริษัทไม่ระบุ' }}</div>
         </div>
-      </section>
+      </div>
+
+      <!-- หัวข้อ -->
+      <div class="d-flex align-items-center flex-wrap gap-2 mb-2">
+        <h5 class="fw-bold text-dark mb-0">{{ job.j_title }}</h5>
+        <span v-if="isBookmarked(job.job_id)" class="chip-saved">บันทึกแล้ว</span>
+      </div>
+
+      <!-- หมวดหมู่ -->
+      <div v-if="job.j_type" class="mb-2">
+        <span class="badge-category">{{ job.j_type }}</span>
+      </div>
+
+      <!-- รายละเอียดสั้น -->
+      <p class="mb-1 text-muted">
+        <i class="bi bi-people-fill me-1"></i> รับจำนวน: {{ job.j_amount || '-' }} คน
+      </p>
+      <p class="mb-0 text-muted">
+        <i class="bi bi-cash-coin me-1"></i> ค่าจ้าง: {{ Number(job.j_salary).toLocaleString() }} บาท
+      </p>
+    </div>
+  </div>
+</section>
+
     </div>
   </div>
 </template>
@@ -218,6 +232,10 @@ export default {
       });
   },
   methods: {
+     openJob(id) {
+    const path = this.isLoggedIn ? `/applicant/jobs/${id}` : `/jobs/${id}`;
+    this.$router.push(path);
+  },
     searchJobs() {
   const keyword = this.filter.keyword.toLowerCase();
   const skillKeyword = this.filter.skills?.toLowerCase() || '';
@@ -344,6 +362,82 @@ export default {
 
 
 <style scoped>
+/* meta มุมขวาบน */
+.card-meta {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.posted-date {
+  font-size: 12px;
+  color: #767676;
+}
+
+/* ปุ่มไอคอน (Bookmark) */
+.icon-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  border: 1px solid #e5e5e5;
+  background: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all .15s ease;
+}
+
+.icon-btn i {
+  font-size: 16px;
+  color: #6b7280; /* เทา */
+}
+
+.icon-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(0,0,0,.08);
+}
+
+/* สถานะเมื่อบันทึกแล้ว */
+.icon-btn.saved {
+  border-color: #ffc107;
+  background: #fff9e6;
+}
+.icon-btn.saved i {
+  color: #ff9900;
+}
+
+/* ชิป "บันทึกแล้ว" */
+.chip-saved {
+  font-size: 12px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid #ffc107;
+  color: #b26b00;
+  background: #fff9e6;
+}
+
+/* เดิมของคุณ (ยังใช้ได้เหมือนเดิม) */
+.badge-category {
+  background-color: #fff5e6;
+  color: #ff6600;
+  border: 1px solid #ff6600;
+  border-radius: 999px;
+  font-weight: 500;
+  padding: 0.15rem 0.6rem;
+  font-size: 14px;
+}
+
+.job-card { transition: transform .2s ease, box-shadow .2s ease; }
+.job-card:hover { transform: translateY(-4px); box-shadow: 0 6px 24px rgba(255, 102, 0, 0.18); }
+
+.job-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 24px rgba(255, 102, 0, 0.2);
+}
+
 .badge-category {
   background-color: #fff5e6;
   color: #ff6600;

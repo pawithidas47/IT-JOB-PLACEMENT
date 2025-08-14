@@ -50,14 +50,6 @@
               <i class="bi bi-check2-circle me-2"></i> สมัครงาน
             </button>
           </div>
-          <div class="d-flex justify-content-end w-100 gap-2 text-end">
-            <button class="btn btn-outline-secondary rounded-pill px-3" @click="saveJob">
-              <i class="bi bi-bookmark me-1"></i> บันทึกงาน
-            </button>
-            <button class="btn btn-outline-secondary rounded-pill px-3" @click="shareJob">
-              <i class="bi bi-share me-1"></i> แชร์
-            </button>
-          </div>
         </div>
       </div>
 

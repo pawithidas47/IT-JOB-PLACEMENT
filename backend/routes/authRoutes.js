@@ -16,7 +16,7 @@ router.post("/register/applicant", async (req, res) => {
       return res.status(400).json({ message: "อีเมลนี้มีอยู่แล้ว" });
     }
 
-    // ✅ บันทึกข้อมูลสมัครสมาชิก (ไม่มี a_username แล้ว)
+    // ✅ บันทึกข้อมูลสมัครสมาชิก
     const [result] = await db.promise().query(
       `INSERT INTO applicants (
         a_password, a_firstname, a_lastname,
@@ -49,7 +49,6 @@ router.post("/register/applicant", async (req, res) => {
     res.status(500).json({ message: "เกิดข้อผิดพลาด", error: err });
   }
 });
-
 
 // ✅ สมัครสมาชิกผู้ว่าจ้าง
 router.post("/register/employer", async (req, res) => {
@@ -85,15 +84,29 @@ router.post("/register/employer", async (req, res) => {
 
 // ✅ Login สำหรับผู้สมัครงาน
 router.post("/login", async (req, res) => {
-  const { email, password } = req.body;
+  // รองรับทั้ง email/password และ a_email/a_password
+  const email = (req.body.email || req.body.a_email || "").trim().toLowerCase();
+  const password = (req.body.password || req.body.a_password || "");
+
+  if (!email || !password) {
+    return res.status(400).json({ message: "กรอกอีเมลและรหัสผ่าน" });
+  }
+
   try {
     const [users] = await db.promise().query(
-      "SELECT * FROM applicants WHERE a_email = ? AND a_password = ?",
+      `SELECT applicant_id, a_firstname, a_lastname, a_email, a_phone, a_status, a_password
+       FROM applicants
+       WHERE TRIM(LOWER(a_email)) = ? AND a_password = ?
+       LIMIT 1`,
       [email, password]
     );
-    if (users.length === 0) return res.status(401).json({ message: "อีเมลหรือรหัสผ่านไม่ถูกต้อง" });
 
-    res.status(200).json({ message: "เข้าสู่ระบบสำเร็จ", user: users[0] });
+    if (users.length === 0) {
+      return res.status(401).json({ message: "อีเมลหรือรหัสผ่านไม่ถูกต้อง" });
+    }
+
+    const { a_password, ...safeUser } = users[0]; // ไม่ส่งรหัสกลับ
+    res.status(200).json({ message: "เข้าสู่ระบบสำเร็จ", user: safeUser });
   } catch (err) {
     console.error("❌ LOGIN APPLICANT ERROR:", err);
     res.status(500).json({ message: "เกิดข้อผิดพลาด", error: err });
@@ -102,15 +115,28 @@ router.post("/login", async (req, res) => {
 
 // ✅ Login สำหรับผู้ว่าจ้าง
 router.post("/employer/login", async (req, res) => {
-  const { email, password } = req.body;
+  const email = (req.body.email || req.body.e_email || "").trim().toLowerCase();
+  const password = (req.body.password || req.body.e_password || "");
+
+  if (!email || !password) {
+    return res.status(400).json({ message: "กรอกอีเมลและรหัสผ่าน" });
+  }
+
   try {
     const [users] = await db.promise().query(
-      "SELECT * FROM employers WHERE e_email = ? AND e_password = ?",
+      `SELECT employer_id, e_email, e_company_name, e_status, e_password
+       FROM employers
+       WHERE TRIM(LOWER(e_email)) = ? AND e_password = ?
+       LIMIT 1`,
       [email, password]
     );
-    if (users.length === 0) return res.status(401).json({ message: "อีเมลหรือรหัสผ่านไม่ถูกต้อง" });
 
-    res.status(200).json({ message: "เข้าสู่ระบบสำเร็จ", user: users[0] });
+    if (users.length === 0) {
+      return res.status(401).json({ message: "อีเมลหรือรหัสผ่านไม่ถูกต้อง" });
+    }
+
+    const { e_password, ...safeUser } = users[0];
+    res.status(200).json({ message: "เข้าสู่ระบบสำเร็จ", user: safeUser });
   } catch (err) {
     console.error("❌ LOGIN EMPLOYER ERROR:", err);
     res.status(500).json({ message: "เกิดข้อผิดพลาด", error: err });

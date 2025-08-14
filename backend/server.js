@@ -1,3 +1,4 @@
+// server.js
 const express = require("express");
 const cors = require("cors");
 const bodyParser = require("body-parser");
@@ -6,7 +7,7 @@ const path = require("path");
 require("dotenv").config();
 
 const db = require("./models/db");
-const connection = db.promise(); // ✅ เพิ่มบรรทัดนี้
+const connection = db.promise();
 
 const authRoutes = require("./routes/authRoutes");
 const jobRoutes = require("./routes/jobRoutes");
@@ -14,29 +15,30 @@ const applicationRoutes = require("./routes/applicationRoutes");
 const applicantRoutes = require("./routes/applicantRoutes");
 const employerRoutes = require("./routes/employerRoutes");
 const adminRoutes = require("./routes/adminRoutes");
+
 const app = express();
+
+/* ---------- MIDDLEWARE: ต้องมาก่อนทุก route ---------- */
 app.use(cors({
-  origin: "http://localhost:8080", // หรือใช้ "*" ชั่วคราวถ้าทดสอบหลายเครื่อง
+  origin: [
+    "http://localhost:8080",
+    "http://10.58.8.62:8080"      // ✅ ใส่ IP เครื่องที่เปิดเว็บ
+  ],
   credentials: true
 }));
-app.use('/api/employers', employerRoutes);
-
-
-// ✅ Middleware
-app.use(cors());
+// ❌ อย่าใส่ app.use(cors()) ซ้ำอีก
 app.use(bodyParser.json());
-app.use("/uploads", express.static("uploads")); // ให้ frontend เรียกดูรูปได้ผ่าน URL
+app.use("/uploads", express.static("uploads"));
 
-// ✅ Routes
+/* ---------- ROUTES ---------- */
 app.use("/api/auth", authRoutes);
 app.use("/api/jobs", jobRoutes);
-//app.use("/api/applications", applicationRoutes);
 app.use("/api/applicants", applicantRoutes);
 app.use("/api/employers", employerRoutes);
-app.use("/api/applications", require("./routes/applicationRoutes"));
+app.use("/api/applications", applicationRoutes);
 app.use("/api/admin", adminRoutes);
 
-// ✅ DELETE กรณีจำเป็น (ลบการสมัคร)
+/* ---------- ตัวอย่าง DELETE application ---------- */
 app.delete("/api/applications/:id", (req, res) => {
   const applicationId = req.params.id;
   const sql = "DELETE FROM applications WHERE application_id = ?";
@@ -52,26 +54,21 @@ app.delete("/api/applications/:id", (req, res) => {
   });
 });
 
-// ✅ ตั้งค่าการอัปโหลดรูปโปรไฟล์ (ใช้ multer)
+/* ---------- UPLOAD (multer) ---------- */
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, "uploads/"); // โฟลเดอร์เป้าหมาย
-  },
+  destination: (req, file, cb) => cb(null, "uploads/"),
   filename: (req, file, cb) => {
     const ext = path.extname(file.originalname);
-    const uniqueName = Date.now() + "-" + Math.round(Math.random() * 1e9) + ext;
-    cb(null, uniqueName);
-  },
+    cb(null, `${Date.now()}-${Math.round(Math.random()*1e9)}${ext}`);
+  }
 });
 const upload = multer({ storage });
 
-// ✅ POST: อัปโหลดรูปโปรไฟล์ผู้สมัคร
 app.post("/api/upload-profile/:applicant_id", upload.single("profile"), async (req, res) => {
-  const applicantId = req.params.applicant_id;
-  const profilePath = "/uploads/" + req.file.filename;
-
   try {
-    await db.promise().query(
+    const applicantId = req.params.applicant_id;
+    const profilePath = "/uploads/" + req.file.filename;
+    await connection.query(
       "UPDATE applicants SET profile_img_url = ? WHERE applicant_id = ?",
       [profilePath, applicantId]
     );
@@ -81,13 +78,12 @@ app.post("/api/upload-profile/:applicant_id", upload.single("profile"), async (r
     res.status(500).json({ error: "เกิดข้อผิดพลาดในการอัปโหลด" });
   }
 });
-// ✅ POST: อัปโหลดรูปโปรไฟล์ของผู้ว่าจ้าง
-app.post("/api/upload-profile-employer/:employer_id", upload.single("profile"), async (req, res) => {
-  const employerId = req.params.employer_id;
-  const profilePath = "/uploads/" + req.file.filename;
 
+app.post("/api/upload-profile-employer/:employer_id", upload.single("profile"), async (req, res) => {
   try {
-    await db.promise().query(
+    const employerId = req.params.employer_id;
+    const profilePath = "/uploads/" + req.file.filename;
+    await connection.query(
       "UPDATE employers SET profile_img_url = ? WHERE employer_id = ?",
       [profilePath, employerId]
     );
@@ -97,83 +93,46 @@ app.post("/api/upload-profile-employer/:employer_id", upload.single("profile"), 
     res.status(500).json({ error: "เกิดข้อผิดพลาดในการอัปโหลด" });
   }
 });
-app.get('/api/applicants/employer/:employerId', async (req, res) => {
-  const employerId = req.params.employerId;
-  // ตรวจสอบว่า employerId ถูกต้อง และดึงข้อมูลจากฐานข้อมูล
-  const applicants = await getApplicantsForEmployer(employerId);
-  if (!applicants) {
-    return res.status(404).json({ error: "ไม่พบข้อมูลผู้สมัครงาน" });
-  }
-  res.json(applicants);
-});
-app.put('/api/employers/:id', async (req, res) => {
-  const employerId = req.params.id;
 
+/* ---------- ตัวอย่าง endpoints ฝั่งนายจ้าง ---------- */
+app.put("/api/employers/:id", async (req, res) => {
+  const employerId = req.params.id;
   const {
-    e_company_name,
-    e_phone,
-    e_contact,
-    e_position,
-    e_website,
-    e_description,
-    e_type,
-    e_address,
-    e_map_iframe
+    e_company_name, e_phone, e_contact, e_position,
+    e_website, e_description, e_type, e_address, e_map_iframe
   } = req.body;
 
   const sql = `
     UPDATE employers SET 
-      e_company_name = ?, 
-      e_phone = ?, 
-      e_contact = ?, 
-      e_position = ?, 
-      e_website = ?, 
-      e_description = ?, 
-      e_type = ?, 
-      e_address = ?, 
-      e_map_iframe = ? 
-    WHERE employer_id = ?
-  `;
+      e_company_name=?, e_phone=?, e_contact=?, e_position=?,
+      e_website=?, e_description=?, e_type=?, e_address=?, e_map_iframe=?
+    WHERE employer_id=?`;
 
   try {
     await connection.execute(sql, [
-      e_company_name,
-      e_phone,
-      e_contact,
-      e_position,
-      e_website,
-      e_description,
-      e_type,
-      e_address,
-      e_map_iframe,
-      employerId
+      e_company_name, e_phone, e_contact, e_position,
+      e_website, e_description, e_type, e_address, e_map_iframe, employerId
     ]);
-
     res.sendStatus(200);
   } catch (err) {
     console.error("❌ Error updating employer:", err);
     res.status(500).send("เกิดข้อผิดพลาดในการอัปเดตข้อมูล");
   }
 });
-app.get('/api/employer/:employer_id/applicants', async (req, res) => {
-  const employer_id = req.params.employer_id;
 
+app.get("/api/employer/:employer_id/applicants", async (req, res) => {
+  const employer_id = req.params.employer_id;
   try {
     const [result] = await connection.execute(`
       SELECT 
         applications.*,
-        applicants.a_firstname,
-        applicants.a_lastname,
-        applicants.a_email,
-        applicants.a_phone,
-        applicants.profile_img_url,
+        applicants.a_firstname, applicants.a_lastname,
+        applicants.a_email, applicants.a_phone, applicants.profile_img_url,
         jobs.j_title
       FROM applications
       INNER JOIN applicants ON applications.applicant_id = applicants.applicant_id
       INNER JOIN jobs ON applications.job_id = jobs.job_id
-      WHERE jobs.employer_id = ?
-    `, [employer_id]);
-
+      WHERE jobs.employer_id = ?`, [employer_id]);
     res.json(result);
   } catch (err) {
     console.error("❌ ดึงข้อมูลผู้สมัครล้มเหลว:", err);
@@ -181,25 +140,17 @@ app.get('/api/employer/:employer_id/applicants', async (req, res) => {
   }
 });
 
-// PUT: อัปเดตสถานะการสมัคร เช่น อนุมัติ/รอตรวจ/ปฏิเสธ
-app.put('/api/employer/applications/:id/status', async (req, res) => {
+app.put("/api/employer/applications/:id/status", async (req, res) => {
   const applicationId = req.params.id;
   const { app_status } = req.body;
-
-  if (!app_status || !applicationId) {
-    return res.status(400).json({ message: "Missing required data" });
-  }
+  if (!app_status) return res.status(400).json({ message: "Missing required data" });
 
   try {
     const [result] = await connection.execute(
-      "UPDATE applications SET app_status = ? WHERE application_id = ?",
+      "UPDATE applications SET app_status=? WHERE application_id=?",
       [app_status, applicationId]
     );
-
-    if (result.affectedRows === 0) {
-      return res.status(404).json({ message: "ไม่พบข้อมูลการสมัคร" });
-    }
-
+    if (result.affectedRows === 0) return res.status(404).json({ message: "ไม่พบข้อมูลการสมัคร" });
     res.json({ message: "อัปเดตสถานะสำเร็จ" });
   } catch (err) {
     console.error("❌ อัปเดตสถานะล้มเหลว:", err);
@@ -207,85 +158,54 @@ app.put('/api/employer/applications/:id/status', async (req, res) => {
   }
 });
 
-// ✅ GET: ดึงข้อมูลโปรไฟล์รวม education, experience
-app.get('/api/applicants/:id', async (req, res) => {
+/* ---------- ดึง/อัปเดตโปรไฟล์ผู้สมัคร ---------- */
+app.get("/api/applicants/:id", async (req, res) => {
   const applicantId = req.params.id;
-
   try {
     const [[user]] = await connection.execute(
-      "SELECT * FROM applicants WHERE applicant_id = ?",
-      [applicantId]
+      "SELECT * FROM applicants WHERE applicant_id = ?", [applicantId]
     );
-
-    if (!user) {
-      return res.status(404).json({ message: "ไม่พบผู้สมัคร" });
-    }
+    if (!user) return res.status(404).json({ message: "ไม่พบผู้สมัคร" });
 
     const [skills] = await connection.execute(
-      "SELECT skill_name FROM user_skills WHERE applicant_id = ?",
-      [applicantId]
+      "SELECT skill_name FROM user_skills WHERE applicant_id = ?", [applicantId]
     );
-
     const [portfolios] = await connection.execute(
-      "SELECT * FROM portfolios WHERE applicant_id = ?",
-      [applicantId]
+      "SELECT * FROM portfolios WHERE applicant_id = ?", [applicantId]
     );
-
     const [education] = await connection.execute(
-      "SELECT * FROM educations WHERE applicant_id = ?",
-      [applicantId]
+      "SELECT * FROM educations WHERE applicant_id = ?", [applicantId]
     );
-
     const [experience] = await connection.execute(
-      "SELECT * FROM experiences WHERE applicant_id = ?",
-      [applicantId]
+      "SELECT * FROM experiences WHERE applicant_id = ?", [applicantId]
     );
 
     res.json({ user: { ...user, education, experience }, skills, portfolios });
-
   } catch (err) {
     console.error("❌ ดึงข้อมูลผู้สมัครผิดพลาด:", err);
     res.status(500).json({ message: "เกิดข้อผิดพลาดในเซิร์ฟเวอร์" });
   }
 });
 
-// ✅ PUT: อัปเดตโปรไฟล์ พร้อมลบ/เพิ่ม education, experience, skills
-app.put('/api/applicants/:id', async (req, res) => {
+app.put("/api/applicants/:id", async (req, res) => {
   const applicantId = req.params.id;
   const {
-    a_firstname,
-    a_lastname,
-    a_email,
-    a_phone,
-    a_faculty,
-    a_gender,
-    a_birthdate,
-    a_nationality,
-    a_position,
-    a_salary,
-    a_province,
-    a_interest,
-    a_computer_level,
-    a_computer_stars,
-    a_bio,
-    a_contact,
-    education,
-    experience,
-    skills,
+    a_firstname, a_lastname, a_email, a_phone, a_faculty,
+    a_gender, a_birthdate, a_nationality, a_position, a_salary,
+    a_province, a_interest, a_computer_level, a_computer_stars,
+    a_bio, a_contact, education, experience, skills,
   } = req.body;
 
   const conn = await connection.getConnection();
   await conn.beginTransaction();
-
   try {
-    // 1) UPDATE applicants
     await conn.execute(
       `UPDATE applicants SET 
-        a_firstname=?, a_lastname=?, a_email=?, a_phone=?, a_faculty=?, 
-        a_gender=?, a_birthdate=?, a_nationality=?, a_position=?, a_salary=?, 
-        a_province=?, a_interest=?, a_computer_level=?, a_computer_stars=?, 
+        a_firstname=?, a_lastname=?, a_email=?, a_phone=?, a_faculty=?,
+        a_gender=?, a_birthdate=?, a_nationality=?, a_position=?, a_salary=?,
+        a_province=?, a_interest=?, a_computer_level=?, a_computer_stars=?,
         a_bio=?, a_contact=?, a_updated=NOW()
-        WHERE applicant_id=?`,
+       WHERE applicant_id=?`,
       [
         a_firstname, a_lastname, a_email, a_phone, a_faculty,
         a_gender, a_birthdate, a_nationality, a_position, a_salary,
@@ -294,9 +214,8 @@ app.put('/api/applicants/:id', async (req, res) => {
       ]
     );
 
-    // 2) Education
-    await conn.execute("DELETE FROM educations WHERE applicant_id = ?", [applicantId]);
-    for (const edu of education || []) {
+    await conn.execute("DELETE FROM educations WHERE applicant_id=?", [applicantId]);
+    for (const edu of (education || [])) {
       await conn.execute(
         `INSERT INTO educations (applicant_id, start_year, university, level, degree, major, gpa)
          VALUES (?, ?, ?, ?, ?, ?, ?)`,
@@ -304,9 +223,8 @@ app.put('/api/applicants/:id', async (req, res) => {
       );
     }
 
-    // 3) Experience
-    await conn.execute("DELETE FROM experiences WHERE applicant_id = ?", [applicantId]);
-    for (const job of experience || []) {
+    await conn.execute("DELETE FROM experiences WHERE applicant_id=?", [applicantId]);
+    for (const job of (experience || [])) {
       await conn.execute(
         `INSERT INTO experiences (applicant_id, title, start_date, end_date, duration, description)
          VALUES (?, ?, ?, ?, ?, ?)`,
@@ -314,9 +232,8 @@ app.put('/api/applicants/:id', async (req, res) => {
       );
     }
 
-    // 4) Skills
-    await conn.execute("DELETE FROM user_skills WHERE applicant_id = ?", [applicantId]);
-    for (const skillName of skills || []) {
+    await conn.execute("DELETE FROM user_skills WHERE applicant_id=?", [applicantId]);
+    for (const skillName of (skills || [])) {
       await conn.execute(
         `INSERT INTO user_skills (applicant_id, skill_name) VALUES (?, ?)`,
         [applicantId, skillName]
@@ -334,8 +251,9 @@ app.put('/api/applicants/:id', async (req, res) => {
   }
 });
 
-
-// ✅ Start server
-app.listen(3001, () => {
-  console.log("🚀 Server running at http://localhost:3001");
+/* ---------- START SERVER (ให้รับจากเครื่องอื่นได้) ---------- */
+const PORT = process.env.PORT || 3001;
+const HOST = "0.0.0.0";         // ✅ ไม่ใช้ loopback อย่างเดียว
+app.listen(PORT, HOST, () => {
+  console.log(`🚀 Server running at http://${HOST}:${PORT}`);
 });

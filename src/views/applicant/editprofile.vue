@@ -14,11 +14,11 @@
           <!-- ซ้าย -->
           <div class="col-md-4">
             <div class="text-center">
-              <img :src="profileImage || defaultImage"
+              <img :src="displayImage"
                    class="rounded-4 shadow-sm border mb-3"
                    style="width:100%;max-width:220px;height:280px;object-fit:cover"
                    alt="profile" />
-              <input type="file" class="form-control" @change="onImageChange" />
+              <input type="file" class="form-control" @change="onImageChange" accept="image/*" />
             </div>
 
             <div class="border-top pt-3 mt-3">
@@ -43,7 +43,6 @@
               <input v-model="user.a_salary" class="form-control" type="text" placeholder="เช่น 15000 หรือ ตามตกลง" />
             </div>
 
-            <!-- ทักษะ/สิ่งที่ทำได้: a_bio -->
             <div class="mb-3">
               <label class="form-label">ทักษะและความสามารถ</label>
               <textarea v-model="user.a_bio" class="form-control" rows="3"
@@ -77,7 +76,7 @@
                 <div class="mb-2"><label>ชื่อตำแหน่ง</label><input v-model="job.title" class="form-control" /></div>
                 <div class="mb-2"><label>วันที่เริ่ม</label><input v-model="job.start_date" type="date" class="form-control" /></div>
                 <div class="mb-2"><label>วันที่สิ้นสุด</label><input v-model="job.end_date" type="date" class="form-control" /></div>
-                <div class="mb-2"><label>ระยะเวลา</label><input v-model="job.duration" class="form-control" /></div>
+                <div class="mb-2"><label>ระยะเวลา (เดือน)</label><input v-model="job.duration" class="form-control" placeholder="เช่น 12" /></div>
                 <div class="mb-2"><label>รายละเอียดงาน</label><textarea v-model="job.description" class="form-control" rows="3"></textarea></div>
                 <button @click="removeExperience(index)" class="btn btn-outline-danger btn-sm">ลบ</button>
               </div>
@@ -113,9 +112,18 @@ export default {
     return {
       user: {},
       portfolios: [],
-      profileImage: null,
+      profileImage: null,   // preview
+      imageFile: null,      // file จริง
+      imgVer: 0,            // กันแคช
       defaultImage: DefaultProfile,
     };
+  },
+  computed: {
+    displayImage() {
+      if (this.profileImage) return this.profileImage;
+      if (this.user?.profile_img_url) return `${BASE_URL}${this.user.profile_img_url}?v=${this.imgVer}`;
+      return this.defaultImage;
+    },
   },
   mounted() {
     const id = this.getCurrentApplicantId();
@@ -147,10 +155,7 @@ export default {
         };
 
         this.portfolios = portfolios || [];
-
-        if (this.user.profile_img_url) {
-          this.profileImage = `${BASE_URL}${this.user.profile_img_url}`;
-        }
+        if (this.user.profile_img_url) this.imgVer = Date.now();
       } catch (err) {
         console.error("❌ fetchProfile failed", err.response?.data || err.message);
       }
@@ -166,40 +171,84 @@ export default {
       return `${age} ปี`;
     },
 
+    onImageChange(e) {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      this.imageFile = file;
+      this.profileImage = URL.createObjectURL(file); // preview
+    },
+
     async saveProfile() {
       try {
         const id = this.getCurrentApplicantId();
         if (!id) { alert("ไม่พบรหัสผู้ใช้"); return; }
 
-        // วันเกิด -> YYYY-MM-DD
-        let formattedBirthdate = null;
-        if (this.user.a_birthdate) {
-          const d = new Date(this.user.a_birthdate);
-          if (!isNaN(d)) {
-            const yyyy = d.getFullYear();
-            const mm = String(d.getMonth() + 1).padStart(2, "0");
-            const dd = String(d.getDate()).padStart(2, "0");
-            formattedBirthdate = `${yyyy}-${mm}-${dd}`;
+        /* 1) อัปโหลดรูปก่อน (ถ้ามี) */
+        if (this.imageFile) {
+          const fd = new FormData();
+          fd.append("profile", this.imageFile); // <-- ต้องชื่อ profile ให้ตรง backend
+          const photoRes = await axios.post(
+            `${BASE_URL}/api/upload-profile/${id}`,
+            fd,
+            { headers: { "Content-Type": "multipart/form-data" } }
+          );
+          if (photoRes.data?.url) {
+            this.user.profile_img_url = photoRes.data.url;
+            this.imgVer = Date.now();
+            const stored = JSON.parse(localStorage.getItem("user") || "{}");
+            localStorage.setItem("user", JSON.stringify({
+              ...stored,
+              profile_img_url: this.user.profile_img_url,
+            }));
           }
         }
 
-        // ค่าจ้าง: ตัวเลข -> number, อื่น ๆ -> null (= ตามตกลง)
+        /* 2) เตรียมข้อมูลให้ตรง type DB */
+        const norm = v => (v?.toString().trim() || null);
+        const normDate = d => (d ? new Date(d).toISOString().slice(0,10) : null);
+        const normInt = v => {
+          const n = parseInt(String(v ?? "").replace(/\D+/g, ""), 10);
+          return Number.isFinite(n) ? n : null;
+        };
+
+        let formattedBirthdate = null;
+        if (this.user.a_birthdate) {
+          const d = new Date(this.user.a_birthdate);
+          if (!isNaN(d)) formattedBirthdate = d.toISOString().slice(0,10);
+        }
+
         const salaryRaw = (this.user.a_salary ?? "").toString().trim();
-        const salaryForApi =
-          salaryRaw !== "" && !isNaN(Number(salaryRaw)) ? Number(salaryRaw) : null;
+        const salaryForApi = salaryRaw !== "" && !isNaN(Number(salaryRaw)) ? Number(salaryRaw) : null;
+
+        const education = (this.user.education || []).map(e => ({
+          start_year: norm(e.start_year),
+          university: norm(e.university),
+          level: norm(e.level),
+          degree: norm(e.degree),
+          major: norm(e.major),
+          gpa: e.gpa === "" ? null : Number(e.gpa)
+        }));
+
+        const experience = (this.user.experience || []).map(j => ({
+          title: norm(j.title),
+          start_date: normDate(j.start_date),
+          end_date: normDate(j.end_date),
+          duration: normInt(j.duration),   // <<< กัน “1เดือน” พัง
+          description: norm(j.description)
+        }));
 
         const payload = {
           ...this.user,
           a_salary: salaryForApi,
           a_birthdate: formattedBirthdate,
-          education: this.user.education,
-          experience: this.user.experience,
+          education,
+          experience,
         };
 
-        // อัปเดตโปรไฟล์หลัก (รวม a_bio)
+        /* 3) อัปเดตโปรไฟล์ */
         await axios.put(`${BASE_URL}/api/applicants/${id}`, payload);
 
-        // sync localStorage
+        /* 4) sync localStorage */
         const stored = JSON.parse(localStorage.getItem("user") || "{}");
         localStorage.setItem("user", JSON.stringify({
           ...stored,
@@ -217,16 +266,12 @@ export default {
       }
     },
 
-    onImageChange(e) {
-      const file = e.target.files[0];
-      if (file) this.profileImage = URL.createObjectURL(file);
-    },
     addEducation() {
-      this.user.education.push({ start_year:"", university:"", level:"", degree:"", major:"", gpa:"" });
+      (this.user.education ||= []).push({ start_year:"", university:"", level:"", degree:"", major:"", gpa:"" });
     },
     removeEducation(i) { this.user.education.splice(i, 1); },
     addExperience() {
-      this.user.experience.push({ title:"", start_date:"", end_date:"", duration:"", description:"" });
+      (this.user.experience ||= []).push({ title:"", start_date:"", end_date:"", duration:"", description:"" });
     },
     removeExperience(i) { this.user.experience.splice(i, 1); },
   },

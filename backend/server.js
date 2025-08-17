@@ -79,18 +79,19 @@ app.post("/api/upload-profile/:applicant_id", upload.single("profile"), async (r
   }
 });
 
-app.post("/api/upload-profile-employer/:employer_id", upload.single("profile"), async (req, res) => {
+app.post("/api/upload-profile/:applicant_id", upload.single("profile"), async (req, res) => {
   try {
-    const employerId = req.params.employer_id;
+    if (!req.file) return res.status(400).json({ error: "no_file" });
+    const applicantId = req.params.applicant_id;
     const profilePath = "/uploads/" + req.file.filename;
     await connection.query(
-      "UPDATE employers SET profile_img_url = ? WHERE employer_id = ?",
-      [profilePath, employerId]
+      "UPDATE applicants SET profile_img_url = ? WHERE applicant_id = ?",
+      [profilePath, applicantId]
     );
-    res.json({ message: "อัปโหลดรูปโปรไฟล์ผู้ว่าจ้างสำเร็จ", url: profilePath });
+    res.json({ message: "ok", url: profilePath });
   } catch (err) {
-    console.error("❌ อัปโหลดโปรไฟล์ผู้ว่าจ้างล้มเหลว:", err);
-    res.status(500).json({ error: "เกิดข้อผิดพลาดในการอัปโหลด" });
+    console.error("❌ อัปโหลดผิดพลาด:", err);
+    res.status(500).json({ error: "upload_failed" });
   }
 });
 

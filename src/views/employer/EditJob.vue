@@ -67,11 +67,6 @@
             </div>
 
            
-            <!-- สิ่งที่ต้องส่ง -->
-            <div class="mb-3">
-              <label class="fw-bold text-dark mb-2">สิ่งที่ต้องส่ง</label>
-              <input v-model="job.j_deliverable" class="form-control" />
-            </div>
 
             <!-- สถานที่ทำงาน -->
             <div class="mb-3">

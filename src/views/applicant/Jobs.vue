@@ -136,7 +136,31 @@
 
         <!-- Job Results -->
         <section class="job-results">
-          <h5 class="mb-2 text-orange">พบ {{ filteredJobs.length }} งาน</h5>
+          <!-- แถบตัวกรองเรียงตาม -->
+       <!-- ส่วนหัวผลลัพธ์ -->
+<!-- ส่วนหัวผลลัพธ์ -->
+<!-- หัวข้อผลลัพธ์ + แถวเรียงตาม -->
+<div class="results-header">
+  <h5 class="mb-1 text-orange">พบ {{ filteredJobs.length }} งาน</h5>
+
+  <div class="sort-row">
+    <label for="sortSelect" class="me-2 mb-0 text-muted small">เรียงตาม</label>
+    <select
+      id="sortSelect"
+      v-model="viewFilter"
+      @change="searchJobs"
+      class="form-select custom-pill"
+    >
+      <option value="all">ทั้งหมด</option>
+      <option value="latest">ล่าสุด</option>
+      <option value="applied">สมัครแล้ว</option>
+      <option value="not_applied">ยังไม่ได้สมัคร</option>
+    </select>
+  </div>
+</div><br>
+
+
+
 
           <div class="job-grid">
             <div
@@ -187,7 +211,8 @@
                 <i class="bi bi-people-fill me-1"></i> รับจำนวน: {{ job.j_amount || '-' }} คน
               </p>
               <p class="mb-0 text-muted">
-                <i class="bi bi-cash-coin me-1"></i> ค่าจ้าง: {{ Number(job.j_salary).toLocaleString() }} บาท
+                <i class="bi bi-cash-coin me-1"></i> ค่าจ้าง:
+                {{ Number(job.j_salary).toLocaleString('th-TH', { maximumFractionDigits: 0 }) }} บาท
               </p>
 
               <!-- เวลาที่ผ่านมา -->
@@ -220,11 +245,12 @@ export default {
         salaryMin: '',
         salaryMax: '',
         employerType: '',
-        sort: '',
       },
+      viewFilter: 'all',           // ทั้งหมด | latest | applied | not_applied
       jobs: [],
       filtered: [],
       bookmarkedIds: [],
+      appliedJobIds: [],           // job_id ที่สมัครแล้ว
       user: null,
     };
   },
@@ -233,21 +259,26 @@ export default {
       return this.filtered;
     },
   },
-  mounted() {
+  async mounted() {
     this.user = JSON.parse(localStorage.getItem('user'));
     const key = `bookmarkedJobs_${this.user?.applicant_id}`;
     const saved = JSON.parse(localStorage.getItem(key)) || [];
     this.bookmarkedIds = saved.map((j) => j.job_id);
 
-    axios
-      .get('http://localhost:3001/api/jobs')
-      .then((res) => {
-        this.jobs = res.data;
-        this.searchJobs();
-      })
-      .catch((err) => {
-        console.error('❌ ดึงข้อมูลงานล้มเหลว:', err);
-      });
+    try {
+      const [jobsRes, appsRes] = await Promise.all([
+        axios.get('http://localhost:3001/api/jobs'),
+        this.user?.applicant_id
+          ? axios.get(`http://localhost:3001/api/applications/${this.user.applicant_id}`)
+          : Promise.resolve({ data: [] }),
+      ]);
+
+      this.jobs = jobsRes.data;
+      this.appliedJobIds = (appsRes.data || []).map(a => a.job_id);
+      this.searchJobs();
+    } catch (err) {
+      console.error('❌ ดึงข้อมูลล้มเหลว:', err);
+    }
   },
   methods: {
     searchJobs() {
@@ -256,38 +287,47 @@ export default {
       const salaryMin = this.filter.salaryMin ? parseInt(this.filter.salaryMin) : 0;
       const salaryMax = this.filter.salaryMax ? parseInt(this.filter.salaryMax) : Number.MAX_SAFE_INTEGER;
 
-      this.filtered = this.jobs
-        .filter((job) => {
-          const matchesKeyword =
-            job.j_title?.toLowerCase().includes(keyword) ||
-            job.j_description?.toLowerCase().includes(keyword) ||
-            job.j_type?.toLowerCase().includes(keyword) ||
-            job.e_company_name?.toLowerCase().includes(keyword);
+      let list = this.jobs.filter((job) => {
+        const matchesKeyword =
+          job.j_title?.toLowerCase().includes(keyword) ||
+          job.j_description?.toLowerCase().includes(keyword) ||
+          job.j_type?.toLowerCase().includes(keyword) ||
+          job.e_company_name?.toLowerCase().includes(keyword);
 
-          const matchesSkills = skillKeyword === '' || job.j_qualification?.toLowerCase().includes(skillKeyword);
-          const matchesType = this.filter.type === '' || job.j_type === this.filter.type;
-          const matchesSalary = job.j_salary >= salaryMin && job.j_salary <= salaryMax;
-          const matchesEmployer = this.filter.employerType === '' || job.employer_type === this.filter.employerType;
+        const matchesSkills = skillKeyword === '' || job.j_qualification?.toLowerCase().includes(skillKeyword);
+        const matchesType = this.filter.type === '' || job.j_type === this.filter.type;
+        const matchesSalary = job.j_salary >= salaryMin && job.j_salary <= salaryMax;
+        const matchesEmployer = this.filter.employerType === '' || job.employer_type === this.filter.employerType;
 
-          return (
-            matchesKeyword &&
-            matchesSkills &&
-            matchesType &&
-            matchesSalary &&
-            matchesEmployer &&
-            job.j_status === 'open'
-          );
-        })
-        .sort((a, b) => {
-          if (this.filter.sort === 'latest') return new Date(b.j_posted_at) - new Date(a.j_posted_at);
-          if (this.filter.sort === 'salary') return b.j_salary - a.j_salary;
-          if (this.filter.sort === 'deadline') return new Date(a.j_appdeadline) - new Date(b.j_appdeadline);
-          return 0;
-        });
+        return (
+          matchesKeyword &&
+          matchesSkills &&
+          matchesType &&
+          matchesSalary &&
+          matchesEmployer &&
+          job.j_status === 'open'
+        );
+      });
+
+      // ✅ ตัวกรองตามสถานะการสมัคร
+      if (this.viewFilter === 'applied') {
+        list = list.filter(j => this.appliedJobIds.includes(j.job_id));
+      } else if (this.viewFilter === 'not_applied') {
+        list = list.filter(j => !this.appliedJobIds.includes(j.job_id));
+      }
+
+      // ✅ เรียง "ล่าสุด"
+      if (this.viewFilter === 'latest') {
+        list = list.sort((a, b) => new Date(b.j_posted_at) - new Date(a.j_posted_at));
+      }
+
+      this.filtered = list;
     },
+
     isBookmarked(jobId) {
       return this.bookmarkedIds.includes(jobId);
     },
+
     bookmarkJob(job) {
       const key = `bookmarkedJobs_${this.user?.applicant_id}`;
       let existing = JSON.parse(localStorage.getItem(key)) || [];
@@ -319,6 +359,7 @@ export default {
 
       localStorage.setItem(key, JSON.stringify(existing));
     },
+
     timeAgo(input) {
       if (!input) return '';
       const d = new Date(input);
@@ -347,6 +388,40 @@ export default {
 </script>
 
 <style scoped>
+/* กล่องหัวข้อ + เรียงตาม (สองบรรทัด) */
+.results-header{
+  display:flex;
+  flex-direction:column;   /* ให้ “เรียงตาม” ลงบรรทัดใหม่ */
+  gap:6px;
+}
+
+/* แถว “เรียงตาม” ชิดขวา */
+.sort-row{
+  display:flex;
+  justify-content:flex-end;  /* ไปขวาสุด */
+  align-items:center;
+}
+
+/* ปรับให้เป็นทรง pill และ "ไม่ยืดเต็มบรรทัด" */
+.form-select.custom-pill{
+  width: 220px !important;       /* บังคับความกว้าง */
+  display: inline-block;          /* กันการยืดเต็ม */
+  height: 38px;
+  font-size: 14px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 1px solid #ddd;
+  background-color: #fff;
+  box-shadow: 0 2px 6px rgba(0,0,0,.05);
+  transition: all .2s ease;
+}
+
+.form-select.custom-pill:focus{
+  border-color: #ff6600;
+  box-shadow: 0 0 0 3px rgba(255,102,0,.20);
+}
+
+
 .main-layout { display: flex; gap: 24px; align-items: stretch; }
 .filter-panel { width: 280px; background: #fff; border: none; min-height: auto; }
 .shadow-popup { box-shadow: 0 0 30px rgba(0,0,0,.1); }

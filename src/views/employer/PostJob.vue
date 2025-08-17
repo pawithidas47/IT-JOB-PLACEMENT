@@ -74,13 +74,6 @@
   </div>
 
 
-
-  <!-- 11. สิ่งที่ต้องส่ง -->
-  <div class="col-12">
-    <label class="form-label fw-bold">สิ่งที่ต้องส่ง (ถ้ามี)</label>
-    <input v-model="job.deliverable" class="form-control rounded-3" placeholder="เช่น PSD, Excel, รูปภาพ" />
-  </div>
-
   
   <div class="col-12">
     <button type="submit" class="btn btn-orange w-100 fw-bold py-2">📨 โพสต์งาน</button>

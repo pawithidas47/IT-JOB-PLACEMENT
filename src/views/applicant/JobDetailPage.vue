@@ -36,13 +36,8 @@
         <h5 class="fw-bold text-dark mb-2">เงินเดือน/ค่าตอบแทน</h5>
         <p class="mb-4 text-dark">{{ formatSalary(job?.j_salary) }} บาท</p>
 
-        <h5 class="fw-bold text-dark mb-2">สวัสดิการ</h5>
-        <div class="mb-4">
-          <div class="text-dark mb-1" v-for="line in splitLines(job?.j_welfare)" :key="line">{{ line }}</div>
-        </div>
-
-        <h5 class="fw-bold text-dark mb-2">สิ่งที่ต้องส่ง</h5>
-        <p class="mb-4 text-dark">{{ job?.j_deliverable || 'ไม่ระบุ' }}</p>
+       
+     
 
         <h5 class="fw-bold text-dark mb-2">สถานที่ปฏิบัติงาน</h5>
         <p class="mb-4 text-dark">{{ job?.j_location || 'ไม่ระบุ' }}</p>

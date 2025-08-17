@@ -110,11 +110,33 @@
         </form>
       </aside>
 
-      <div class="vertical-divider"></div>
+   <div class="vertical-divider"></div>
 
-      <!-- Job Results -->
-      <section class="job-results">
-        <h5 class="mb-2 text-orange">พบ {{ filteredJobs.length }} งาน</h5>
+        <!-- Job Results -->
+        <section class="job-results">
+          <!-- แถบตัวกรองเรียงตาม -->
+       <!-- ส่วนหัวผลลัพธ์ -->
+<!-- ส่วนหัวผลลัพธ์ -->
+<!-- หัวข้อผลลัพธ์ + แถวเรียงตาม -->
+<div class="results-header">
+          <h5 class="mb-1 text-orange">พบ {{ filteredJobs.length }} งาน</h5>
+
+  <div class="sort-row">
+    <label for="sortSelect" class="me-2 mb-0 text-muted small">เรียงตาม</label>
+    <select
+      id="sortSelect"
+      v-model="viewFilter"
+      @change="searchJobs"
+      class="form-select custom-pill"
+    >
+      <option value="all">ทั้งหมด</option>
+      <option value="latest">ล่าสุด</option>
+      <option value="applied">สมัครแล้ว</option>
+      <option value="not_applied">ยังไม่ได้สมัคร</option>
+    </select>
+  </div>
+</div><br>
+
 
         <div class="job-grid">
           <div
@@ -191,6 +213,8 @@ export default {
   data() {
     return {
       isLoggedIn: localStorage.getItem('authToken') !== null,
+      // ✅ ค่าเริ่มต้นของดรอปดาว
+      viewFilter: 'all',              // 'all' | 'latest' | 'applied' | 'not_applied'
       filter: {
         keyword: '',
         type: '',
@@ -204,6 +228,8 @@ export default {
       filtered: [],
       bookmarkedIds: [],
       user: null,
+      // ถ้าจะใช้ตัวกรอง “สมัครแล้ว/ยังไม่ได้สมัคร”
+      appliedJobIds: new Set(),       // เก็บ job_id ที่ผู้ใช้สมัครแล้ว
     };
   },
   computed: {
@@ -217,6 +243,8 @@ export default {
       const key = `bookmarkedJobs_${this.user.applicant_id}`;
       const saved = JSON.parse(localStorage.getItem(key)) || [];
       this.bookmarkedIds = saved.map(j => j.job_id);
+      // โหลดงานที่สมัครแล้ว (ถ้ามี endpoint)
+      this.loadAppliedJobs();
     }
 
     axios.get('http://localhost:3001/api/jobs')
@@ -229,6 +257,14 @@ export default {
       });
   },
   methods: {
+    async loadAppliedJobs() {
+      try {
+        const res = await axios.get(`http://localhost:3001/api/applications/${this.user.applicant_id}`);
+        this.appliedJobIds = new Set(res.data.map(a => a.job_id));
+      } catch (e) {
+        console.warn('โหลดงานที่สมัครแล้วไม่สำเร็จ (ข้ามได้)', e);
+      }
+    },
     openJob(id) {
       const path = this.isLoggedIn ? `/applicant/jobs/${id}` : `/jobs/${id}`;
       this.$router.push(path);
@@ -239,7 +275,7 @@ export default {
       const salaryMin = this.filter.salaryMin ? parseInt(this.filter.salaryMin) : 0;
       const salaryMax = this.filter.salaryMax ? parseInt(this.filter.salaryMax) : Number.MAX_SAFE_INTEGER;
 
-      this.filtered = this.jobs.filter((job) => {
+      let result = this.jobs.filter((job) => {
         const matchesKeyword =
           job.j_title?.toLowerCase().includes(keyword) ||
           job.j_description?.toLowerCase().includes(keyword) ||
@@ -263,6 +299,18 @@ export default {
           job.j_status === 'open'
         );
       });
+
+      // ✅ คัดกรองตามดรอปดาว "เรียงตาม"
+      if (this.viewFilter === 'latest') {
+        result = result.sort((a, b) => new Date(b.j_posted_at) - new Date(a.j_posted_at));
+      } else if (this.viewFilter === 'applied') {
+        result = result.filter(j => this.appliedJobIds.has(j.job_id));
+      } else if (this.viewFilter === 'not_applied') {
+        result = result.filter(j => !this.appliedJobIds.has(j.job_id));
+      }
+      // 'all' => ไม่ทำอะไรเพิ่ม
+
+      this.filtered = result;
     },
     isBookmarked(jobId) {
       return this.bookmarkedIds.includes(jobId);
@@ -345,7 +393,40 @@ export default {
   }
 };
 </script>
+
 <style scoped>
+/* กล่องหัวข้อ + เรียงตาม (สองบรรทัด) */
+.results-header{
+  display:flex;
+  flex-direction:column;   /* ให้ “เรียงตาม” ลงบรรทัดใหม่ */
+  gap:6px;
+}
+
+/* แถว “เรียงตาม” ชิดขวา */
+.sort-row{
+  display:flex;
+  justify-content:flex-end;  /* ไปขวาสุด */
+  align-items:center;
+}
+
+/* ปรับให้เป็นทรง pill และ "ไม่ยืดเต็มบรรทัด" */
+.form-select.custom-pill{
+  width: 220px !important;       /* บังคับความกว้าง */
+  display: inline-block;          /* กันการยืดเต็ม */
+  height: 38px;
+  font-size: 14px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 1px solid #ddd;
+  background-color: #fff;
+  box-shadow: 0 2px 6px rgba(0,0,0,.05);
+  transition: all .2s ease;
+}
+
+.form-select.custom-pill:focus{
+  border-color: #ff6600;
+  box-shadow: 0 0 0 3px rgba(255,102,0,.20);
+}
 /* ====== Layout เหมือนรูปเดิม ====== */
 .main-layout {
   display: flex;

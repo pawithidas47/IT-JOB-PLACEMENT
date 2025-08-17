@@ -116,12 +116,14 @@
         </ul>
         <!-- ✅ ปุ่มดูข้อมูลบริษัท -->
 <div class="text-center mt-4">
-  <router-link
-    :to="`/employer/profile/${job.employer_id}`"
-    class="btn btn-outline-success w-100 rounded-pill"
-  >
-    ดูข้อมูลบริษัท
-  </router-link>
+<!-- ใหม่ -->
+<router-link
+  :to="`/applicant/company/${job.employer_id}`"
+  class="btn btn-outline-success w-100 rounded-pill"
+>
+  ดูข้อมูลบริษัท
+</router-link>
+
 </div>
       </div>
 

@@ -10,7 +10,7 @@
           <input v-model="searchText" class="form-control" placeholder="ค้นหาตามชื่อ..." />
           <select v-model="selectedStatus" class="form-select custom-select">
             <option value="">ทั้งหมด</option>
-            
+            <option value="pending">รอดำเนินการ</option>
             <option value="approved">อนุมัติแล้ว</option>
             <option value="rejected">ถูกปฏิเสธ</option>
             <option value="cancelled">ยกเลิกแล้ว</option>
@@ -27,38 +27,54 @@
               <th>ประเภท</th>
               <th>ผู้ว่าจ้าง</th>
               <th>วันที่สมัคร</th>
-              <th>ค่าจ้าง</th>
+              <th>จำนวนที่รับ</th>
+              <th>ค่าจ้าง (บาท)</th>
               <th>สถานะ</th>
               <th>จัดการ</th>
             </tr>
           </thead>
-          <tbody>
-            <tr v-for="job in filteredJobs" :key="job.application_id">
-              <td class="fw-semibold text-dark">{{ job.job_name }}</td>
-              <td>{{ job.job_type }}</td>
-              <td>{{ job.employer_name || '-' }}</td>
-              <td>{{ formatDate(job.applied_at) }}</td>
-              <td>{{ job.job_wage.toLocaleString() }}</td>
-              <td><span :class="statusClass(job.status)">{{ translateStatus(job.status) }}</span></td>
-              <td>
-                <button
-                  v-if="job.status === 'cancelled'"
-                  class="btn btn-sm btn-outline-black rounded-pill px-3"
-                  @click="deleteApplication(job.application_id)">
-                  <i class="bi bi-trash me-1"></i>
-                </button>
 
+          <tbody>
+            <tr
+              v-for="job in filteredJobs"
+              :key="job.application_id"
+              class="row-click"
+              @click="openJob(job.job_id)"
+            >
+              <td class="fw-semibold text-dark text-start">{{ job.job_name }}</td>
+              <td class="text-start">{{ job.job_type }}</td>
+              <td class="text-start">{{ job.employer_name || '-' }}</td>
+              <td>{{ formatDate(job.applied_at) }}</td>
+              <td>{{ job.job_amount ?? '-' }}</td>
+              <td>{{ formatMoney(job.job_wage) }}</td>
+
+              <td>
+                <span :class="statusClass(job.status)">{{ translateStatus(job.status) }}</span>
+              </td>
+              <td @click.stop>
+                <!-- รอดำเนินการ: กดยกเลิกได้ -->
                 <button
-                  v-else-if="job.status !== 'rejected'"
+                  v-if="job.status === 'pending'"
                   class="btn btn-outline-danger rounded-pill px-3"
-                  @click="cancelApplication(job.application_id)">
+                  @click="cancelApplication(job.application_id)"
+                >
                   ยกเลิก
                 </button>
-                <span v-else class="text-muted">-</span>
+
+                <!-- อื่น ๆ ทั้งหมด: ลบได้ -->
+                <button
+                  v-else
+                  class="btn btn-sm btn-outline-black rounded-pill px-3"
+                  @click="deleteApplication(job.application_id)"
+                  title="ลบรายการ"
+                >
+                  <i class="bi bi-trash me-1"></i>
+                </button>
               </td>
             </tr>
+
             <tr v-if="filteredJobs.length === 0">
-              <td colspan="7" class="text-muted">ไม่พบรายการสมัครงานตามเงื่อนไข</td>
+              <td colspan="8" class="text-muted">ไม่พบรายการสมัครงานตามเงื่อนไข</td>
             </tr>
           </tbody>
         </table>
@@ -86,36 +102,45 @@ export default {
     filteredJobs() {
       return this.applications.filter((job) => {
         const statusMatch = this.selectedStatus ? job.status === this.selectedStatus : true;
-        const nameMatch = job.job_name.toLowerCase().includes(this.searchText.toLowerCase());
+        const nameMatch = (job.job_name || "").toLowerCase().includes(this.searchText.toLowerCase());
         return statusMatch && nameMatch;
       });
     },
   },
   methods: {
+    formatMoney(value) {
+    const n = Number(value);
+    if (!isFinite(n)) return '-';
+    return n.toLocaleString('th-TH', { maximumFractionDigits: 0 });
+  },
+
+    openJob(jobId) {
+      if (!jobId) return;
+      this.$router.push({ name: "ApplicantJobDetail", params: { id: jobId } });
+    },
     translateStatus(code) {
       return {
-        
-        approved: "อนุมัติแล้ว (รอการติดต่อ)",
-
-        rejected: "ถูกปฏิเสธ",
+        pending:   "รอดำเนินการ",
+        approved:  "อนุมัติแล้ว",
+        rejected:  "ถูกปฏิเสธ",
         cancelled: "ยกเลิกแล้ว",
       }[code] || code;
     },
     statusClass(status) {
       return {
-        pending: "text-warning fw-bold",
-        accepted: "text-success fw-bold",
-        approved: "text-primary fw-bold",
-        rejected: "text-danger fw-bold",
+        pending:   "text-warning fw-bold",
+        approved:  "text-primary fw-bold",
+        rejected:  "text-danger fw-bold",
         cancelled: "text-muted fw-bold",
       }[status] || "";
     },
     async fetchApplications() {
       try {
-        const user_id = localStorage.getItem("user_id");
-        if (!user_id) return;
-        const res = await axios.get(`http://localhost:3001/api/applications/${user_id}`);
-        this.applications = res.data;
+        const user = JSON.parse(localStorage.getItem("user"));
+        const applicantId = user?.applicant_id || localStorage.getItem("user_id");
+        if (!applicantId) return;
+        const { data } = await axios.get(`http://localhost:3001/api/applications/${applicantId}`);
+        this.applications = data;
       } catch (err) {
         console.error("❌ ดึงข้อมูลสมัครงานไม่สำเร็จ:", err);
       }
@@ -123,40 +148,43 @@ export default {
     async cancelApplication(applicationId) {
       try {
         const confirmed = await Swal.fire({
-          title: "คุณแน่ใจหรือไม่?",
+          title: "ยืนยันการยกเลิก?",
           text: "หากยกเลิกแล้วจะไม่สามารถสมัครซ้ำได้",
           icon: "warning",
           showCancelButton: true,
           confirmButtonText: "ยืนยันยกเลิก",
+          cancelButtonText: "ปิด",
         });
-        if (confirmed.isConfirmed) {
-          await axios.put(`http://localhost:3001/api/applications/${applicationId}/cancel`);
-          Swal.fire({ icon: "success", title: "ยกเลิกสำเร็จ!", timer: 1500, showConfirmButton: false });
-          this.fetchApplications();
-        }
+        if (!confirmed.isConfirmed) return;
+
+        await axios.put(`http://localhost:3001/api/applications/${applicationId}/cancel`);
+        await this.fetchApplications();
+        Swal.fire({ icon: "success", title: "ยกเลิกสำเร็จ!", timer: 1500, showConfirmButton: false });
       } catch (err) {
         console.error("❌ ยกเลิกไม่สำเร็จ:", err);
       }
     },
     async deleteApplication(applicationId) {
       try {
-        const confirmed = await Swal.fire({
+        const ok = await Swal.fire({
           title: "ลบรายการนี้?",
           text: "เมื่อลบแล้วจะไม่สามารถกู้คืนได้",
           icon: "warning",
           showCancelButton: true,
           confirmButtonText: "ลบ",
+          cancelButtonText: "ยกเลิก",
         });
-        if (confirmed.isConfirmed) {
-          await axios.delete(`http://localhost:3001/api/applications/${applicationId}`);
-          Swal.fire({ icon: "success", title: "ลบเรียบร้อย!", timer: 1500, showConfirmButton: false });
-          this.fetchApplications();
-        }
+        if (!ok.isConfirmed) return;
+
+        await axios.delete(`http://localhost:3001/api/applications/${applicationId}`);
+        await this.fetchApplications();
+        Swal.fire({ icon: "success", title: "ลบเรียบร้อย!", timer: 1200, showConfirmButton: false });
       } catch (err) {
         console.error("❌ ลบไม่สำเร็จ:", err);
       }
     },
     formatDate(dateStr) {
+      if (!dateStr) return "-";
       return new Date(dateStr).toLocaleDateString("th-TH", {
         day: "2-digit",
         month: "2-digit",
@@ -171,6 +199,7 @@ export default {
 </script>
 
 <style scoped>
+.row-click { cursor: pointer; }
 .btn-outline-black {
   color: #545050;
   border: 1px solid #000;
@@ -191,15 +220,7 @@ export default {
   min-width: 200px;
   max-width: 240px;
 }
-.table thead {
-  background-color: #f9f9f9;
-  font-weight: 600;
-  border-bottom: 2px solid #eee;
-}
-.table td,
-.table th {
-  vertical-align: middle;
-  padding: 0.75rem;
-  border-color: #f0f0f0;
-}
+.table thead { background-color: #f9f9f9; font-weight: 600; border-bottom: 2px solid #eee; }
+.table td, .table th { vertical-align: middle; padding: 0.75rem; border-color: #f0f0f0; }
+.text-primary { color: #0d6efd !important; }
 </style>

@@ -9,7 +9,7 @@
       <router-link to="/employer/dashboard" class="top-link" exact-active-class="active-link">จัดการงาน</router-link>
       <router-link to="/employer/post-job" class="top-link" exact-active-class="active-link">ลงประกาศงาน</router-link>
       <router-link to="/employer/applicants" class="top-link" exact-active-class="active-link">ผู้สมัครงาน</router-link>
-      <router-link to="/employer/search-applicants" class="top-link" exact-active-class="active-link">ค้นหาผู้หางาน</router-link>
+     
 
       <!-- Dropdown ผู้ใช้ -->
       <div class="dropdown" @click="toggleDropdown">

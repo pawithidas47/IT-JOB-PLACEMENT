@@ -46,10 +46,7 @@
 
          
 
-          <!-- สิ่งที่ต้องส่ง -->
-          <h5 class="fw-bold text-dark mb-2">สิ่งที่ต้องส่ง</h5>
-          <p class="mb-4 text-dark">{{ job?.j_deliverable || 'ไม่ระบุ' }}</p>
-
+         
           <!-- สถานที่ปฏิบัติงาน -->
           <h5 class="fw-bold text-dark mb-2">สถานที่ปฏิบัติงาน</h5>
           <p class="mb-4 text-dark">{{ job?.j_location || 'ไม่ระบุ' }}</p>

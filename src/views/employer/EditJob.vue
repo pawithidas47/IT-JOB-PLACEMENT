@@ -105,7 +105,6 @@
     </div>
   </div>
 </template>
-
 <script>
 import axios from "axios";
 import NavbarEmployer from "@/components/NavbarEmployer.vue";
@@ -120,7 +119,8 @@ export default {
   },
   mounted() {
     const jobId = this.$route.params.id;
-    axios.get(`http://localhost:3001/api/jobs/${jobId}`)
+    axios
+      .get(`http://localhost:3001/api/jobs/${jobId}`)
       .then((res) => {
         this.job = res.data;
       })
@@ -131,21 +131,21 @@ export default {
       });
   },
   methods: {
-    submitEdit() {
+    async submitEdit() {
       const jobId = this.$route.params.id;
-      axios.put(`http://localhost:3001/api/jobs/${jobId}`, this.job)
-        .then(() => {
-          alert("✅ แก้ไขงานสำเร็จ");
-          this.$router.push("/employer/dashboard");
-        })
-        .catch((err) => {
-          console.error("❌ แก้ไขงานล้มเหลว:", err);
-          alert("เกิดข้อผิดพลาดในการบันทึกข้อมูล");
-        });
+      try {
+        await axios.put(`http://localhost:3001/api/jobs/${jobId}`, this.job);
+        alert("✅ แก้ไขงานสำเร็จ");
+        this.$router.push(`/employer/jobs/${jobId}`); // ← กลับไปหน้ารายละเอียดงาน
+      } catch (err) {
+        console.error("❌ แก้ไขงานล้มเหลว:", err);
+        alert("เกิดข้อผิดพลาดในการบันทึกข้อมูล");
+      }
     },
     cancelEdit() {
-      this.$router.back(); // หรือจะใช้: this.$router.push(`/employer/jobs/${this.job?.job_id}`);
-    }
+      const jobId = this.job?.job_id || this.$route.params.id;
+      this.$router.push(`/employer/jobs/${jobId}`); // ← กลับไปหน้ารายละเอียดงาน
+    },
   },
 };
 </script>

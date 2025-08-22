@@ -1,4 +1,4 @@
-<template>
+<template> 
   <div>
     <NavbarApplicant />
 
@@ -40,21 +40,20 @@
 
       <!-- กริดการ์ด -->
       <div v-else class="job-grid">
-        <div
-          class="job-card p-4 bg-white border rounded-3 shadow-sm position-relative"
+        <!-- การ์ดทั้งใบเป็นลิงก์ -->
+        <router-link
           v-for="job in filteredJobs"
           :key="job.job_id"
+          :to="`/applicant/jobs/${job.job_id}`"
+          class="job-card p-4 bg-white border rounded-3 shadow-sm position-relative"
         >
-          <!-- ปุ่มมุมขวาบน -->
-          <div class="card-meta">
-            <!-- ป้ายสมัครแล้วบนสุด (ถ้าสมัคร) -->
+          <!-- ปุ่มมุมขวาบน (หยุดการนำทางเมื่อกด) -->
+          <div class="card-meta" @click.stop>
             <span v-if="isApplied(job.job_id)" class="chip-applied me-2">สมัครแล้ว</span>
-
-            <!-- ปุ่มลบ -->
             <button
               class="icon-btn danger"
               title="ลบออกจากที่บันทึก"
-              @click.stop="removeJob(job.job_id)"
+              @click.stop.prevent="removeJob(job.job_id)"
             >
               <i class="bi bi-trash"></i>
             </button>
@@ -74,9 +73,7 @@
           </div>
 
           <!-- หัวข้อ -->
-          <div class="d-flex align-items-center flex-wrap gap-2 mb-2">
-            <h5 class="fw-bold text-dark mb-0">{{ job.j_title }}</h5>
-          </div>
+          <h5 class="fw-bold text-dark mb-2">{{ job.j_title }}</h5>
 
           <!-- หมวดหมู่ -->
           <div v-if="job.j_type" class="mb-2">
@@ -96,18 +93,7 @@
           <div class="ago-badge">
             {{ timeAgo(job.j_posted_at) }}
           </div>
-
-          <!-- ปุ่มเข้าหน้ารายละเอียด -->
-          <div class="mt-3">
-            <router-link
-              :to="`/applicant/jobs/${job.job_id}`"
-              class="btn btn-sm btn-outline-primary rounded-pill px-3"
-              title="ดูรายละเอียดงาน"
-            >
-              ดูรายละเอียด
-            </router-link>
-          </div>
-        </div>
+        </router-link>
       </div>
     </div>
   </div>
@@ -125,7 +111,7 @@ export default {
       base: "http://localhost:3001",
       savedJobs: [],
       filteredJobs: [],
-      appliedJobIds: [], // เก็บ job_id ที่สมัครแล้ว (ไม่นับที่ยกเลิก)
+      appliedJobIds: [], // job_id ที่สมัครแล้ว (ไม่นับที่ยกเลิก)
       user: JSON.parse(localStorage.getItem("user")),
       filter: {
         title: "",
@@ -134,13 +120,10 @@ export default {
     };
   },
   mounted() {
-    // โหลดงานที่บันทึกไว้จาก localStorage
     if (this.user?.applicant_id) {
       const key = `bookmarkedJobs_${this.user.applicant_id}`;
       const saved = localStorage.getItem(key);
-      if (saved) {
-        this.savedJobs = JSON.parse(saved);
-      }
+      if (saved) this.savedJobs = JSON.parse(saved);
       this.fetchApplied();
       this.applyFilter();
     }
@@ -151,7 +134,6 @@ export default {
         const res = await axios.get(
           `http://localhost:3001/api/applications/${this.user.applicant_id}`
         );
-        // เก็บเฉพาะงานที่สถานะไม่ใช่ cancelled
         this.appliedJobIds = res.data
           .filter((app) => app.status !== "cancelled")
           .map((app) => Number(app.job_id));
@@ -166,7 +148,6 @@ export default {
     applyFilter() {
       const kw = this.filter.title.trim().toLowerCase();
 
-      // ค้นหาตามคำ
       let list = this.savedJobs.filter((job) => {
         if (!kw) return true;
         return (
@@ -177,7 +158,6 @@ export default {
         );
       });
 
-      // กรองตาม “เรียงตาม”
       switch (this.filter.sort) {
         case "applied":
           list = list.filter((j) => this.isApplied(j.job_id));
@@ -186,9 +166,7 @@ export default {
           list = list.filter((j) => !this.isApplied(j.job_id));
           break;
         case "latest":
-          list.sort(
-            (a, b) => new Date(b.j_posted_at) - new Date(a.j_posted_at)
-          );
+          list.sort((a, b) => new Date(b.j_posted_at) - new Date(a.j_posted_at));
           break;
         case "salaryHigh":
           list.sort((a, b) => Number(b.j_salary) - Number(a.j_salary));
@@ -196,7 +174,6 @@ export default {
         case "salaryLow":
           list.sort((a, b) => Number(a.j_salary) - Number(b.j_salary));
           break;
-        // "all" => ไม่ต้องทำอะไรเพิ่มเติม
       }
 
       this.filteredJobs = list;
@@ -243,7 +220,6 @@ export default {
 
 /* หัวข้อค้นหา/เรียงตาม */
 .form-control { border-radius: 999px; }
-
 .custom-pill {
   width: 220px;
   height: 38px;
@@ -266,13 +242,17 @@ export default {
   .job-grid { grid-template-columns: 1fr; }
 }
 
-/* Card เหมือนหน้ารายการงาน */
+/* การ์ด = ลิงก์ทั้งใบ + ขนาดคงที่เท่ารูป 1 */
 .job-card {
+  display: block;
+  height: 210px;             /* ✅ ความสูงคงที่ */
   border-radius: 12px;
   background: #fff;
   transition: transform .2s ease, box-shadow .2s ease;
   box-shadow: 0 6px 18px rgba(0,0,0,.06);
   position: relative;
+  text-decoration: none;     /* ตัดเส้นใต้ลิงก์ */
+  color: inherit;
 }
 .job-card:hover { transform: translateY(-2px); box-shadow: 0 10px 24px rgba(0,0,0,.08); }
 

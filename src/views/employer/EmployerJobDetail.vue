@@ -2,98 +2,90 @@
   <div>
     <NavbarEmployer />
 
-    <div v-if="job">
-      <div class="container py-5 mx-auto" style="max-width: 840px;">
-        <div class="card shadow rounded-4 p-5 border-0 bg-white">
+    <div v-if="job" class="detail-wrap">
+      <!-- Hero -->
+      <header class="hero">
+  <div class="hero-meta">
+    <span class="date"><i class="bi bi-calendar-event me-1"></i>{{ formatDate(job?.j_posted_at) || '-' }}</span>
+  </div>
 
-          <!-- วันที่ -->
-          <p class="text-muted small mb-2">
-            <i class="bi bi-calendar-event me-2"></i>{{ formatDate(job?.j_posted_at) || '-' }}
-          </p>
+  <h1 class="title">รับสมัคร {{ job?.j_title }}</h1>
 
-          <!-- หัวเรื่อง -->
-          <h3 class="fw-bold text-dark mb-1">รับสมัคร {{ job?.j_title }}</h3>
-          <p class="text-muted mb-3">{{ job?.e_company_name || '-' }}</p>
+  <!-- กลุ่มหมวดหมู่ + สถานะ ใต้ชื่อ -->
+  <div class="hero-tags">
+    <span class="chip type">{{ job?.j_type || '-' }}</span>
+    <span v-if="job?.j_status === 'closed'" class="chip closed">ปิดรับสมัคร</span>
+  </div>
 
-          <!-- หมวดหมู่ -->
-          <div class="mb-4">
-             <span class="badge-category">
-  {{ job?.j_type || '-' }}
-</span>
+  <p class="company">{{ job?.e_company_name || '-' }}</p>
+</header>
 
+
+      <!-- Content card -->
+      <main class="card-pro">
+        <!-- Summary chips -->
+        <section class="quick-row">
+          <div class="quick-box">
+            <div class="q-label">จำนวนที่รับ</div>
+            <div class="q-value">{{ job?.j_amount || '-' }} อัตรา</div>
           </div>
-
-          <!-- จำนวนที่รับ -->
-          <p class="fw-bold text-dark mb-4">
-            จำนวนที่รับ: {{ job?.j_amount || '-' }} อัตรา
-          </p>
-
-          <!-- ลักษณะงาน -->
-          <h5 class="fw-bold text-dark mb-2">ลักษณะงาน</h5>
-          <div class="mb-4">
-            <div class="text-dark mb-1" v-for="line in splitLines(job?.j_description)" :key="line">{{ line }}</div>
+          <div class="divider"></div>
+          <div class="quick-box">
+            <div class="q-label">ค่าตอบแทน</div>
+            <div class="q-value">{{ salaryDisplay }}</div>
           </div>
-
-          <!-- คุณสมบัติ -->
-          <h5 class="fw-bold text-dark mb-2">คุณสมบัติผู้สมัคร</h5>
-          <div class="mb-4">
-            <div class="text-dark mb-1" v-for="line in splitLines(job?.j_qualification)" :key="line">{{ line }}</div>
+          <div class="divider"></div>
+          <div class="quick-box">
+            <div class="q-label">วัน/เวลาทำงาน</div>
+            <div class="q-value">{{ job?.j_worktime || 'ไม่ระบุ' }}</div>
           </div>
+        </section>
 
-          <!-- เงินเดือน -->
-          <h5 class="fw-bold text-dark mb-2">ค่าตอบแทน</h5>
-          <p class="mb-4 text-dark">{{ formatSalary(job?.j_salary) }} บาท</p>
+        <!-- Description / Qualification -->
+        <section class="section">
+          <h3 class="section-title"><i class="bi bi-briefcase me-2"></i>ลักษณะงาน</h3>
+          <div class="text-block">
+            <div v-for="(line,i) in splitLines(job?.j_description)" :key="'d'+i" class="para">{{ line }}</div>
+          </div>
+        </section>
 
-         
+        <section class="section">
+          <h3 class="section-title"><i class="bi bi-check2-circle me-2"></i>คุณสมบัติผู้สมัคร</h3>
+          <ul class="bullet-list">
+            <li v-for="(line,i) in splitLines(job?.j_qualification)" :key="'q'+i">{{ line }}</li>
+          </ul>
+          <div v-if="!job?.j_qualification" class="muted">ไม่ระบุ</div>
+        </section>
 
-         
-          <!-- สถานที่ปฏิบัติงาน -->
-          <h5 class="fw-bold text-dark mb-2">สถานที่ปฏิบัติงาน</h5>
-          <p class="mb-4 text-dark">{{ job?.j_location || 'ไม่ระบุ' }}</p>
-
-          <!-- เวลาทำงาน -->
-          <h5 class="fw-bold text-dark mb-2">วันและเวลาทำงาน</h5>
-          <p class="mb-4 text-dark">{{ job?.j_worktime || 'ไม่ระบุ' }}</p>
-
-       
- <!-- ปุ่ม 3 ปุ่ม เรียงแนวนอนแบบสวยเท่ากัน -->
-<div class="d-flex flex-wrap gap-2 mt-4 justify-content-end">
-  <!-- ปิดรับสมัคร -->
-  <button
-    type="button"
-    class="btn btn-warning rounded-pill d-flex align-items-center justify-content-center px-4 py-2"
-    @click="closeJob"
-    :disabled="job.j_status === 'closed'"
-  >
-    <i class="bi bi-lock-fill me-2"></i> ปิดรับสมัคร
-  </button>
-
-  <!-- แก้ไข -->
-  <router-link :to="`/employer/edit-job/${job?.job_id}`" class="text-decoration-none">
-    <button class="btn btn-outline-primary rounded-pill d-flex align-items-center justify-content-center px-4 py-2">
-      <i class="bi bi-pencil-square me-2"></i> แก้ไขงานนี้
-    </button>
-  </router-link>
-
-  <!-- ลบ -->
-  <button class="btn btn-danger rounded-pill d-flex align-items-center justify-content-center px-4 py-2"
-    @click="confirmDelete">
-    <i class="bi bi-trash me-2"></i> ลบงานนี้
-  </button>
-
-</div>
+        <!-- Footer note -->
+        <div v-if="job?.j_status === 'closed'" class="alert-note">
+          <i class="bi bi-lock-fill me-2"></i>งานนี้ปิดรับสมัครแล้ว
         </div>
-      </div>
-    </div>
-<div v-if="job && job.j_status === 'closed'" class="alert alert-secondary rounded-pill text-center fw-bold my-3">
-  🔒 งานนี้ปิดรับสมัครแล้ว
-</div>
+      </main>
 
-    <!-- Loading -->
-   
+      <!-- Action bar (desktop at top-right, mobile sticky bottom) -->
+      <nav class="action-bar" :class="{ fixed: isMobile }">
+        <button
+          type="button"
+          class="btn-pill warn"
+          @click="closeJob"
+          :disabled="job.j_status === 'closed'"
+          title="ปิดรับสมัคร"
+        >
+          <i class="bi bi-lock-fill me-2"></i> ปิดรับสมัคร
+        </button>
+
+        <router-link :to="`/employer/edit-job/${job?.job_id}`" class="btn-pill ghost" title="แก้ไขงานนี้">
+          <i class="bi bi-pencil-square me-2"></i> แก้ไขงานนี้
+        </router-link>
+
+        <button class="btn-pill danger" @click="confirmDelete" title="ลบงานนี้">
+          <i class="bi bi-trash me-2"></i> ลบงานนี้
+        </button>
+      </nav>
+    </div>
   </div>
 </template>
-
 <script>
 import axios from "axios";
 import NavbarEmployer from "@/components/NavbarEmployer.vue";
@@ -102,79 +94,169 @@ export default {
   name: "EmployerJobDetail",
   components: { NavbarEmployer },
   data() {
-    return { job: null };
+    return {
+      job: null,
+      isMobile: false,
+      resizeHandler: null, // ใช้ชื่อปกติ ไม่ขึ้นต้นด้วย _
+    };
+  },
+  computed: {
+    salaryDisplay() {
+      const s = this.job?.j_salary;
+      if (s == null || s === "") return "ไม่ระบุ";
+      const numeric = typeof s === "number" || (/^\s*\d+(\.\d+)?\s*$/.test(String(s)));
+      if (numeric) {
+        const n = Number(s);
+        return isNaN(n) ? String(s) : `${n.toLocaleString()} บาท`;
+      }
+      return String(s);
+    }
   },
   mounted() {
     const jobId = this.$route.params.id;
     axios.get(`http://localhost:3001/api/jobs/${jobId}`)
-      .then(res => {
-        this.job = res.data;
-      })
-      .catch(err => {
-        console.error("❌ โหลดงานไม่สำเร็จ:", err);
-      });
+      .then(res => { this.job = res.data; })
+      .catch(err => { console.error("❌ โหลดงานไม่สำเร็จ:", err); });
+
+    // ✅ ใช้ตัวแปรเดียวตลอด
+    this.resizeHandler = () => { this.isMobile = window.innerWidth < 768; };
+    this.resizeHandler();
+    window.addEventListener("resize", this.resizeHandler);
+  },
+  beforeUnmount() {
+    // ✅ ถอด listener ให้ตรงกับที่ผูกไว้
+    if (this.resizeHandler) window.removeEventListener("resize", this.resizeHandler);
   },
   methods: {
     formatDate(dateStr) {
       if (!dateStr) return null;
-      const date = new Date(dateStr);
-      return isNaN(date) ? null : date.toLocaleDateString("th-TH", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric"
+      const d = new Date(dateStr);
+      return isNaN(d) ? null : d.toLocaleDateString("th-TH", {
+        day: "2-digit", month: "2-digit", year: "numeric"
       });
     },
-    formatSalary(salary) {
-      return parseFloat(salary).toLocaleString();
-    },
-    splitLines(text) {
-      return text?.split('\n') || [];
-    },
+    splitLines(text) { return (text || "").split(/\r?\n/).filter(Boolean); },
     confirmDelete() {
-      if (confirm("คุณแน่ใจหรือไม่ว่าต้องการลบงานนี้?")) {
-        axios.delete(`http://localhost:3001/api/jobs/${this.job?.job_id}`)
-          .then(() => {
-            alert("✅ ลบงานสำเร็จ");
-            this.$router.push("/employer/dashboard");
-          })
-          .catch(err => {
-            console.error("❌ ลบงานล้มเหลว:", err);
-            alert("เกิดข้อผิดพลาดในการลบงาน");
-          });
-      }
+      if (!confirm("คุณแน่ใจหรือไม่ว่าต้องการลบงานนี้?")) return;
+      axios.delete(`http://localhost:3001/api/jobs/${this.job?.job_id}`)
+        .then(() => { alert("✅ ลบงานสำเร็จ"); this.$router.push("/employer/dashboard"); })
+        .catch(err => { console.error("❌ ลบงานล้มเหลว:", err); alert("เกิดข้อผิดพลาดในการลบงาน"); });
     },
     closeJob() {
-      const jobId = this.job?.job_id;
-      if (!jobId) return;
-
-      const confirmClose = confirm("คุณต้องการปิดรับสมัครงานนี้หรือไม่?");
-      if (!confirmClose) return;
-
+      const jobId = this.job?.job_id; if (!jobId) return;
+      if (!confirm("คุณต้องการปิดรับสมัครงานนี้หรือไม่?")) return;
       axios.put(`http://localhost:3001/api/jobs/${jobId}/close`)
-        .then(() => {
-          alert("✅ งานนี้ถูกปิดรับสมัครแล้ว");
-          this.job.j_status = 'closed'; // อัปเดตใน UI ทันที
-        })
-        .catch((err) => {
-          console.error("❌ ปิดรับสมัครล้มเหลว:", err);
-          alert("เกิดข้อผิดพลาดในการปิดรับสมัคร");
-        });
+        .then(() => { alert("✅ งานนี้ถูกปิดรับสมัครแล้ว"); this.job.j_status = "closed"; })
+        .catch(err => { console.error("❌ ปิดรับสมัครล้มเหลว:", err); alert("เกิดข้อผิดพลาดในการปิดรับสมัคร"); });
     }
   }
 };
 </script>
 
-
 <style scoped>
-.text-orange {
-  color: #ff6600;
+.hero-tags{display:flex;gap:8px;margin:6px 0 4px}
+
+/* Layout */
+.detail-wrap{max-width:1100px;margin:0 auto;padding:24px 16px 100px;}
+.hero {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-left: 4px solid #ff6600; /* ✅ เพิ่มเส้นนำสายตา */
+  border-radius: 12px;
+  padding: 28px 24px;
+  margin-bottom: 18px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04);
 }
-.badge-category {
-  background-color: #fff5e6;
-  color: #ff6600;
-  border: 1px solid #ff6600;
-  border-radius: 999px;
-  font-weight: bold;
-  padding: 0.25rem 0.75rem;
+
+.hero-meta{display:flex;flex-wrap:wrap;gap:8px 10px;margin-bottom:6px;align-items:center}
+.date{color:#6b7280;font-size:.9rem}
+.chip{padding:4px 10px;border-radius:999px;font-weight:600;font-size:.82rem}
+.chip.type{background:#fff5e6;color:#ff6600;border:1px solid #ffb380}
+.chip.closed{background:#f1f5f9;color:#0f172a;border:1px dashed #cbd5e1}
+.title{font-weight:800;color:#0f172a;margin:2px 0 6px;line-height:1.25}
+.company{color:#6b7280;margin:0}
+
+/* Card body */
+.card-pro{
+  border-radius: 22px;
+  border:1px solid #eef2f7;
+  background:#fff;
+  box-shadow: 0 12px 30px rgba(16,24,40,.06);
+  padding: 20px;
+}
+
+/* Quick summary row */
+.quick-row{
+  display:grid;
+  grid-template-columns: 1fr auto 1fr auto 1fr;
+  gap: 14px;
+  align-items:center;
+  padding: 8px 4px 4px;
+}
+.divider{width:1px;height:40px;background:linear-gradient(#e5e7eb,#e5e7eb)}
+
+/* Quick items */
+.quick-box .q-label{color:#6b7280;font-size:.86rem;margin-bottom:2px}
+.quick-box .q-value{font-weight:700;color:#111827}
+
+/* Sections */
+.section{margin-top:22px}
+.section-title{
+  font-size:1.05rem;
+  font-weight:800;
+  color:#0f172a;
+  margin-bottom:10px;
+}
+.text-block .para{margin-bottom:.4rem; color:#111827}
+.muted{color:#94a3b8}
+.bullet-list{padding-left:1.1rem;margin:0}
+.bullet-list li{margin:.2rem 0; color:#111827}
+
+/* Note */
+.alert-note{
+  margin-top:18px;
+  background:#f6f7fb;
+  border:1px dashed #cbd5e1;
+  color:#0f172a;
+  border-radius:14px;
+  padding:10px 12px;
+  font-weight:700;
+}
+
+/* Action bar */
+.action-bar{
+  display:flex; gap:10px;
+  justify-content:flex-end;
+  margin-top:16px;
+}
+.action-bar.fixed{
+  position:fixed; left:0; right:0; bottom:0;
+  padding:10px 16px; background:#ffffffea; backdrop-filter: blur(6px);
+  box-shadow: 0 -10px 30px rgba(0,0,0,.06);
+}
+
+/* Buttons */
+.btn-pill{
+  border:none; border-radius:999px; padding:10px 18px; font-weight:700;
+  display:inline-flex; align-items:center; justify-content:center;
+  transition:transform .08s ease, box-shadow .2s ease, background .2s ease;
+  white-space:nowrap;
+}
+.btn-pill:hover{transform:translateY(-1px)}
+.btn-pill.warn{background:#ffedd5;color:#9a3412;border:1px solid #fdba74}
+.btn-pill.warn:disabled{opacity:.7;cursor:not-allowed}
+.btn-pill.ghost{background:#fff;border:1px solid #dbe2ea;color:#0f172a}
+.btn-pill.ghost:hover{box-shadow:0 6px 18px rgba(16,24,40,.08)}
+.btn-pill.danger{background:#fee2e2;color:#7f1d1d;border:1px solid #fecaca}
+
+/* Responsive */
+@media (max-width: 991px){
+  .quick-row{grid-template-columns:1fr;gap:10px}
+  .divider{display:none}
+}
+@media (max-width: 767px){
+  .hero{padding:22px 18px}
+  .title{font-size:1.35rem}
+  .card-pro{padding:16px}
 }
 </style>

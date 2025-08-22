@@ -5,7 +5,6 @@ const upload = multer({ dest: "uploads/" });
 
 const jobCtrl = require("../controllers/jobController");
 
-// ✅ โพสต์งานใหม่ (แบบ formData)
 // ✅ โพสต์งานใหม่
 router.post("/", upload.none(), async (req, res) => {
   try {
@@ -17,9 +16,7 @@ router.post("/", upload.none(), async (req, res) => {
       j_salary,
       j_amount,
       j_worktime,
-      j_location,
       j_deliverable,
-     
       j_qualification
     } = req.body;
 
@@ -28,28 +25,39 @@ router.post("/", upload.none(), async (req, res) => {
     const sql = `
       INSERT INTO jobs (
         employer_id, j_title, j_description, j_type, j_salary,
-        j_amount, j_worktime, j_location, j_deliverable,
-        j_qualification
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        j_amount, j_worktime, j_deliverable, j_qualification
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
 
-    await db.promise().execute(sql, [
-      employer_id, j_title, j_description, j_type, j_salary,
-      j_amount, j_worktime, j_location, j_deliverable,
-      j_contact, j_qualification
-    ]);
+    const vals = [
+      employer_id ?? null,
+      j_title ?? null,
+      j_description ?? null,
+      j_type ?? null,
+      (typeof j_salary === "undefined" ? null : j_salary),
+      j_amount ?? null,
+      j_worktime ?? null,
+      (typeof j_deliverable === "undefined" ? null : j_deliverable),
+      j_qualification ?? null
+    ];
 
+    await db.promise().execute(sql, vals);
     res.status(200).json({ message: "โพสต์งานสำเร็จ" });
   } catch (err) {
     console.error("❌ เพิ่มงานล้มเหลว:", err);
     res.status(500).json({ error: "โพสต์ไม่สำเร็จ", detail: err.message });
   }
 });
+
+// ✅ ปิดงาน
 router.put("/:id/close", async (req, res) => {
   const db = require("../models/db");
   const jobId = req.params.id;
   try {
-    await db.promise().execute("UPDATE jobs SET j_status = 'closed' WHERE job_id = ?", [jobId]);
+    await db.promise().execute(
+      "UPDATE jobs SET j_status = 'closed' WHERE job_id = ?",
+      [jobId]
+    );
     res.status(200).json({ message: "ปิดรับสมัครสำเร็จ" });
   } catch (err) {
     console.error("❌ ปิดรับสมัครล้มเหลว:", err);
@@ -57,16 +65,12 @@ router.put("/:id/close", async (req, res) => {
   }
 });
 
-
-// ✅ เชื่อม controller อื่น
+// ✅ routes อื่น
 router.get("/", jobCtrl.getJobs);
 router.get("/employer/:id", jobCtrl.getJobsByEmployer);
 router.get("/:id", jobCtrl.getJobById);
 router.put("/:id", jobCtrl.updateJob);
 router.delete("/:id", jobCtrl.deleteJob);
-// ใน routes/jobRoutes.js
-router.put("/:id/close", jobCtrl.closeJob);        // ✅ OK
 
-
-
+// ⚠️ หมายเหตุ: อย่าประกาศ route put("/:id/close") ซ้ำซ้อนอีกครั้งด้านล่าง
 module.exports = router;

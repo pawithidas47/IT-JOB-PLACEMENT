@@ -46,7 +46,8 @@
               <td class="text-start">{{ job.employer_name || '-' }}</td>
               <td>{{ formatDate(job.applied_at) }}</td>
               <td>{{ job.job_amount ?? '-' }}</td>
-              <td>{{ formatMoney(job.job_wage) }}</td>
+              <td>{{ formatWage(job.job_wage) }}</td>
+
 
               <td>
                 <span :class="statusClass(job.status)">{{ translateStatus(job.status) }}</span>
@@ -108,6 +109,19 @@ export default {
     },
   },
   methods: {
+      formatWage(value) {
+    if (value === null || value === undefined || value === '') return '-';
+
+    // ถ้ามาเป็นตัวเลขหรือสตริงตัวเลข → ฟอร์แมต
+    const isNumeric = typeof value === 'number' || /^\s*\d+(\.\d+)?\s*$/.test(String(value));
+    if (isNumeric) {
+      const n = Number(value);
+      return isFinite(n) ? n.toLocaleString('th-TH', { maximumFractionDigits: 0 }) : '-';
+    }
+
+    // กรณีเป็นข้อความ เช่น "ตามตกลง" → แสดงตามเดิม
+    return String(value);
+  },
     formatMoney(value) {
     const n = Number(value);
     if (!isFinite(n)) return '-';

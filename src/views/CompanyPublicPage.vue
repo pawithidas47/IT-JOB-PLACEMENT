@@ -64,10 +64,11 @@
 
   <div v-if="jobs.length" class="job-list">
     <article
-      v-for="job in jobs"
-      :key="job.job_id"
-      class="job-item"
-      @click="$router.push({ name: 'ApplicantJobDetail', params: { id: job.job_id } })"
+  v-for="job in jobs"
+  :key="job.job_id"
+  class="job-item"
+  @click="$router.push({ name: 'PublicJobDetail', params: { id: job.job_id } })"
+
     >
       <!-- ชื่อ -->
       <h4 class="job-title">รับสมัคร {{ job.j_title }}</h4>

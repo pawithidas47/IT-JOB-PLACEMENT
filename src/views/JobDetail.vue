@@ -13,21 +13,16 @@
               <div class="co-type">{{ job?.e_type || 'ประเภทธุรกิจ' }}</div>
             </div>
           </div>
-
-          <!-- วันที่โพสต์ ขวาบน (ไม่มีไอคอน) -->
           <div class="hero-date">{{ formatDate(job?.j_posted_at) || '-' }}</div>
         </div>
 
-        <!-- ชื่องาน -->
         <h1 class="title">รับสมัคร {{ job?.j_title }}</h1>
 
-        <!-- meta ใต้ชื่อ -->
         <div class="hero-meta">
           <span class="chip type">{{ job?.j_type || '-' }}</span>
           <span v-if="job?.j_status === 'closed'" class="chip closed">ปิดรับสมัคร</span>
         </div>
 
-        <!-- ปุ่มสมัครงาน ขวาล่างของ HERO -->
         <button
           v-if="job?.j_status !== 'closed'"
           class="btn-pill apply hero-apply"
@@ -39,104 +34,109 @@
         </button>
       </header>
 
-      <!-- การ์ดหลัก 2 คอลัมน์ -->
-      <main class="card-pro">
+      <!-- สองคอลัมน์: การ์ดซ้าย + การ์ดขวา -->
+      <main class="main-grid">
         <div class="grid">
-          <!-- ซ้าย: รายละเอียดงาน -->
+          <!-- ซ้าย: การ์ดรายละเอียดงาน -->
           <section class="col-left">
-            <!-- สรุปเร็ว -->
-            <div class="quick-row">
-              <div class="quick-box">
-                <div class="q-label">จำนวนที่รับ</div>
-                <div class="q-value">{{ job?.j_amount || '-' }} อัตรา</div>
-              </div>
-              <div class="divider"></div>
-              <div class="quick-box">
-                <div class="q-label">ค่าตอบแทน</div>
-                <div class="q-value">{{ salaryDisplay }}</div>
-              </div>
-              <div class="divider"></div>
-              <div class="quick-box">
-                <div class="q-label">วัน/เวลาทำงาน</div>
-                <div class="q-value">{{ job?.j_worktime || 'ไม่ระบุ' }}</div>
-              </div>
-            </div>
-
-            <!-- ลักษณะงาน -->
-            <section class="section card-section">
-              <h3 class="section-title"><i class="bi bi-briefcase me-2"></i>ลักษณะงาน</h3>
-              <div class="text-block">
-                <div v-for="(line,i) in splitLines(job?.j_description)" :key="'d'+i" class="para">
-                  {{ line }}
+            <div class="company-card left-card">
+              <!-- แถบสรุปเร็ว -->
+              <div class="quick-row">
+                <div class="quick-box">
+                  <div class="q-label">จำนวนที่รับ</div>
+                  <div class="q-value">{{ job?.j_amount || '-' }} อัตรา</div>
+                </div>
+                <div class="divider"></div>
+                <div class="quick-box">
+                  <div class="q-label">ค่าตอบแทน</div>
+                  <div class="q-value">{{ salaryDisplay }}</div>
+                </div>
+                <div class="divider"></div>
+                <div class="quick-box">
+                  <div class="q-label">วัน/เวลาทำงาน</div>
+                  <div class="q-value">{{ job?.j_worktime || 'ไม่ระบุ' }}</div>
                 </div>
               </div>
-            </section>
 
-            <!-- คุณสมบัติ -->
-            <section class="section card-section">
-              <h3 class="section-title"><i class="bi bi-check2-circle me-2"></i>คุณสมบัติผู้สมัคร</h3>
-              <ul class="bullet-list" v-if="job?.j_qualification">
-                <li v-for="(line,i) in splitLines(job?.j_qualification)" :key="'q'+i">{{ line }}</li>
-              </ul>
-              <div v-else class="muted">ไม่ระบุ</div>
-            </section>
+              <!-- ลักษณะงาน -->
+              <section class="section card-section">
+                <h3 class="section-title"><i class="bi bi-briefcase me-2"></i>ลักษณะงาน</h3>
+                <div class="text-block">
+                  <div v-for="(line,i) in splitLines(job?.j_description)" :key="'d'+i" class="para">
+                    {{ line }}
+                  </div>
+                </div>
+              </section>
 
-            <div v-if="job?.j_status === 'closed'" class="alert-note">
-              <i class="bi bi-lock-fill me-2"></i>งานนี้ปิดรับสมัครแล้ว
+              <!-- คุณสมบัติ -->
+              <section class="section card-section">
+                <h3 class="section-title"><i class="bi bi-check2-circle me-2"></i>คุณสมบัติผู้สมัคร</h3>
+                <ul class="bullet-list" v-if="job?.j_qualification">
+                  <li v-for="(line,i) in splitLines(job?.j_qualification)" :key="'q'+i">{{ line }}</li>
+                </ul>
+                <div v-else class="muted">ไม่ระบุ</div>
+              </section>
+
+              <div v-if="job?.j_status === 'closed'" class="alert-note">
+                <i class="bi bi-lock-fill me-2"></i>งานนี้ปิดรับสมัครแล้ว
+              </div>
             </div>
           </section>
 
-          <!-- ขวา: ข้อมูลบริษัท + สถานที่ -->
+          <!-- ขวา: การ์ดข้อมูลบริษัท -->
           <aside class="col-right">
-            <h4 class="snap-title">เกี่ยวกับบริษัท</h4>
-            <p class="snap-text">{{ job?.e_description || 'ไม่ระบุ' }}</p>
+            <div class="company-card right-card">
+              <h4 class="snap-title">เกี่ยวกับบริษัท</h4>
+              <p class="snap-text">{{ job?.e_description || 'ไม่ระบุ' }}</p>
 
-            <div v-if="galleryArray.length" class="snap-block">
-              <div class="snap-label">แกลเลอรี่</div>
-              <div class="gallery">
-                <img
-                  v-for="img in galleryArray"
-                  :key="img"
-                  :src="'http://localhost:3001' + img"
-                  class="g-thumb"
-                  @click="openImage(img)"
-                  alt="gallery"
-                />
+              <div v-if="galleryArray.length" class="snap-block">
+                <div class="snap-label">แกลเลอรี่</div>
+                <div class="gallery">
+                  <img
+                    v-for="img in galleryArray"
+                    :key="img"
+                    :src="'http://localhost:3001' + img"
+                    class="g-thumb"
+                    @click="openImage(img)"
+                    alt="gallery"
+                  />
+                </div>
+              </div>
+
+              <div class="snap-block">
+                <div class="snap-label">สถานที่ปฏิบัติงาน</div>
+                <p class="snap-text">{{ job?.j_location || 'ไม่ระบุ' }}</p>
+                <iframe
+                  v-if="job?.e_map_iframe"
+                  :src="job.e_map_iframe"
+                  width="100%" height="220"
+                  style="border:0; border-radius:10px"
+                  allowfullscreen loading="lazy"
+                ></iframe>
+              </div>
+
+              <div class="snap-block">
+                <div class="snap-label">ติดต่อ</div>
+                <ul class="snap-list">
+                  <li><i class="bi bi-person-circle me-2"></i>{{ job?.e_contact || '-' }}</li>
+                  <li><i class="bi bi-telephone me-2"></i>{{ job?.e_phone || '-' }}</li>
+                  <li>
+                    <i class="bi bi-globe me-2"></i>
+                    <a v-if="job?.e_website" :href="job.e_website" target="_blank" rel="noopener">{{ job.e_website }}</a>
+                    <span v-else>-</span>
+                  </li>
+                </ul>
+              </div>
+
+              <div class="company-actions">
+                <router-link
+                  :to="{ name: 'CompanyPublic', params: { id: job.employer_id } }"
+                  class="btn-pill ghost same-size"
+                >
+                  ดูข้อมูลบริษัท
+                </router-link>
               </div>
             </div>
-
-            <div class="snap-block">
-              <div class="snap-label">สถานที่ปฏิบัติงาน</div>
-              <p class="snap-text">{{ job?.j_location || 'ไม่ระบุ' }}</p>
-              <iframe
-                v-if="job?.e_map_iframe"
-                :src="job.e_map_iframe"
-                width="100%"
-                height="220"
-                style="border:0; border-radius:10px"
-                allowfullscreen
-                loading="lazy"
-              ></iframe>
-            </div>
-
-            <div class="snap-block">
-              <div class="snap-label">ติดต่อ</div>
-              <ul class="snap-list">
-                <li><i class="bi bi-person-circle me-2"></i>{{ job?.e_contact || '-' }}</li>
-                <li><i class="bi bi-telephone me-2"></i>{{ job?.e_phone || '-' }}</li>
-                <li>
-                  <i class="bi bi-globe me-2"></i>
-                  <a v-if="job?.e_website" :href="job.e_website" target="_blank" rel="noopener">{{ job.e_website }}</a>
-                  <span v-else>-</span>
-                </li>
-              </ul>
-            </div>
-<div class="company-actions">
-    <router-link :to="{ name: 'CompanyPublic', params: { id: job.employer_id } }" class="btn-pill ghost same-size">
-  ดูข้อมูลบริษัท
-</router-link>
-
-  </div>
           </aside>
         </div>
       </main>
@@ -210,8 +210,6 @@ export default {
         console.error("❌ ตรวจสอบสถานะใบสมัครล้มเหลว:", err);
       }
     },
-
-    // ✅ ป๊อปอัปตอนยังไม่ล็อกอิน มีปุ่มยกเลิกด้วย
     async applyJob() {
       if (!this.isLoggedIn) {
         const res = await Swal.fire({
@@ -252,13 +250,10 @@ export default {
         Swal.fire("เกิดข้อผิดพลาด", "ไม่สามารถสมัครงานได้", "error");
       }
     },
-
-    // ✅ วันที่แบบ 3 ก.ค. 68 (พ.ศ. 2 หลัก)
     formatDate(s) {
       if (!s) return "-";
       try {
         const date = new Date(s);
-        // th-TH จะใช้ปฏิทินพุทธฯ อัตโนมัติ
         return date.toLocaleDateString("th-TH", {
           day: "2-digit",
           month: "short",
@@ -268,7 +263,6 @@ export default {
         return "-";
       }
     },
-
     splitLines(t) { return (t || "").split(/\r?\n/).filter(Boolean); },
     openImage(path) {
       const url = "http://localhost:3001" + path;
@@ -279,46 +273,44 @@ export default {
 </script>
 
 <style scoped>
-/* ปุ่มขนาดเดียวกันทั้งสอง *//* Layout */
+.company-card{
+  background:#fff;border:1px solid #eef2f7;border-radius:12px;padding:16px;
+  box-shadow:0 8px 20px rgba(16,24,40,.06);
+}
+.left-card{margin-top:0;}
+.right-card{margin-top:0;}
+
 .detail-wrap{max-width:1100px;margin:0 auto;padding:24px 16px 60px}
 
 /* HERO */
 .hero{
-  position:relative; /* ปุ่มสมัครมุมขวาล่าง */
+  position:relative;
   background:#fff;border:1px solid #e5e7eb;border-left:4px solid #ff6600;
-  border-radius:12px;padding:16px 20px 56px; /* เผื่อพื้นที่ปุ่มล่าง */
+  border-radius:12px;padding:16px 20px 56px;
   box-shadow:0 4px 14px rgba(0,0,0,.04);margin-bottom:16px
 }
-.hero-top{display:flex;justify-content:space-between;gap:12px;align-items:center}
+.hero-top{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
 .co-inline{display:flex;align-items:center;gap:12px}
 .co-logo{width:48px;height:48px;border-radius:50%;object-fit:cover;border:1px solid #e5e7eb}
 .co-text{display:flex;flex-direction:column}
 .co-name{font-weight:800;color:#0f172a;line-height:1}
 .co-type{color:#64748b;font-size:.9rem}
-.hero-date{color:#6b7280;font-size:.95rem;white-space:nowrap}
+.hero-date{color:#6b7280;font-size:.95rem;white-space:nowrap;margin-top:-4px}
 .title{font-weight:800;color:#0f172a;margin:8px 0 8px;line-height:1.2}
 .hero-meta{display:flex;gap:8px;align-items:center}
 .chip{padding:4px 10px;border-radius:999px;font-weight:600;font-size:.82rem}
 .chip.type{background:#fff5e6;color:#ff6600;border:1px solid #ffb380}
 .chip.closed{background:#f1f5f9;color:#0f172a;border:1px dashed #cbd5e1}
-
-/* ปุ่มสมัครที่ HERO (ขวาล่าง) */
 .hero-apply{position:absolute;right:18px;bottom:14px}
 
-/* CARD หลัก */
-.card-pro{
-  border-radius:18px;border:1px solid #eef2f7;background:#fff;
-  box-shadow:0 12px 30px rgba(16,24,40,.06);padding:16px 16px 20px /* bottom padding */
-}
-.grid{display:grid;grid-template-columns:1.6fr .95fr;gap:18px}
+/* GRID */
+.main-grid{}
+.grid{display:grid;grid-template-columns:1.6fr .95fr;gap:18px;align-items:start}
 .col-left{min-width:0}
-.col-right{
-  border-left:1px solid #eef2f7;padding-left:16px;
-  display:flex;flex-direction:column /* ให้เรียงเป็นคอลัมน์ */
-}
+.col-right{min-width:0} /* เอาเส้นคั่นออกแล้ว เพราะแต่ละฝั่งเป็นการ์ดของตัวเอง */
 
 /* Quick summary */
-.quick-row{display:grid;grid-template-columns:1fr auto 1fr auto 1fr;gap:14px;align-items:center;padding:8px 0 12px}
+.quick-row{display:grid;grid-template-columns:1fr auto 1fr auto 1fr;gap:14px;align-items:center;padding:4px 0 12px}
 .divider{width:1px;height:40px;background:#e5e7eb}
 .q-label{color:#6b7280;font-size:.86rem}
 .q-value{font-weight:700;color:#111827}
@@ -333,7 +325,7 @@ export default {
 .muted{color:#94a3b8}
 .alert-note{margin-top:14px;background:#f6f7fb;border:1px dashed #cbd5e1;color:#0f172a;border-radius:12px;padding:10px 12px;font-weight:700}
 
-/* Company snapshot (ขวา) */
+/* ขวา */
 .snap-title{font-size:1rem;font-weight:800;margin-bottom:8px;color:#0f172a}
 .snap-block{margin-top:14px}
 .snap-label{font-weight:700;color:#0f172a;margin-bottom:4px}
@@ -342,7 +334,7 @@ export default {
 .gallery{display:flex;gap:8px;overflow:auto}
 .g-thumb{height:70px;width:110px;object-fit:cover;border-radius:8px;border:1px solid #e5e7eb;cursor:pointer}
 
-/* ปุ่มดูข้อมูลบริษัท: อยู่กึ่งกลาง และขนาดเท่าปุ่มสมัคร */
+/* ปุ่ม */
 .company-actions{margin-top:20px;text-align:center}
 .btn-pill{border:none;border-radius:999px;padding:10px 18px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;transition:transform .08s ease,box-shadow .2s ease;min-width:160px;text-align:center}
 .btn-pill:hover{transform:translateY(-1px)}
@@ -354,13 +346,7 @@ export default {
 /* Responsive */
 @media (max-width:991px){
   .grid{grid-template-columns:1fr}
-  .col-right{border-left:none;border-top:1px solid #eef2f7;padding-left:0;padding-top:14px}
-  .quick-row{grid-template-columns:1fr;gap:8px}
-  .divider{display:none}
-  .hero{padding-bottom:64px} /* กันปุ่มล่างทับ */
+  .hero{padding-bottom:64px}
   .hero-apply{right:12px;bottom:10px}
-  .company-actions{justify-content:stretch}
 }
-
-
 </style>

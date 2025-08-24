@@ -25,6 +25,7 @@ const CompanyPublicForApplicant = () =>
 // import("@/views/applicant/CompanyPublicForApplicant.vue");
 
 const routes = [
+  
    { path: '/company/:id', name: 'CompanyPublic', component: CompanyPublicPage },
   /* --- หน้าโปรไฟล์บริษัทสำหรับผู้สมัคร (public) --- */
   {

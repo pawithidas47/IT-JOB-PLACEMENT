@@ -1,124 +1,145 @@
 <template>
   <div>
     <NavbarHome />
-    <div v-if="job" class="container py-5 d-flex flex-column flex-lg-row gap-4" style="max-width: 1140px">
-      <!-- ซ้าย: รายละเอียดงาน -->
-      <div class="card shadow rounded-4 p-5 border-0 bg-white w-100" style="flex: 2">
-        <p class="text-muted small mb-2">
-          <i class="bi bi-calendar-event me-2"></i>{{ formatDate(job?.j_posted_at) || '-' }}
-        </p>
 
-        <h3 class="fw-bold text-dark mb-1">รับสมัคร {{ job?.j_title }}</h3>
-        <p class="text-muted mb-3">{{ job?.e_company_name || '-' }}</p>
-
-        <div class="mb-4">
-          <span class="badge-category">{{ job?.j_type || '-' }}</span>
-        </div>
-
-        <p class="fw-bold text-dark mb-4">จำนวนที่รับ: {{ job?.j_amount || '-' }} อัตรา</p>
-
-        <h5 class="fw-bold text-dark mb-2">ลักษณะงาน</h5>
-        <div class="mb-4">
-          <div class="text-dark mb-1" v-for="line in splitLines(job?.j_description)" :key="line">{{ line }}</div>
-        </div>
-
-        <h5 class="fw-bold text-dark mb-2">คุณสมบัติผู้สมัคร</h5>
-        <div class="mb-4">
-          <div class="text-dark mb-1" v-for="line in splitLines(job?.j_qualification)" :key="line">{{ line }}</div>
-        </div>
-
-        <h5 class="fw-bold text-dark mb-2">เงินเดือน/ค่าตอบแทน</h5>
-        <p class="mb-4 text-dark">{{ formatSalary(job?.j_salary) }} บาท</p>
-
-        <h5 class="fw-bold text-dark mb-2">สิ่งที่ต้องส่ง</h5>
-        <p class="mb-4 text-dark">{{ job?.j_deliverable || 'ไม่ระบุ' }}</p>
-
-        <h5 class="fw-bold text-dark mb-2">สถานที่ปฏิบัติงาน</h5>
-        <p class="mb-4 text-dark">{{ job?.j_location || 'ไม่ระบุ' }}</p>
-
-        <h5 class="fw-bold text-dark mb-2">วันและเวลาทำงาน</h5>
-        <p class="mb-4 text-dark">{{ job?.j_worktime || 'ไม่ระบุ' }}</p>
-
-        <!-- ปุ่มสมัครงาน -->
-        <div class="mt-4 d-flex flex-column align-items-center gap-2">
-          <div class="w-100 d-flex justify-content-center">
-            <button
-              class="btn text-white fw-bold d-inline-flex align-items-center justify-content-center"
-              style="background: linear-gradient(135deg,#ff6600,#e55d00); border-radius: 12px; height: 48px; font-size: 16px; padding: 0 24px; box-shadow: 0 2px 10px rgba(255, 102, 0, 0.3); width: 100%;"
-              @click="applyJob"
-            >
-              <i class="bi bi-check2-circle me-2"></i> สมัครงาน
-            </button>
+    <div v-if="job" class="detail-wrap">
+      <!-- HERO -->
+      <header class="hero">
+        <div class="hero-top">
+          <div class="co-inline">
+            <img :src="companyLogo" class="co-logo" alt="company" />
+            <div class="co-text">
+              <div class="co-name">{{ job?.e_company_name || '-' }}</div>
+              <div class="co-type">{{ job?.e_type || 'ประเภทธุรกิจ' }}</div>
+            </div>
           </div>
-        </div>
-      </div>
 
-      <!-- ขวา: ข้อมูลบริษัท -->
-      <div class="card shadow rounded-4 p-4 bg-white" style="flex: 1; min-width: 260px; max-width: 360px;">
-        <div class="text-center mb-3">
-          <img :src="job.e_profile_img_url ? 'http://localhost:3001' + job.e_profile_img_url : '/default-profile.jpg'"
-            class="rounded-circle mb-2" style="width: 100px; height: 100px; object-fit: cover" />
-          <h5 class="fw-bold mb-1">{{ job?.e_company_name || 'ชื่อบริษัท' }}</h5>
-          <p class="text-muted small mb-2">{{ job?.e_type || 'ประเภทธุรกิจ' }}</p>
+          <!-- วันที่โพสต์ ขวาบน (ไม่มีไอคอน) -->
+          <div class="hero-date">{{ formatDate(job?.j_posted_at) || '-' }}</div>
         </div>
 
-        <h6 class="fw-bold text-success mb-2">เกี่ยวกับบริษัท</h6>
-        <p class="small" v-if="job.e_description">{{ job.e_description }}</p>
+        <!-- ชื่องาน -->
+        <h1 class="title">รับสมัคร {{ job?.j_title }}</h1>
 
-        <h6 class="fw-bold text-success mb-2 mt-4">แกลเลอรี่รูปภาพบริษัท</h6>
-        <div class="d-flex gap-2 overflow-auto mb-3">
-          <img v-for="img in galleryArray" :key="img" :src="'http://localhost:3001' + img" class="rounded"
-            style="height: 80px; object-fit: cover; cursor: pointer"
-            @click="showImage('http://localhost:3001' + img)" />
+        <!-- meta ใต้ชื่อ -->
+        <div class="hero-meta">
+          <span class="chip type">{{ job?.j_type || '-' }}</span>
+          <span v-if="job?.j_status === 'closed'" class="chip closed">ปิดรับสมัคร</span>
         </div>
 
-        <div v-if="selectedImage" class="modal-backdrop" @click.self="selectedImage = null">
-          <div class="modal-image-wrapper">
-            <button class="close-btn" @click="selectedImage = null">✕</button>
-            <button class="nav-btn left" @click="prevImage">‹</button>
-            <img :src="selectedImage" class="preview-image" />
-            <button class="nav-btn right" @click="nextImage">›</button>
-          </div>
-        </div>
+        <!-- ปุ่มสมัครงาน ขวาล่างของ HERO -->
+        <button
+          v-if="job?.j_status !== 'closed'"
+          class="btn-pill apply hero-apply"
+          @click="applyJob"
+          :disabled="alreadyApplied"
+          title="สมัครงาน"
+        >
+          <i class="bi bi-check2-circle me-2"></i>{{ alreadyApplied ? 'คุณสมัครแล้ว' : 'สมัครงาน' }}
+        </button>
+      </header>
 
-        <h6 class="fw-bold text-success mb-2 mt-3">ที่อยู่บริษัท</h6>
-        <p class="small mb-2">{{ job?.e_address || 'ยังไม่ระบุที่อยู่บริษัท' }}</p>
+      <!-- การ์ดหลัก 2 คอลัมน์ -->
+      <main class="card-pro">
+        <div class="grid">
+          <!-- ซ้าย: รายละเอียดงาน -->
+          <section class="col-left">
+            <!-- สรุปเร็ว -->
+            <div class="quick-row">
+              <div class="quick-box">
+                <div class="q-label">จำนวนที่รับ</div>
+                <div class="q-value">{{ job?.j_amount || '-' }} อัตรา</div>
+              </div>
+              <div class="divider"></div>
+              <div class="quick-box">
+                <div class="q-label">ค่าตอบแทน</div>
+                <div class="q-value">{{ salaryDisplay }}</div>
+              </div>
+              <div class="divider"></div>
+              <div class="quick-box">
+                <div class="q-label">วัน/เวลาทำงาน</div>
+                <div class="q-value">{{ job?.j_worktime || 'ไม่ระบุ' }}</div>
+              </div>
+            </div>
 
-        <iframe v-if="job?.e_map_iframe" :src="job.e_map_iframe" width="100%" height="220"
-          style="border: 0; border-radius: 8px" allowfullscreen loading="lazy"
-          referrerpolicy="no-referrer-when-downgrade"></iframe>
+            <!-- ลักษณะงาน -->
+            <section class="section card-section">
+              <h3 class="section-title"><i class="bi bi-briefcase me-2"></i>ลักษณะงาน</h3>
+              <div class="text-block">
+                <div v-for="(line,i) in splitLines(job?.j_description)" :key="'d'+i" class="para">
+                  {{ line }}
+                </div>
+              </div>
+            </section>
 
-        <h6 class="fw-bold text-success mb-2 mt-3">ข้อมูลติดต่อบริษัท</h6>
-        <ul class="list-unstyled small text-muted">
-          <li><i class="bi bi-person-circle me-2"></i> {{ job?.e_contact || '-' }}</li>
-          <li><i class="bi bi-telephone me-2"></i> {{ job?.e_phone || '-' }}</li>
-          <li>
-            <i class="bi bi-globe me-2"></i>
-            <a v-if="job?.e_website" :href="job.e_website" target="_blank">{{ job.e_website }}</a>
-            <span v-else>-</span>
-          </li>
-        </ul>
-        <!-- ✅ ปุ่มดูข้อมูลบริษัท -->
-<div class="text-center mt-4">
- <router-link
-  :to="`/company/${job.employer_id}`"
-  class="btn btn-outline-success w-100 rounded-pill"
->
+            <!-- คุณสมบัติ -->
+            <section class="section card-section">
+              <h3 class="section-title"><i class="bi bi-check2-circle me-2"></i>คุณสมบัติผู้สมัคร</h3>
+              <ul class="bullet-list" v-if="job?.j_qualification">
+                <li v-for="(line,i) in splitLines(job?.j_qualification)" :key="'q'+i">{{ line }}</li>
+              </ul>
+              <div v-else class="muted">ไม่ระบุ</div>
+            </section>
+
+            <div v-if="job?.j_status === 'closed'" class="alert-note">
+              <i class="bi bi-lock-fill me-2"></i>งานนี้ปิดรับสมัครแล้ว
+            </div>
+          </section>
+
+          <!-- ขวา: ข้อมูลบริษัท + สถานที่ -->
+          <aside class="col-right">
+            <h4 class="snap-title">เกี่ยวกับบริษัท</h4>
+            <p class="snap-text">{{ job?.e_description || 'ไม่ระบุ' }}</p>
+
+            <div v-if="galleryArray.length" class="snap-block">
+              <div class="snap-label">แกลเลอรี่</div>
+              <div class="gallery">
+                <img
+                  v-for="img in galleryArray"
+                  :key="img"
+                  :src="'http://localhost:3001' + img"
+                  class="g-thumb"
+                  @click="openImage(img)"
+                  alt="gallery"
+                />
+              </div>
+            </div>
+
+            <div class="snap-block">
+              <div class="snap-label">สถานที่ปฏิบัติงาน</div>
+              <p class="snap-text">{{ job?.j_location || 'ไม่ระบุ' }}</p>
+              <iframe
+                v-if="job?.e_map_iframe"
+                :src="job.e_map_iframe"
+                width="100%"
+                height="220"
+                style="border:0; border-radius:10px"
+                allowfullscreen
+                loading="lazy"
+              ></iframe>
+            </div>
+
+            <div class="snap-block">
+              <div class="snap-label">ติดต่อ</div>
+              <ul class="snap-list">
+                <li><i class="bi bi-person-circle me-2"></i>{{ job?.e_contact || '-' }}</li>
+                <li><i class="bi bi-telephone me-2"></i>{{ job?.e_phone || '-' }}</li>
+                <li>
+                  <i class="bi bi-globe me-2"></i>
+                  <a v-if="job?.e_website" :href="job.e_website" target="_blank" rel="noopener">{{ job.e_website }}</a>
+                  <span v-else>-</span>
+                </li>
+              </ul>
+            </div>
+<div class="company-actions">
+    <router-link :to="{ name: 'CompanyPublic', params: { id: job.employer_id } }" class="btn-pill ghost same-size">
   ดูข้อมูลบริษัท
 </router-link>
 
-
-</div>
-      </div>
-    </div>
-
-    <div v-if="sharePopup" class="popup-overlay">
-      <div class="popup-content">
-        <p class="mb-3 fw-bold text-center">📋 คัดลอกลิงก์งานเรียบร้อยแล้ว คุณสามารถนำไปแชร์ต่อได้เลย!</p>
-        <div class="d-flex justify-content-end">
-          <button class="btn btn-outline-secondary" @click="sharePopup = false">ปิด</button>
+  </div>
+          </aside>
         </div>
-      </div>
+      </main>
     </div>
   </div>
 </template>
@@ -133,209 +154,213 @@ export default {
   components: { NavbarHome },
   data() {
     return {
-      job: {},
+      job: null,
       user: null,
       alreadyApplied: false,
       applicationStatus: null,
-      selectedImage: null,
-      currentImageIndex: 0,
       galleryArray: [],
-      sharePopup: false,
     };
   },
   computed: {
-    isLoggedIn() {
-      return !!this.user?.applicant_id;
+    isLoggedIn() { return !!this.user?.applicant_id; },
+    companyLogo() {
+      return this.job?.e_profile_img_url
+        ? "http://localhost:3001" + this.job.e_profile_img_url
+        : "/default-profile.jpg";
+    },
+    salaryDisplay() {
+      const s = this.job?.j_salary;
+      if (s == null || s === "") return "ไม่ระบุ";
+      const numeric = typeof s === "number" || (/^\s*\d+(\.\d+)?\s*$/.test(String(s)));
+      if (numeric) {
+        const n = Number(s);
+        return isNaN(n) ? String(s) : `${n.toLocaleString("th-TH")} บาท`;
+      }
+      return String(s);
     },
   },
   async mounted() {
-    const userData = localStorage.getItem("user");
-    this.user = userData ? JSON.parse(userData) : null;
-    await this.loadJobData();
+    this.user = JSON.parse(localStorage.getItem("user") || "null");
+    await this.loadJob();
   },
   methods: {
-    async loadJobData() {
+    async loadJob() {
       try {
-        const jobId = this.$route.params.id;
-        const jobRes = await axios.get(`http://localhost:3001/api/jobs/${jobId}`);
-        this.job = jobRes.data;
+        const id = this.$route.params.id;
+        const { data } = await axios.get(`http://localhost:3001/api/jobs/${id}`);
+        this.job = data;
 
-        try {
-          this.galleryArray = JSON.parse(this.job.e_gallery || "[]");
-        } catch {
-          this.galleryArray = [];
-        }
+        try { this.galleryArray = JSON.parse(this.job.e_gallery || "[]"); }
+        catch { this.galleryArray = []; }
 
-        if (this.isLoggedIn && this.job?.job_id) {
-          await this.checkApplicationStatus();
-        }
-      } catch (err) {
-        console.error("❌ โหลด job ล้มเหลว:", err);
+        if (this.isLoggedIn && this.job?.job_id) await this.checkStatus();
+      } catch (e) {
+        console.error("❌ โหลดข้อมูลงานล้มเหลว:", e);
         Swal.fire("เกิดข้อผิดพลาด", "ไม่สามารถโหลดข้อมูลงานได้", "error");
       }
     },
-
-    async checkApplicationStatus() {
-      if (!this.user?.applicant_id || !this.job?.job_id) return;
+    async checkStatus() {
       try {
-        const res = await axios.get(
+        const { data } = await axios.get(
           `http://localhost:3001/api/applications/check-status/${this.job.job_id}/${this.user.applicant_id}`
         );
-        this.applicationStatus = res.data.status;
-        this.alreadyApplied = res.data.alreadyApplied;
+        this.applicationStatus = data.status;
+        this.alreadyApplied = data.alreadyApplied;
       } catch (err) {
-        console.error("❌ ตรวจสอบสถานะล้มเหลว:", err);
+        console.error("❌ ตรวจสอบสถานะใบสมัครล้มเหลว:", err);
       }
     },
 
-    applyJob() {
+    // ✅ ป๊อปอัปตอนยังไม่ล็อกอิน มีปุ่มยกเลิกด้วย
+    async applyJob() {
       if (!this.isLoggedIn) {
-        Swal.fire({
+        const res = await Swal.fire({
+          title: "กรุณาเข้าสู่ระบบ",
+          text: "คุณต้องเข้าสู่ระบบก่อนสมัครงาน",
           icon: "warning",
-          title: "กรุณาเข้าสู่ระบบก่อน",
-          text: "คุณต้องเข้าสู่ระบบเพื่อสมัครงานที่สนใจ",
           showCancelButton: true,
           confirmButtonText: "เข้าสู่ระบบ",
           cancelButtonText: "ยกเลิก",
-        }).then((result) => {
-          if (result.isConfirmed) {
-            this.$router.push("/login");
-          }
+          reverseButtons: true,
         });
+        if (res.isConfirmed) this.$router.push("/login");
         return;
       }
-
-      this.confirmApply();
-    },
-
-    async confirmApply() {
       if (this.alreadyApplied) return;
-      const { job_id } = this.job;
-      const { applicant_id, portfolio_url } = this.user;
 
-      const result = await Swal.fire({
+      const ok = await Swal.fire({
         title: "ยืนยันการสมัครงาน",
         text: `คุณต้องการสมัคร "${this.job.j_title}" หรือไม่?`,
         icon: "question",
         showCancelButton: true,
         confirmButtonText: "ยืนยัน",
         cancelButtonText: "ยกเลิก",
+        reverseButtons: true,
       });
-
-      if (!result.isConfirmed) return;
+      if (!ok.isConfirmed) return;
 
       try {
         await axios.post("http://localhost:3001/api/applications", {
-          job_id,
-          applicant_id,
-          app_portfolio_url: portfolio_url || null,
+          job_id: this.job.job_id,
+          applicant_id: this.user.applicant_id,
+          app_portfolio_url: this.user.portfolio_url || null,
         });
-
         Swal.fire("สมัครงานสำเร็จ!", "ระบบได้บันทึกการสมัครของคุณแล้ว", "success");
-        await this.checkApplicationStatus();
-      } catch (err) {
-        Swal.fire("เกิดข้อผิดพลาด", err.response?.data?.message || "ไม่สามารถสมัครงานได้", "error");
-        console.error("❌ สมัครไม่สำเร็จ:", err);
+        await this.checkStatus();
+      } catch (e) {
+        console.error("❌ สมัครงานไม่สำเร็จ:", e);
+        Swal.fire("เกิดข้อผิดพลาด", "ไม่สามารถสมัครงานได้", "error");
       }
     },
 
-    saveJob() {
-      if (!this.isLoggedIn) {
-        Swal.fire({
-          icon: "warning",
-          title: "กรุณาเข้าสู่ระบบก่อน",
-          text: "คุณต้องเข้าสู่ระบบเพื่อบันทึกงานที่สนใจ",
-          showCancelButton: true,
-          confirmButtonText: "เข้าสู่ระบบ",
-          cancelButtonText: "ยกเลิก",
-        }).then((result) => {
-          if (result.isConfirmed) {
-            this.$router.push("/login");
-          }
+    // ✅ วันที่แบบ 3 ก.ค. 68 (พ.ศ. 2 หลัก)
+    formatDate(s) {
+      if (!s) return "-";
+      try {
+        const date = new Date(s);
+        // th-TH จะใช้ปฏิทินพุทธฯ อัตโนมัติ
+        return date.toLocaleDateString("th-TH", {
+          day: "2-digit",
+          month: "short",
+          year: "2-digit",
         });
-        return;
+      } catch {
+        return "-";
       }
-
-      Swal.fire({
-        toast: true,
-        position: "bottom-end",
-        icon: "success",
-        title: "บันทึกงานเรียบร้อย",
-        showConfirmButton: false,
-        timer: 1500,
-      });
     },
 
-    shareJob() {
-      navigator.clipboard.writeText(window.location.href);
-      this.sharePopup = true;
-    },
-
-    formatDate(dateStr) {
-      if (!dateStr) return "-";
-      const options = { year: "numeric", month: "long", day: "numeric" };
-      return new Date(dateStr).toLocaleDateString("th-TH", options);
-    },
-
-    formatSalary(salary) {
-      if (!salary || isNaN(salary)) return "-";
-      return Number(salary).toLocaleString("th-TH");
-    },
-
-    splitLines(text) {
-      if (!text) return [];
-      return text.split(/\r?\n/).filter((line) => line.trim() !== "");
-    },
-
-    showImage(url) {
-      this.currentImageIndex = this.galleryArray.findIndex(
-        (img) => "http://localhost:3001" + img === url
-      );
-      this.selectedImage = url;
-    },
-
-    nextImage() {
-      const total = this.galleryArray.length;
-      this.currentImageIndex = (this.currentImageIndex + 1) % total;
-      this.selectedImage = "http://localhost:3001" + this.galleryArray[this.currentImageIndex];
-    },
-
-    prevImage() {
-      const total = this.galleryArray.length;
-      this.currentImageIndex = (this.currentImageIndex - 1 + total) % total;
-      this.selectedImage = "http://localhost:3001" + this.galleryArray[this.currentImageIndex];
+    splitLines(t) { return (t || "").split(/\r?\n/).filter(Boolean); },
+    openImage(path) {
+      const url = "http://localhost:3001" + path;
+      window.open(url, "_blank", "noopener");
     },
   },
 };
 </script>
 
 <style scoped>
-.badge-category {
-  background-color: #fff5e6;
-  color: #ff6600;
-  border: 1px solid #ff6600;
-  border-radius: 999px;
-  font-weight: bold;
-  padding: 0.25rem 0.75rem;
+/* ปุ่มขนาดเดียวกันทั้งสอง *//* Layout */
+.detail-wrap{max-width:1100px;margin:0 auto;padding:24px 16px 60px}
+
+/* HERO */
+.hero{
+  position:relative; /* ปุ่มสมัครมุมขวาล่าง */
+  background:#fff;border:1px solid #e5e7eb;border-left:4px solid #ff6600;
+  border-radius:12px;padding:16px 20px 56px; /* เผื่อพื้นที่ปุ่มล่าง */
+  box-shadow:0 4px 14px rgba(0,0,0,.04);margin-bottom:16px
 }
-.popup-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background-color: rgba(0, 0, 0, 0.3);
-  z-index: 9999;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+.hero-top{display:flex;justify-content:space-between;gap:12px;align-items:center}
+.co-inline{display:flex;align-items:center;gap:12px}
+.co-logo{width:48px;height:48px;border-radius:50%;object-fit:cover;border:1px solid #e5e7eb}
+.co-text{display:flex;flex-direction:column}
+.co-name{font-weight:800;color:#0f172a;line-height:1}
+.co-type{color:#64748b;font-size:.9rem}
+.hero-date{color:#6b7280;font-size:.95rem;white-space:nowrap}
+.title{font-weight:800;color:#0f172a;margin:8px 0 8px;line-height:1.2}
+.hero-meta{display:flex;gap:8px;align-items:center}
+.chip{padding:4px 10px;border-radius:999px;font-weight:600;font-size:.82rem}
+.chip.type{background:#fff5e6;color:#ff6600;border:1px solid #ffb380}
+.chip.closed{background:#f1f5f9;color:#0f172a;border:1px dashed #cbd5e1}
+
+/* ปุ่มสมัครที่ HERO (ขวาล่าง) */
+.hero-apply{position:absolute;right:18px;bottom:14px}
+
+/* CARD หลัก */
+.card-pro{
+  border-radius:18px;border:1px solid #eef2f7;background:#fff;
+  box-shadow:0 12px 30px rgba(16,24,40,.06);padding:16px 16px 20px /* bottom padding */
 }
-.popup-content {
-  background: white;
-  border-radius: 16px;
-  padding: 24px 32px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-  max-width: 90%;
-  width: 400px;
+.grid{display:grid;grid-template-columns:1.6fr .95fr;gap:18px}
+.col-left{min-width:0}
+.col-right{
+  border-left:1px solid #eef2f7;padding-left:16px;
+  display:flex;flex-direction:column /* ให้เรียงเป็นคอลัมน์ */
 }
+
+/* Quick summary */
+.quick-row{display:grid;grid-template-columns:1fr auto 1fr auto 1fr;gap:14px;align-items:center;padding:8px 0 12px}
+.divider{width:1px;height:40px;background:#e5e7eb}
+.q-label{color:#6b7280;font-size:.86rem}
+.q-value{font-weight:700;color:#111827}
+
+/* Sections */
+.section{margin-top:14px}
+.card-section{border:1px solid #eef2f7;border-radius:12px;padding:14px 14px 10px;background:#fff}
+.section-title{font-size:1.05rem;font-weight:800;color:#0f172a;margin-bottom:10px}
+.text-block .para{margin-bottom:.4rem;color:#111827}
+.bullet-list{padding-left:1.1rem;margin:0}
+.bullet-list li{margin:.25rem 0;color:#111827}
+.muted{color:#94a3b8}
+.alert-note{margin-top:14px;background:#f6f7fb;border:1px dashed #cbd5e1;color:#0f172a;border-radius:12px;padding:10px 12px;font-weight:700}
+
+/* Company snapshot (ขวา) */
+.snap-title{font-size:1rem;font-weight:800;margin-bottom:8px;color:#0f172a}
+.snap-block{margin-top:14px}
+.snap-label{font-weight:700;color:#0f172a;margin-bottom:4px}
+.snap-text{color:#111827;margin:0}
+.snap-list{list-style:none;padding-left:0;margin:0}
+.gallery{display:flex;gap:8px;overflow:auto}
+.g-thumb{height:70px;width:110px;object-fit:cover;border-radius:8px;border:1px solid #e5e7eb;cursor:pointer}
+
+/* ปุ่มดูข้อมูลบริษัท: อยู่กึ่งกลาง และขนาดเท่าปุ่มสมัคร */
+.company-actions{margin-top:20px;text-align:center}
+.btn-pill{border:none;border-radius:999px;padding:10px 18px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;transition:transform .08s ease,box-shadow .2s ease;min-width:160px;text-align:center}
+.btn-pill:hover{transform:translateY(-1px)}
+.btn-pill.apply{background:linear-gradient(135deg,#ff6600,#e55d00);color:#fff}
+.btn-pill.ghost{background:#fff;border:1px solid #dbe2ea;color:#0f172a}
+.btn-pill.ghost:hover{box-shadow:0 6px 18px rgba(16,24,40,.08)}
+.btn-pill.same-size{min-width:160px;padding:10px 18px}
+
+/* Responsive */
+@media (max-width:991px){
+  .grid{grid-template-columns:1fr}
+  .col-right{border-left:none;border-top:1px solid #eef2f7;padding-left:0;padding-top:14px}
+  .quick-row{grid-template-columns:1fr;gap:8px}
+  .divider{display:none}
+  .hero{padding-bottom:64px} /* กันปุ่มล่างทับ */
+  .hero-apply{right:12px;bottom:10px}
+  .company-actions{justify-content:stretch}
+}
+
+
 </style>

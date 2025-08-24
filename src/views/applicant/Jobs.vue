@@ -226,7 +226,6 @@
     </div>
   </div>
 </template>
-
 <script>
 import NavbarApplicant from '@/components/NavbarApplicant.vue';
 import axios from 'axios';
@@ -246,11 +245,11 @@ export default {
         salaryMax: '',
         employerType: '',
       },
-      viewFilter: 'all',           // ทั้งหมด | latest | applied | not_applied
+      viewFilter: 'all',
       jobs: [],
       filtered: [],
       bookmarkedIds: [],
-      appliedJobIds: [],           // job_id ที่สมัครแล้ว
+      appliedJobIds: [],
       user: null,
     };
   },
@@ -281,44 +280,104 @@ export default {
     }
   },
   methods: {
+    // ✅ แปลง "ค่าจ้าง (string)" เป็นช่วงตัวเลข
+    // คืนรูปแบบ { min: number, max: number } ถ้าไม่สามารถตีความได้จะคืน {min:0, max:Infinity}
+    parseSalaryRange(s) {
+      if (s == null) return { min: 0, max: Infinity };
+      const text = String(s).trim();
+
+      // ตามตกลง / ไม่ระบุ
+      if (!text || /ตามตกลง|ไม่ระบุ/i.test(text)) return { min: 0, max: Infinity };
+
+      // ดึงตัวเลขทั้งหมด (ตัด comma ฯลฯ)
+      const nums = (text.match(/\d[\d,]*/g) || []).map(n => Number(n.replace(/,/g, '')))
+                     .filter(n => !isNaN(n));
+
+      if (nums.length === 0) {
+        // "2500+" / ไม่มีตัวเลขชัดเจน → พยายามหาเลขหน้า "+" ถ้ามี
+        const plus = text.match(/(\d[\d,]*)\s*\+/);
+        if (plus) {
+          const v = Number(plus[1].replace(/,/g, ''));
+          return isNaN(v) ? { min: 0, max: Infinity } : { min: v, max: Infinity };
+        }
+        return { min: 0, max: Infinity };
+      }
+
+      if (nums.length === 1) {
+        // เช่น "รายวัน 800" / "2,500+" ให้เป็นช่วง [v, +∞)
+        const v = nums[0];
+        if (/\+/.test(text)) return { min: v, max: Infinity };
+        return { min: v, max: v };
+      }
+
+      // มีสองค่า เช่น "10,500 – 12,000"
+      const [a, b] = nums;
+      return { min: Math.min(a, b), max: Math.max(a, b) };
+    },
+
+    // ✅ ตีความสถานะ: null/'' ให้เป็น open (เว้น closed)
+    isOpenStatus(j) {
+      const s = (j?.j_status || 'open').toLowerCase();
+      return s !== 'closed';
+    },
+
+    // ✅ ฟิลเตอร์หลัก
     searchJobs() {
       const keyword = this.filter.keyword.toLowerCase();
       const skillKeyword = this.filter.skills?.toLowerCase() || '';
+
+      // ถ้าไม่ได้ตั้งช่วงค่าจ้าง → ไม่ต้องบังคับเช็คช่วง
+      const useSalaryFilter = this.filter.salaryMin !== '' || this.filter.salaryMax !== '';
       const salaryMin = this.filter.salaryMin ? parseInt(this.filter.salaryMin) : 0;
       const salaryMax = this.filter.salaryMax ? parseInt(this.filter.salaryMax) : Number.MAX_SAFE_INTEGER;
 
       let list = this.jobs.filter((job) => {
+        // 1) เปิดรับ (open) โดยปริยาย
+        if (!this.isOpenStatus(job)) return false;
+
+        // 2) Keyword
         const matchesKeyword =
           job.j_title?.toLowerCase().includes(keyword) ||
           job.j_description?.toLowerCase().includes(keyword) ||
           job.j_type?.toLowerCase().includes(keyword) ||
           job.e_company_name?.toLowerCase().includes(keyword);
 
-        const matchesSkills = skillKeyword === '' || job.j_qualification?.toLowerCase().includes(skillKeyword);
-        const matchesType = this.filter.type === '' || job.j_type === this.filter.type;
-        const matchesSalary = job.j_salary >= salaryMin && job.j_salary <= salaryMax;
-        const matchesEmployer = this.filter.employerType === '' || job.employer_type === this.filter.employerType;
+        if (!matchesKeyword) return false;
 
-        return (
-          matchesKeyword &&
-          matchesSkills &&
-          matchesType &&
-          matchesSalary &&
-          matchesEmployer &&
-          job.j_status === 'open'
-        );
+        // 3) Skills (ค้นในคุณสมบัติ)
+        const matchesSkills =
+          !skillKeyword || job.j_qualification?.toLowerCase().includes(skillKeyword);
+        if (!matchesSkills) return false;
+
+        // 4) ประเภทงาน
+        const matchesType = !this.filter.type || job.j_type === this.filter.type;
+        if (!matchesType) return false;
+
+        // 5) ประเภทผู้ว่าจ้าง (ถ้าเก็บใน job)
+        const matchesEmployer =
+          !this.filter.employerType || job.employer_type === this.filter.employerType;
+        if (!matchesEmployer) return false;
+
+        // 6) ค่าจ้าง (เช็คแบบช่วงทับซ้อน)
+        if (useSalaryFilter) {
+          const { min, max } = this.parseSalaryRange(job.j_salary);
+          const overlap = Math.max(min, salaryMin) <= Math.min(max, salaryMax);
+          if (!overlap) return false;
+        }
+
+        return true;
       });
 
-      // ✅ ตัวกรองตามสถานะการสมัคร
+      // ฟิลเตอร์สถานะการสมัคร
       if (this.viewFilter === 'applied') {
         list = list.filter(j => this.appliedJobIds.includes(j.job_id));
       } else if (this.viewFilter === 'not_applied') {
         list = list.filter(j => !this.appliedJobIds.includes(j.job_id));
       }
 
-      // ✅ เรียง "ล่าสุด"
+      // เรียงล่าสุด
       if (this.viewFilter === 'latest') {
-        list = list.sort((a, b) => new Date(b.j_posted_at) - new Date(a.j_posted_at));
+        list = list.slice().sort((a, b) => new Date(b.j_posted_at) - new Date(a.j_posted_at));
       }
 
       this.filtered = list;
@@ -336,25 +395,11 @@ export default {
       if (index !== -1) {
         existing.splice(index, 1);
         this.bookmarkedIds = this.bookmarkedIds.filter((id) => id !== job.job_id);
-        Swal.fire({
-          toast: true,
-          position: 'bottom-end',
-          icon: 'info',
-          title: 'ยกเลิกบันทึกงานแล้ว',
-          showConfirmButton: false,
-          timer: 1500,
-        });
+        Swal.fire({ toast:true, position:'bottom-end', icon:'info', title:'ยกเลิกบันทึกงานแล้ว', showConfirmButton:false, timer:1500 });
       } else {
         existing.push(job);
         this.bookmarkedIds.push(job.job_id);
-        Swal.fire({
-          toast: true,
-          position: 'bottom-end',
-          icon: 'success',
-          title: 'บันทึกงานเรียบร้อย',
-          showConfirmButton: false,
-          timer: 1500,
-        });
+        Swal.fire({ toast:true, position:'bottom-end', icon:'success', title:'บันทึกงานเรียบร้อย', showConfirmButton:false, timer:1500 });
       }
 
       localStorage.setItem(key, JSON.stringify(existing));
@@ -366,17 +411,15 @@ export default {
       if (isNaN(d)) return '';
       const now = new Date();
       let diff = Math.floor((now - d) / 1000);
-
       const units = [
         { sec: 31536000, name: 'ปี' },
-        { sec: 2592000, name: 'เดือน' },
-        { sec: 604800, name: 'สัปดาห์' },
-        { sec: 86400, name: 'วัน' },
-        { sec: 3600, name: 'ชั่วโมง' },
-        { sec: 60, name: 'นาที' },
-        { sec: 1, name: 'วินาที' },
+        { sec: 2592000,  name: 'เดือน' },
+        { sec: 604800,   name: 'สัปดาห์' },
+        { sec: 86400,    name: 'วัน' },
+        { sec: 3600,     name: 'ชั่วโมง' },
+        { sec: 60,       name: 'นาที' },
+        { sec: 1,        name: 'วินาที' },
       ];
-
       for (const u of units) {
         const val = Math.floor(diff / u.sec);
         if (val >= 1) return `${val} ${u.name}ที่ผ่านมา`;

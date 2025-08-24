@@ -17,7 +17,7 @@ import HomePage from "@/views/Home.vue";
 import Login from "@/views/Login.vue";
 import AdminLogin from "@/views/admin/AdminLogin.vue";
 import AdminDashboard from "@/views/admin/AdminDashboard.vue";
-
+import CompanyPublicPage from '@/views/CompanyPublicPage.vue';
 /** ✅ ชี้ไปที่ไฟล์จริงในโฟลเดอร์ applicant */
 const CompanyPublicForApplicant = () =>
   import("@/views/applicant/CompanyPublicForApplicant.vue"); 
@@ -25,6 +25,7 @@ const CompanyPublicForApplicant = () =>
 // import("@/views/applicant/CompanyPublicForApplicant.vue");
 
 const routes = [
+   { path: '/company/:id', name: 'CompanyPublic', component: CompanyPublicPage },
   /* --- หน้าโปรไฟล์บริษัทสำหรับผู้สมัคร (public) --- */
   {
     path: "/applicant/company/:id",

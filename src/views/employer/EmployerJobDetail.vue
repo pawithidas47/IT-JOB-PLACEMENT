@@ -31,7 +31,7 @@
           </div>
           <div class="divider"></div>
           <div class="quick-box">
-            <div class="q-label">ค่าตอบแทน</div>
+            <div class="q-label">ค่าจ้าง</div>
             <div class="q-value">{{ salaryDisplay }}</div>
           </div>
           <div class="divider"></div>
@@ -85,8 +85,7 @@
       </nav>
     </div>
   </div>
-</template>
-<script>
+</template><script>
 import axios from "axios";
 import NavbarEmployer from "@/components/NavbarEmployer.vue";
 
@@ -97,61 +96,133 @@ export default {
     return {
       job: null,
       isMobile: false,
-      resizeHandler: null, // ใช้ชื่อปกติ ไม่ขึ้นต้นด้วย _
+      resizeHandler: null,
     };
   },
   computed: {
     salaryDisplay() {
-      const s = this.job?.j_salary;
-      if (s == null || s === "") return "ไม่ระบุ";
-      const numeric = typeof s === "number" || (/^\s*\d+(\.\d+)?\s*$/.test(String(s)));
-      if (numeric) {
-        const n = Number(s);
-        return isNaN(n) ? String(s) : `${n.toLocaleString()} บาท`;
-      }
-      return String(s);
-    }
+      return this.job ? this._formatSalary(this.job) : "ไม่ระบุ";
+    },
   },
   mounted() {
     const jobId = this.$route.params.id;
-    axios.get(`http://localhost:3001/api/jobs/${jobId}`)
-      .then(res => { this.job = res.data; })
-      .catch(err => { console.error("❌ โหลดงานไม่สำเร็จ:", err); });
+    axios
+      .get(`http://localhost:3001/api/jobs/${jobId}`)
+      .then((res) => {
+        const j = res.data || {};
 
-    // ✅ ใช้ตัวแปรเดียวตลอด
-    this.resizeHandler = () => { this.isMobile = window.innerWidth < 768; };
+        // 🔧 normalize field
+        let type = j.j_salary_type ?? j.salary_type ?? j.j_type_salary ?? "";
+        let min = this._toNum(j.j_salary_min ?? j.salary_min);
+        let max = this._toNum(j.j_salary_max ?? j.salary_max);
+
+        // ถ้าไม่มี → parse จาก j_salary (string)
+        if ((!type || (!min && !max)) && j.j_salary) {
+          const lg = this._parseLegacySalary(j.j_salary);
+          type ||= lg.type || "";
+          if (min == null) min = lg.min;
+          if (max == null) max = lg.max;
+        }
+
+        this.job = {
+          ...j,
+          j_salary_type: type,
+          j_salary_min: min,
+          j_salary_max: max,
+        };
+      })
+      .catch((err) => console.error("❌ โหลดงานไม่สำเร็จ:", err));
+
+    this.resizeHandler = () => {
+      this.isMobile = window.innerWidth < 768;
+    };
     this.resizeHandler();
     window.addEventListener("resize", this.resizeHandler);
   },
   beforeUnmount() {
-    // ✅ ถอด listener ให้ตรงกับที่ผูกไว้
-    if (this.resizeHandler) window.removeEventListener("resize", this.resizeHandler);
+    if (this.resizeHandler)
+      window.removeEventListener("resize", this.resizeHandler);
   },
   methods: {
+    _toNum(v) {
+      if (v == null || v === "") return null;
+      const n = Number(String(v).replace(/[^\d.-]/g, ""));
+      return Number.isFinite(n) ? n : null;
+    },
+    _parseLegacySalary(txt) {
+      if (!txt || typeof txt !== "string") return {};
+      const m = txt.match(
+        /(รายชั่วโมง|รายวัน|รายเดือน|เหมางาน|ตามตกลง)?\s*([\d,]+)?\s*(?:[-–]\s*([\d,]+))?/
+      );
+      return !m
+        ? {}
+        : {
+            type: m[1] || "",
+            min: this._toNum(m[2]),
+            max: this._toNum(m[3]),
+          };
+    },
+    _formatSalary(job) {
+      const type = (job.j_salary_type || "").trim();
+      const min = this._toNum(job.j_salary_min);
+      const max = this._toNum(job.j_salary_max);
+
+      if (type === "ตามตกลง") return "ตามตกลง";
+      if (type && (min != null || max != null)) {
+        if (min != null && max != null)
+          return `${min.toLocaleString()} – ${max.toLocaleString()} บาท (${type})`;
+        if (min != null) return `${min.toLocaleString()} บาทขึ้นไป (${type})`;
+        if (max != null) return `สูงสุด ${max.toLocaleString()} บาท (${type})`;
+      }
+      return job.j_salary || "ไม่ระบุ";
+    },
+
     formatDate(dateStr) {
       if (!dateStr) return null;
       const d = new Date(dateStr);
-      return isNaN(d) ? null : d.toLocaleDateString("th-TH", {
-        day: "2-digit", month: "2-digit", year: "numeric"
-      });
+      return isNaN(d)
+        ? null
+        : d.toLocaleDateString("th-TH", {
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
+          });
     },
-    splitLines(text) { return (text || "").split(/\r?\n/).filter(Boolean); },
+    splitLines(text) {
+      return (text || "").split(/\r?\n/).filter(Boolean);
+    },
     confirmDelete() {
       if (!confirm("คุณแน่ใจหรือไม่ว่าต้องการลบงานนี้?")) return;
-      axios.delete(`http://localhost:3001/api/jobs/${this.job?.job_id}`)
-        .then(() => { alert("✅ ลบงานสำเร็จ"); this.$router.push("/employer/dashboard"); })
-        .catch(err => { console.error("❌ ลบงานล้มเหลว:", err); alert("เกิดข้อผิดพลาดในการลบงาน"); });
+      axios
+        .delete(`http://localhost:3001/api/jobs/${this.job?.job_id}`)
+        .then(() => {
+          alert("✅ ลบงานสำเร็จ");
+          this.$router.push("/employer/dashboard");
+        })
+        .catch((err) => {
+          console.error("❌ ลบงานล้มเหลว:", err);
+          alert("เกิดข้อผิดพลาดในการลบงาน");
+        });
     },
     closeJob() {
-      const jobId = this.job?.job_id; if (!jobId) return;
+      const jobId = this.job?.job_id;
+      if (!jobId) return;
       if (!confirm("คุณต้องการปิดรับสมัครงานนี้หรือไม่?")) return;
-      axios.put(`http://localhost:3001/api/jobs/${jobId}/close`)
-        .then(() => { alert("✅ งานนี้ถูกปิดรับสมัครแล้ว"); this.job.j_status = "closed"; })
-        .catch(err => { console.error("❌ ปิดรับสมัครล้มเหลว:", err); alert("เกิดข้อผิดพลาดในการปิดรับสมัคร"); });
-    }
-  }
+      axios
+        .put(`http://localhost:3001/api/jobs/${jobId}/close`)
+        .then(() => {
+          alert("✅ งานนี้ถูกปิดรับสมัครแล้ว");
+          this.job.j_status = "closed";
+        })
+        .catch((err) => {
+          console.error("❌ ปิดรับสมัครล้มเหลว:", err);
+          alert("เกิดข้อผิดพลาดในการปิดรับสมัคร");
+        });
+    },
+  },
 };
 </script>
+
 
 <style scoped>
 .hero-tags{display:flex;gap:8px;margin:6px 0 4px}

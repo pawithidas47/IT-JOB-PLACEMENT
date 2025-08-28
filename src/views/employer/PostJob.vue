@@ -122,7 +122,7 @@
 
           <!-- ค่าตอบแทน -->
           <div>
-            <label class="label">ค่าตอบแทน</label>
+            <label class="label">ค่าจ้าง</label>
             <div class="grid grid-3 gap-4">
               <div>
                 <select v-model="job.salary_type" class="select">
@@ -154,7 +154,7 @@
               <div class="sum-val">{{ jWorktimeString || '—' }}</div>
             </div>
             <div class="sum-item">
-              <div class="sum-title">ค่าตอบแทน </div>
+              <div class="sum-title">ค่าจ้าง </div>
               <div class="sum-val">{{ jSalaryString || '—' }}</div>
             </div>
           </div>
@@ -182,17 +182,15 @@ export default {
         description: "",
         qualification: "",
         vacancy: "",
-        // salary
         salary_type: "",
         salary_min: null,
         salary_max: null,
       },
-      // UI state
       ui: {
         kind: "งานชิ้นเดียว",
         durationPreset: "งานชิ้นเดียว",
         dueDate: "",
-        daysSelected: ["จ", "อ", "พ", "พฤ", "ศ"], // default weekdays
+        daysSelected: ["จ", "อ", "พ", "พฤ", "ศ"],
         startTime: "09:00",
         endTime: "17:00",
       },
@@ -208,62 +206,35 @@ export default {
     };
   },
   computed: {
-    // สรุประยะเวลา
     jDurationString() {
       const p = this.ui.durationPreset;
       if (!p) return "";
-      if (p === "งานชิ้นเดียว") {
-        if (this.ui.dueDate) {
-          return `งานชิ้นเดียว (ส่งภายใน ${this.thaiDate(this.ui.dueDate)})`;
-        }
-        return "งานชิ้นเดียว";
+      if (p === "งานชิ้นเดียว" && this.ui.dueDate) {
+        return `งานชิ้นเดียว (ส่งภายใน ${this.thaiDate(this.ui.dueDate)})`;
       }
-      return p === "ต่อเนื่อง" ? "ต่อเนื่อง" : p;
+      return p;
     },
-    // สรุปวันเวลา
     jWorktimeString() {
-      const ds = this.ui.daysSelected.slice();
+      const ds = this.ui.daysSelected;
       if (!ds.length) return "";
-      // จ.-ศ. ?
-      const isWeekdays =
-        ds.length === 5 && ["จ", "อ", "พ", "พฤ", "ศ"].every((k) => ds.includes(k));
+      const isWeekdays = ds.length === 5 && ["จ", "อ", "พ", "พฤ", "ศ"].every((k) => ds.includes(k));
       const dayPart = isWeekdays ? "จ.-ศ." : ds.join(", ");
-
-      const tPart =
-        this.ui.startTime && this.ui.endTime
-          ? `${this.ui.startTime} – ${this.ui.endTime}`
-          : "";
+      const tPart = this.ui.startTime && this.ui.endTime ? `${this.ui.startTime} – ${this.ui.endTime}` : "";
       return [dayPart, tPart].filter(Boolean).join(" ");
     },
-    // สรุปค่าตอบแทน
     jSalaryString() {
-      const t = this.job.salary_type;
-      if (!t) return "";
-      if (t === "ตามตกลง") return "ตามตกลง";
-      const min = this.job.salary_min != null && this.job.salary_min !== ""
-        ? Number(this.job.salary_min).toLocaleString()
-        : null;
-      const max = this.job.salary_max != null && this.job.salary_max !== ""
-        ? Number(this.job.salary_max).toLocaleString()
-        : null;
-
-      if (min && max) return `${t} ${min} – ${max}`;
-      if (min) return `${t} ${min}+`;
-      if (max) return `${t} สูงสุด ${max}`;
-      return t;
+      return this.buildSalaryString(this.job.salary_type, this.job.salary_min, this.job.salary_max);
     },
   },
   mounted() {
     const u = localStorage.getItem("user");
     if (!u) return this.$router.push("/login");
     this.user = JSON.parse(u);
-    // ค่าเริ่มต้นให้เข้ากับชนิดงานแรก
     this.setKind(this.ui.kind, "เหมางาน");
   },
   methods: {
     setKind(kind, salaryType) {
       this.ui.kind = kind;
-      // ผูกชนิดงานกับประเภทค่าจ้างให้เลย (แก้ได้)
       this.job.salary_type = salaryType;
     },
     toggleDay(key) {
@@ -271,39 +242,40 @@ export default {
       if (i >= 0) this.ui.daysSelected.splice(i, 1);
       else this.ui.daysSelected.push(key);
     },
-    selectWeekdays() {
-      this.ui.daysSelected = ["จ", "อ", "พ", "พฤ", "ศ"];
-    },
+    selectWeekdays() { this.ui.daysSelected = ["จ", "อ", "พ", "พฤ", "ศ"]; },
     toggleAllDays() {
-      if (this.ui.daysSelected.length === 7) this.ui.daysSelected = [];
-      else this.ui.daysSelected = ["อา", "จ", "อ", "พ", "พฤ", "ศ", "ส"];
+      this.ui.daysSelected = this.ui.daysSelected.length === 7 ? [] : ["อา", "จ", "อ", "พ", "พฤ", "ศ", "ส"];
     },
     thaiDate(iso) {
       const d = new Date(iso);
-      if (isNaN(d)) return iso;
-      return d.toLocaleDateString("th-TH", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric",
-      });
+      return isNaN(d) ? iso : d.toLocaleDateString("th-TH", { day: "2-digit", month: "2-digit", year: "numeric" });
+    },
+    buildSalaryString(type, min, max) {
+      const toNum = (v) => (v==null||v==="") ? null : Number(String(v).replace(/[^\d.-]/g,""));
+      const mn = toNum(min), mx = toNum(max);
+      if (!type || type==="ตามตกลง") return "ตามตกลง";
+      if (mn!=null && mx!=null) return `${type} ${mn.toLocaleString()} – ${mx.toLocaleString()}`;
+      if (mn!=null) return `${type} ${mn.toLocaleString()}+`;
+      if (mx!=null) return `${type} สูงสุด ${mx.toLocaleString()}`;
+      return type;
     },
     async submitJob() {
       if (!this.job.title || !this.job.category) return;
-
       const payload = {
         j_title: this.job.title,
         j_description: this.job.description,
         j_type: this.job.category,
         j_amount: this.job.vacancy || null,
-        j_salary: this.jSalaryString || null,
+        j_salary_type: this.job.salary_type || null,
+        j_salary_min: this.job.salary_type==='ตามตกลง' ? null : (this.job.salary_min ?? null),
+        j_salary_max: this.job.salary_type==='ตามตกลง' ? null : (this.job.salary_max ?? null),
+        j_salary: this.buildSalaryString(this.job.salary_type, this.job.salary_min, this.job.salary_max), // ✅
         j_worktime: this.jWorktimeString || null,
-        j_deliverable: "", // กัน undefined
+        j_deliverable: "",
         j_qualification: this.job.qualification || null,
-        // map ระยะเวลางาน
-        j_duration: this.jDurationString || null, // (มีในสรุปและใช้แสดงผลได้เลย)
+        j_duration: this.jDurationString || null,
         employer_id: this.user.employer_id,
       };
-
       try {
         await this.$axios.post("http://localhost:3001/api/jobs", payload);
         alert("✅ โพสต์งานสำเร็จ");
@@ -316,6 +288,7 @@ export default {
   },
 };
 </script>
+
 
 <style scoped>
 /* Layout & card */

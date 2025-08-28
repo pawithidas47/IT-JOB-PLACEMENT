@@ -135,7 +135,7 @@ export default {
     translateStatus(code) {
       return {
         pending:   "รอดำเนินการ",
-        approved:  "อนุมัติแล้ว",
+        approved:  "อนุมัติแล้ว (รอการติดต่อ)",
         rejected:  "ถูกปฏิเสธ",
         cancelled: "ยกเลิกแล้ว",
       }[code] || code;

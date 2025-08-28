@@ -78,8 +78,8 @@
                     <span class="muted">{{ edu.start_year || '-' }}</span>
                   </div>
                   <div class="vcard-body">
-                    ระดับ: {{ edu.level || '-' }} • วุฒิ: {{ edu.degree || '-' }}<br />
-                    สาขา: {{ edu.major || '-' }} <span v-if="edu.gpa">• เกรด: {{ edu.gpa }}</span>
+                    ระดับ: {{ edu.level || '-' }} <br>
+                    สาขา: {{ edu.major || '-' }} <span v-if="edu.gpa"><br> เกรด: {{ edu.gpa }}</span>
                   </div>
                 </div>
               </div>

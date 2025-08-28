@@ -41,7 +41,6 @@
                     <option>หญิง</option><option>ชาย</option><option>ไม่ระบุ</option>
                   </select>
                 </div>
-                <!-- ไม่แสดงวันเกิด -->
               </div>
 
               <div class="form-row">
@@ -96,7 +95,6 @@
                 <label>ทักษะและความสามารถ</label>
                 <textarea v-model.trim="user.a_bio" class="form-control" rows="3"
                   placeholder="พิมพ์สิ่งที่ทำได้/ประสบการณ์/จุดแข็ง"></textarea>
-               
               </div>
 
               <div class="form-row">
@@ -105,74 +103,55 @@
               </div>
             </div>
 
-            <!-- Education -->
-            <div class="card">
-              <div class="card-head">
-                <h5 class="card-title">ประวัติการศึกษา</h5>
-                <button @click="addEducation" class="btn btn-outline-primary btn-sm">
-                  <i class="bi bi-plus-lg me-1"></i> เพิ่ม
-                </button>
-              </div>
+           <div v-for="(edu, i) in user.education || []" :key="'edu-'+i" class="subcard">
+  <!-- แถวบน: ปี / ระดับ / มหาวิทยาลัย(ยาว 2 ช่อง) -->
+  <div class="grid-3">
+    <div class="form-row">
+      <label>ปีที่เริ่ม (พ.ศ.)</label>
+      <select v-model="edu.start_year" class="form-select">
+        <option disabled value="">เลือกปี</option>
+        <option v-for="y in yearOptions" :key="y" :value="y">{{ y }}</option>
+      </select>
+    </div>
 
-              <div v-for="(edu, i) in user.education || []" :key="'edu-'+i" class="subcard">
-                <div class="grid-4">
-                  <div class="form-row">
-                    <label>ปีที่เริ่ม (พ.ศ.)</label>
-                    <select v-model="edu.start_year" class="form-select">
-                      <option disabled value="">เลือกปี</option>
-                      <option v-for="y in yearOptions" :key="y" :value="y">{{ y }}</option>
-                    </select>
-                  </div>
+    <div class="form-row">
+      <label>ระดับการศึกษา</label>
+      <select v-model="edu.level" class="form-select">
+        <option disabled value="">เลือกระดับ</option>
+        <option>ปวช.</option><option>ปวส.</option>
+        <option>อนุปริญญา</option>
+        <option>ปริญญาตรี</option><option>ปริญญาโท</option><option>ปริญญาเอก</option>
+        <option>ประกาศนียบัตร</option>
+      </select>
+    </div>
 
-                  <div class="form-row">
-                    <label>ระดับการศึกษา</label>
-                    <select v-model="edu.level" class="form-select">
-                      <option disabled value="">เลือกระดับ</option>
-                      <option>ปวช.</option><option>ปวส.</option>
-                      <option>อนุปริญญา</option>
-                      <option>ปริญญาตรี</option><option>ปริญญาโท</option><option>ปริญญาเอก</option>
-                      <option>ประกาศนียบัตร</option>
-                    </select>
-                  </div>
+    <!-- ✅ ช่องมหาวิทยาลัยยาว (กิน 2 คอลัมน์) -->
+    <div class="form-row grid-span-2">
+      <label>มหาวิทยาลัย</label>
+      <input v-model.trim="edu.university" class="form-control" />
+    </div>
+  </div>
 
-                  <div class="form-row">
-                    <label>มหาวิทยาลัย</label>
-                    <input v-model.trim="edu.university" class="form-control" />
-                  </div>
+  <!-- แถวล่าง: สาขา + GPA อยู่บรรทัดเดียว -->
+  <div class="grid-2 mt-1">
+    <div class="form-row">
+      <label>สาขา</label>
+      <input v-model.trim="edu.major" class="form-control" />
+    </div>
 
-                  <div class="form-row">
-                    <label>เกรด</label>
-                    <input v-model="edu.gpa" class="form-control" inputmode="decimal" placeholder="เช่น 3.25" />
-                  </div>
+    <div class="form-row">
+      <label>เกรดเฉลี่ย (GPA)</label>
+      <input v-model="edu.gpa" class="form-control" inputmode="decimal" placeholder="เช่น 3.25" />
+    </div>
+  </div>
 
-                  <!-- วุฒิการศึกษา: ดรอปดาว + อื่นๆ -->
-                  <div class="form-row grid-span-2">
-                    <label>วุฒิการศึกษา</label>
-                    <select v-model="edu.degree" class="form-select">
-                      <option disabled value="">เลือกระดับวุฒิ</option>
-                      <option v-for="d in degreeOptions" :key="d" :value="d">{{ d }}</option>
-                      <option value="อื่นๆ">อื่นๆ (ระบุ)</option>
-                    </select>
-                  </div>
+  <div class="subcard-actions">
+    <button @click="removeEducation(i)" class="btn btn-outline-danger btn-sm">
+      <i class="bi bi-trash me-1"></i> ลบ
+    </button>
+  </div>
+</div>
 
-                  <div class="form-row grid-span-2" v-if="edu.degree === 'อื่นๆ'">
-                    <label>ระบุวุฒิการศึกษา</label>
-                    <input v-model.trim="edu.degree_other" class="form-control" placeholder="พิมพ์วุฒิที่ไม่มีในรายการ" />
-                  </div>
-
-                  <div class="form-row grid-span-2">
-                    <label>สาขา</label>
-                    <input v-model.trim="edu.major" class="form-control" />
-                  </div>
-                </div>
-
-                <div class="subcard-actions">
-                  <button @click="removeEducation(i)" class="btn btn-outline-danger btn-sm">
-                    <i class="bi bi-trash me-1"></i> ลบ
-                  </button>
-                </div>
-              </div>
-            </div>
 
             <!-- Experience -->
             <div class="card">
@@ -201,7 +180,6 @@
                   </div>
                 </div>
 
-                <!-- รายละเอียดงาน ยาวเต็มบรรทัด -->
                 <div class="form-row">
                   <label>รายละเอียดงาน</label>
                   <textarea v-model.trim="job.description" class="form-control" rows="4"
@@ -249,8 +227,7 @@ export default {
       imageFile: null,
       imgVer: 0,
       defaultImage: DefaultProfile,
-      yearOptions: [],        // พ.ศ. ย้อนหลัง
-      degreeOptions: ['ปวช.', 'ปวส.', 'อนุปริญญา', 'ปริญญาตรี', 'ปริญญาโท', 'ปริญญาเอก', 'ประกาศนียบัตร'],
+      yearOptions: [],
     };
   },
   computed: {
@@ -266,7 +243,6 @@ export default {
     },
   },
   mounted() {
-    // เตรียมปี พ.ศ. ย้อนหลัง 30 ปี
     const now = new Date();
     const thaiYear = now.getFullYear() + 543;
     this.yearOptions = Array.from({ length: 30 }, (_, i) => thaiYear - i);
@@ -304,7 +280,7 @@ export default {
 
         this.user = {
           ...user,
-          education: (education || []).map(e => ({ ...e })), // รองรับ degree_other ถ้ามี
+          education: (education || []).map(e => ({ ...e })),
           experience: (experience || []).map((e) => ({
             ...e,
             start_date: e.start_date ? e.start_date.slice(0, 10) : "",
@@ -337,7 +313,6 @@ export default {
         const id = this.getCurrentApplicantId();
         if (!id) { alert("ไม่พบรหัสผู้ใช้"); return; }
 
-        // Upload image
         if (this.imageFile) {
           const fd = new FormData();
           fd.append("profile", this.imageFile);
@@ -352,14 +327,10 @@ export default {
           }
         }
 
-        // map education (ใช้ degree_other เมื่อเลือก 'อื่นๆ')
         const education = (this.user.education || []).map((e) => ({
           start_year: (e.start_year ?? "").toString().trim() || null,
           university: (e.university ?? "").toString().trim() || null,
           level:      (e.level ?? "").toString().trim() || null,
-          degree:     (e.degree === "อื่นๆ"
-                        ? (e.degree_other ?? "").toString().trim()
-                        : (e.degree ?? "").toString().trim()) || null,
           major:      (e.major ?? "").toString().trim() || null,
           gpa:        e.gpa === "" || e.gpa == null ? null : Number(e.gpa),
         }));
@@ -383,7 +354,7 @@ export default {
           a_salary      : (this.user.a_salary ?? "").toString().trim() || null,
           a_bio         : (this.user.a_bio ?? "").toString().trim() || null,
           a_interest    : (this.user.a_interest ?? "").toString().trim() || null,
-          a_birthdate   : this.user.a_birthdate ? this.toISODate(this.user.a_birthdate) : null, // ซ่อนไว้แต่ยังส่งได้
+          a_birthdate   : this.user.a_birthdate ? this.toISODate(this.user.a_birthdate) : null,
           profile_img_url: this.user.profile_img_url || null,
           education, experience,
         };
@@ -403,7 +374,7 @@ export default {
     },
     addEducation() {
       (this.user.education ||= []).push({
-        start_year: "", university: "", level: "", degree: "", degree_other: "", major: "", gpa: ""
+        start_year: "", university: "", level: "", major: "", gpa: ""
       });
     },
     removeEducation(i) { this.user.education.splice(i, 1); },
@@ -462,4 +433,7 @@ export default {
 .actions{ display:flex; justify-content:flex-end; gap:10px; margin-top:16px; }
 
 .text-muted{ color:var(--muted)!important; }
+.grid-span-2 { grid-column: span 2; }
+.mt-1 { margin-top: .25rem; } /* หรือใช้ spacing ของโปรเจ็กต์คุณ */
+
 </style>

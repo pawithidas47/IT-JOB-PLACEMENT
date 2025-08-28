@@ -19,6 +19,6 @@ router.get("/jobs", adminAuth, adminController.getAllJobs);           // ดู�
 router.delete("/jobs/:id", adminAuth, adminController.deleteJob);     // ลบงาน
 
 // ✅ รายการไฟล์ที่อัปโหลด (เช่นรูป, resume, portfolio)
-router.get("/uploads", adminAuth, adminController.getUploadedFiles);  // ดูรายชื่อไฟล์ที่ถูกอัปโหลด
+
 
 module.exports = router;

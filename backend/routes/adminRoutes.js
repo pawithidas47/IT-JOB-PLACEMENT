@@ -4,7 +4,68 @@ const db = require("../models/db");
 
 const adminAuthCtrl = require("../controllers/adminAuthController");
 const adminCtrl = require("../controllers/adminController");
+router.put('/api/admin/users/:id', /*authAdmin,*/ async (req, res) => {
+  try {
+    const id = req.params.id;
+    const { name, email, phone, role, status } = req.body;
 
+    // ตรวจค่าจำเป็น
+    if (!name || !email || !role || !status) {
+      return res.status(400).send('กรอกข้อมูลให้ครบ');
+    }
+
+    // ตัวอย่างใช้ mysql2/promise
+    const [result] = await req.db.execute(
+      `UPDATE users 
+       SET name=?, email=?, phone=?, role=?, status=?, updated_at=NOW()
+       WHERE id=?`,
+      [name, email, phone || null, role, status, id]
+    );
+
+    if (result.affectedRows === 0) return res.status(404).send('ไม่พบผู้ใช้');
+
+    const [rows] = await req.db.execute(
+      `SELECT id, name, email, phone, role, status, created_at, updated_at
+       FROM users WHERE id=?`, [id]
+    );
+    return res.status(200).json(rows[0]); // ส่ง JSON กลับให้ฝั่งหน้าเว็บอัปเดตแถว
+  } catch (e) {
+    console.error(e);
+    return res.status(500).send('แก้ไขไม่สำเร็จ');
+  }
+});
+
+// สร้างผู้ใช้ใหม่
+router.post('/api/admin/users', /*authAdmin,*/ async (req, res) => {
+  try {
+    const { name, email, phone, role, status, password } = req.body;
+    if (!name || !email || !role || !status || !password) {
+      return res.status(400).send('กรอกข้อมูลให้ครบ');
+    }
+
+    // ตรวจอีเมลซ้ำ (ตัวอย่าง)
+    const [dup] = await req.db.execute(`SELECT id FROM users WHERE email=?`, [email]);
+    if (dup.length) return res.status(409).send('อีเมลนี้ถูกใช้แล้ว');
+
+    const bcrypt = require('bcryptjs');
+    const hash = await bcrypt.hash(password, 10);
+
+    const [ins] = await req.db.execute(
+      `INSERT INTO users (name, email, phone, role, status, password_hash, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, NOW(), NOW())`,
+      [name, email, phone || null, role, status, hash]
+    );
+
+    const [rows] = await req.db.execute(
+      `SELECT id, name, email, phone, role, status, created_at, updated_at
+       FROM users WHERE id=?`, [ins.insertId]
+    );
+    return res.status(201).json(rows[0]);
+  } catch (e) {
+    console.error(e);
+    return res.status(500).send('เพิ่มผู้ใช้ไม่สำเร็จ');
+  }
+});
 // ✅ Login
 router.post("/login", adminAuthCtrl.loginAdmin);
 

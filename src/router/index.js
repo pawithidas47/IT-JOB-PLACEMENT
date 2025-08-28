@@ -53,8 +53,7 @@ const routes = [
   { path: "/admin/dashboard", component: AdminDashboard },
   { path: "/admin/users", component: () => import("@/views/admin/AdminUsers.vue") },
   { path: "/admin/jobs", component: () => import("@/views/admin/AdminJobs.vue") },
-  { path: "/admin/uploads", component: () => import("@/views/admin/AdminUploads.vue") },
-  { path: "/admin/complaints", component: () => import("@/views/admin/AdminComplaints.vue") },
+ 
 
   /* --- Employer area --- */
   { path: "/employer/dashboard", name: "DashboardEmployer", component: DashboardEmployer },

@@ -20,8 +20,7 @@ export default {
         { to: "/admin/dashboard", icon: "bi-speedometer2", label: "ภาพรวม" },
         { to: "/admin/users", icon: "bi-people-fill", label: "ผู้ใช้ทั้งหมด" },
         { to: "/admin/jobs", icon: "bi-briefcase-fill", label: "งานทั้งหมด" },
-        { to: "/admin/uploads", icon: "bi-folder-fill", label: "ไฟล์ที่อัปโหลด" },
-        { to: "/admin/complaints", icon: "bi-exclamation-diamond-fill", label: "ข้อร้องเรียน" },
+       
       ],
     };
   },

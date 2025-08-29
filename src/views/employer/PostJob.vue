@@ -8,28 +8,30 @@
 
         <form @submit.prevent="submitJob" class="grid gap-5">
           <!-- ชื่องาน / หมวดหมู่ -->
-          <div class="grid grid-2 gap-4">
-            <div>
-              <label class="label">ชื่องาน <span class="req">*</span></label>
-              <input v-model.trim="job.title" class="input" placeholder="เช่น ดูแลระบบเครือข่าย" required />
-            </div>
+          <div class="form-group grid grid-2 gap-4">
+  <div>
+    <label class="label">ชื่องาน <span class="req">*</span></label>
+    <input v-model.trim="job.title" class="input" placeholder="เช่น ออกแบบโปสเตอร์กิจกรรม" required />
+  </div>
+
 
             <div>
               <label class="label">หมวดหมู่ <span class="req">*</span></label>
               <select v-model="job.category" class="select" required>
                 <option disabled value="">— เลือกหมวดหมู่ —</option>
-                <option value="ออกแบบและมัลติมีเดีย">ออกแบบและมัลติมีเดีย</option>
-                <option value="UX/UI Design">UX/UI Design</option>
-                <option value="พัฒนาเว็บไซต์">พัฒนาเว็บไซต์</option>
-                <option value="พัฒนาแอปพลิเคชัน">พัฒนาแอปพลิเคชัน</option>
-                <option value="เขียนบทความ/ แปลบทความ">เขียน/ แปลบทความ</option>
-                <option value="คีย์ข้อมูล / Data Entry">คีย์ข้อมูล / Data Entry</option>
-                <option value="แอดมินเพจ / ดูแลโซเชียลมีเดีย">แอดมินเพจ / โซเชียลมีเดีย</option>
-                <option value="การตลาดดิจิทัล">การตลาดดิจิทัล</option>
-                <option value="IT Support">IT Support</option>
-                <option value="ดูแลระบบเครือข่าย">ดูแลระบบเครือข่าย</option>
-                <option value="ตัดต่อวิดีโอ / สร้างคอนเทนต์">ตัดต่อวิดีโอ / คอนเทนต์</option>
-                <option value="ที่ปรึกษาด้านเทคโนโลยี">ที่ปรึกษาด้านเทคโนโลยี</option>
+               <option value="การตลาดดิจิทัล">การตลาดดิจิทัล</option>
+  <option value="งานแปล / เขียนบทความ">งานแปล / เขียนบทความ</option>
+  <option value="งานตัดต่อวิดีโอ / สร้างคอนเทนต์">งานตัดต่อวิดีโอ / สร้างคอนเทนต์</option>
+  <option value="งานออกแบบ UX/UI">งานออกแบบ UX/UI</option>
+  <option value="งานออกแบบกราฟิก / มัลติมีเดีย">งานออกแบบกราฟิก / มัลติมีเดีย</option>
+  <option value="คีย์ข้อมูล / ป้อนข้อมูล">คีย์ข้อมูล / ป้อนข้อมูล</option>
+  <option value="ดูแลระบบเครือข่าย">ดูแลระบบเครือข่าย</option>
+  <option value="พัฒนาเว็บไซต์">พัฒนาเว็บไซต์</option>
+  <option value="พัฒนาแอปพลิเคชัน">พัฒนาแอปพลิเคชัน</option>
+  <option value="ผู้ดูแลเพจ / โซเชียลมีเดีย">ผู้ดูแลเพจ / โซเชียลมีเดีย</option>
+  <option value="ที่ปรึกษาด้านเทคโนโลยี">ที่ปรึกษาด้านเทคโนโลยี</option>
+  <option value="สนับสนุนงานไอที">สนับสนุนงานไอที (IT Support)</option>
+  <option value="อื่น ๆ">อื่น ๆ</option>
               </select>
             </div>
           </div>
@@ -52,7 +54,7 @@
           <div class="grid grid-2 gap-4">
             <div>
               <label class="label">จำนวนที่รับ</label>
-              <input v-model.trim="job.vacancy" class="input" placeholder="เช่น 3 อัตรา" />
+              <input v-model.trim="job.vacancy" class="input" placeholder="เช่น 2 อัตรา" />
             </div>
           </div>
 
@@ -61,69 +63,48 @@
             <label class="label">ชนิดงาน</label>
             <div class="chips">
               <button type="button" class="chip" :class="{active: ui.kind==='งานชิ้นเดียว'}"
-                @click="setKind('งานชิ้นเดียว','เหมางาน')">งานชิ้นเดียว</button>
+                      @click="setKind('งานชิ้นเดียว','เหมางาน')">งานชิ้นเดียว</button>
               <button type="button" class="chip" :class="{active: ui.kind==='รายชั่วโมง'}"
-                @click="setKind('รายชั่วโมง','รายชั่วโมง')">รายชั่วโมง</button>
+                      @click="setKind('รายชั่วโมง','รายชั่วโมง')">รายชั่วโมง</button>
               <button type="button" class="chip" :class="{active: ui.kind==='พาร์ทไทม์(รายวัน)'}"
-                @click="setKind('พาร์ทไทม์(รายวัน)','รายวัน')">พาร์ทไทม์ (รายวัน)</button>
+                      @click="setKind('พาร์ทไทม์(รายวัน)','รายวัน')">พาร์ทไทม์ (รายวัน)</button>
               <button type="button" class="chip" :class="{active: ui.kind==='ฟูลไทม์(รายเดือน)'}"
-                @click="setKind('ฟูลไทม์(รายเดือน)','รายเดือน')">ฟูลไทม์ (รายเดือน)</button>
+                      @click="setKind('ฟูลไทม์(รายเดือน)','รายเดือน')">ฟูลไทม์ (รายเดือน)</button>
             </div>
           </div>
 
-          <!-- ระยะเวลางาน (พรีเซ็ต + งานชิ้นเดียวมีวันส่ง) -->
+          <!-- ระยะเวลางาน -->
           <div>
             <label class="label">ระยะเวลางาน</label>
-            <div class="chips">
-              <button type="button" class="chip" :class="{active: ui.durationPreset==='ต่อเนื่อง'}"
-                @click="ui.durationPreset='ต่อเนื่อง'">ต่อเนื่อง</button>
-              <button type="button" class="chip" :class="{active: ui.durationPreset==='1 เดือน'}"
-                @click="ui.durationPreset='1 เดือน'">1 เดือน</button>
-              <button type="button" class="chip" :class="{active: ui.durationPreset==='3 เดือน'}"
-                @click="ui.durationPreset='3 เดือน'">3 เดือน</button>
-              <button type="button" class="chip" :class="{active: ui.durationPreset==='6 เดือน'}"
-                @click="ui.durationPreset='6 เดือน'">6 เดือน</button>
-              <button type="button" class="chip" :class="{active: ui.durationPreset==='งานชิ้นเดียว'}"
-                @click="ui.durationPreset='งานชิ้นเดียว'">งานชิ้นเดียว</button>
-            </div>
 
-            <div v-if="ui.durationPreset==='งานชิ้นเดียว'" class="mt-2">
-              <label class="label sub">วันส่งงาน (ถ้ามี)</label>
-              <input type="date" v-model="ui.dueDate" class="input"/>
-            </div>
+            <!-- ถ้าเป็นงานชิ้นเดียว ฟิกข้อความ และให้กรอกวันส่งงาน (ถ้ามี) -->
+            <template v-if="ui.kind==='งานชิ้นเดียว'">
+              <div class="pill-fixed">งานชิ้นเดียว</div>
+              <div class="mt-2">
+                <label class="label sub">วันส่งงาน (ถ้ามี)</label>
+                <input type="date" v-model="ui.dueDate" class="input"/>
+              </div>
+            </template>
+
+            <!-- ถ้าไม่ใช่งานชิ้นเดียว แสดง preset ตามปกติ -->
+            <template v-else>
+              <div class="chips">
+                <button type="button" class="chip" :class="{active: ui.durationPreset==='ต่อเนื่อง'}"
+                        @click="ui.durationPreset='ต่อเนื่อง'">ต่อเนื่อง</button>
+                <button type="button" class="chip" :class="{active: ui.durationPreset==='1 เดือน'}"
+                        @click="ui.durationPreset='1 เดือน'">1 เดือน</button>
+                <button type="button" class="chip" :class="{active: ui.durationPreset==='3 เดือน'}"
+                        @click="ui.durationPreset='3 เดือน'">3 เดือน</button>
+                <button type="button" class="chip" :class="{active: ui.durationPreset==='6 เดือน'}"
+                        @click="ui.durationPreset='6 เดือน'">6 เดือน</button>
+              </div>
+            </template>
           </div>
 
-          <!-- วัน-เวลาทำงาน -->
-          <div>
-            <label class="label">วัน‑เวลาทำงาน</label>
-
-            <div class="chips mb-2">
-              <button type="button" class="chip" @click="selectWeekdays">เลือก จ.-ศ.</button>
-              <button type="button" class="chip" @click="toggleAllDays">สลับเลือกทุกวัน</button>
-            </div>
-
-            <div class="days">
-              <button v-for="d in days" :key="d.key" type="button"
-                class="day" :class="{active: ui.daysSelected.includes(d.key)}"
-                @click="toggleDay(d.key)">{{ d.label }}</button>
-            </div>
-
-            <div class="grid grid-2 gap-4 mt-2">
-              <div>
-                <label class="label sub">เริ่ม</label>
-                <input type="time" v-model="ui.startTime" class="input" />
-              </div>
-              <div>
-                <label class="label sub">เลิก</label>
-                <input type="time" v-model="ui.endTime" class="input" />
-              </div>
-            </div>
-          </div>
-
-          <!-- ค่าตอบแทน -->
+          <!-- ค่าจ้าง (ดรอปดาวเลือกราคา) -->
           <div>
             <label class="label">ค่าจ้าง</label>
-            <div class="grid grid-3 gap-4">
+            <div class="grid grid-2 gap-4">
               <div>
                 <select v-model="job.salary_type" class="select">
                   <option disabled value="">ประเภทค่าจ้าง</option>
@@ -134,13 +115,52 @@
                   <option value="ตามตกลง">ตามตกลง</option>
                 </select>
               </div>
+
               <div v-if="job.salary_type !== 'ตามตกลง'">
-                <input type="number" min="0" class="input" v-model.number="job.salary_min" placeholder="ขั้นต่ำ" />
-              </div>
-              <div v-if="job.salary_type !== 'ตามตกลง'">
-                <input type="number" min="0" class="input" v-model.number="job.salary_max" placeholder="ขั้นสูง" />
+                <select v-model.number="job.salary_value" class="select">
+                  <option disabled :value="null">เลือกราคา</option>
+                  <option v-for="v in salaryAmountOptions" :key="v" :value="v">
+                    {{ v.toLocaleString() }} บาท
+                  </option>
+                </select>
               </div>
             </div>
+            <div class="hint" v-if="job.salary_type==='เหมางาน'">* ราคาเป็นต่อชิ้นงาน</div>
+          </div>
+
+          <!-- วัน-เวลาทำงาน -->
+          <div>
+            <label class="label">วัน-เวลาทำงาน</label>
+
+            <!-- งานชิ้นเดียว: ฟิกเป็น 'ตามตกลง/ขึ้นกับงาน' -->
+            <div v-if="ui.kind==='งานชิ้นเดียว'" class="pill-muted">
+              ตามตกลง/ขึ้นกับงาน
+            </div>
+
+            <!-- งานประเภทอื่น: ให้เลือกวัน-เวลา -->
+            <template v-else>
+              <div class="chips mb-2">
+                <button type="button" class="chip" @click="selectWeekdays">เลือก จ.-ศ.</button>
+                <button type="button" class="chip" @click="toggleAllDays">สลับเลือกทุกวัน</button>
+              </div>
+
+              <div class="days">
+                <button v-for="d in days" :key="d.key" type="button"
+                        class="day" :class="{active: ui.daysSelected.includes(d.key)}"
+                        @click="toggleDay(d.key)">{{ d.label }}</button>
+              </div>
+
+              <div class="grid grid-2 gap-4 mt-2">
+                <div>
+                  <label class="label sub">เริ่ม</label>
+                  <input type="time" v-model="ui.startTime" class="input" />
+                </div>
+                <div>
+                  <label class="label sub">เลิก</label>
+                  <input type="time" v-model="ui.endTime" class="input" />
+                </div>
+              </div>
+            </template>
           </div>
 
           <!-- สรุปก่อนโพสต์ -->
@@ -150,7 +170,7 @@
               <div class="sum-val">{{ jDurationString || '—' }}</div>
             </div>
             <div class="sum-item">
-              <div class="sum-title">วัน‑เวลาทำงาน </div>
+              <div class="sum-title">วัน-เวลาทำงาน </div>
               <div class="sum-val">{{ jWorktimeString || '—' }}</div>
             </div>
             <div class="sum-item">
@@ -183,60 +203,92 @@ export default {
         qualification: "",
         vacancy: "",
         salary_type: "",
-        salary_min: null,
-        salary_max: null,
+        salary_value: null, // เลือกราคาจากดรอปดาว
       },
       ui: {
-        kind: "งานชิ้นเดียว",
-        durationPreset: "งานชิ้นเดียว",
-        dueDate: "",
+        kind: "งานชิ้นเดียว",           // ค่าเริ่มต้น
+        durationPreset: "ต่อเนื่อง",     // ใช้เมื่อไม่ใช่งานชิ้นเดียว
+        dueDate: "",                      // ใช้กับงานชิ้นเดียว (ถ้ามี)
         daysSelected: ["จ", "อ", "พ", "พฤ", "ศ"],
         startTime: "09:00",
         endTime: "17:00",
       },
       days: [
         { key: "อา", label: "อา" },
-        { key: "จ", label: "จ" },
-        { key: "อ", label: "อ" },
-        { key: "พ", label: "พ" },
+        { key: "จ",  label: "จ"  },
+        { key: "อ",  label: "อ"  },
+        { key: "พ",  label: "พ"  },
         { key: "พฤ", label: "พฤ" },
-        { key: "ศ", label: "ศ" },
-        { key: "ส", label: "ส" },
+        { key: "ศ",  label: "ศ"  },
+        { key: "ส",  label: "ส"  },
       ],
     };
   },
   computed: {
-    jDurationString() {
-      const p = this.ui.durationPreset;
-      if (!p) return "";
-      if (p === "งานชิ้นเดียว" && this.ui.dueDate) {
-        return `งานชิ้นเดียว (ส่งภายใน ${this.thaiDate(this.ui.dueDate)})`;
-      }
-      return p;
+    // options ราคาตามประเภทค่าจ้าง
+    salaryAmountOptions() {
+      const t = this.job.salary_type;
+      if (t === "รายชั่วโมง") return [50, 60, 80, 100, 120, 150, 200];
+      if (t === "รายวัน")    return [300, 500, 800, 1000, 1500, 2000];
+      if (t === "รายเดือน")  return [8000, 10000, 12000, 15000, 18000, 20000, 25000];
+      if (t === "เหมางาน")   return [300, 500, 800, 1000, 1500, 2000, 3000, 5000];
+      return [];
     },
+
+    // สรุประยะเวลา
+    jDurationString() {
+      if (this.ui.kind === "งานชิ้นเดียว") {
+        return this.ui.dueDate
+          ? `งานชิ้นเดียว (ส่งภายใน ${this.thaiDate(this.ui.dueDate)})`
+          : "งานชิ้นเดียว";
+      }
+      return this.ui.durationPreset || "";
+    },
+
+    // สรุปวันเวลา
     jWorktimeString() {
-      const ds = this.ui.daysSelected;
+      if (this.ui.kind === "งานชิ้นเดียว") return "ตามตกลง/ขึ้นกับงาน";
+      const ds = this.ui.daysSelected.slice();
       if (!ds.length) return "";
-      const isWeekdays = ds.length === 5 && ["จ", "อ", "พ", "พฤ", "ศ"].every((k) => ds.includes(k));
+      const isWeekdays = ds.length === 5 && ["จ", "อ", "พ", "พฤ", "ศ"].every(k => ds.includes(k));
       const dayPart = isWeekdays ? "จ.-ศ." : ds.join(", ");
       const tPart = this.ui.startTime && this.ui.endTime ? `${this.ui.startTime} – ${this.ui.endTime}` : "";
       return [dayPart, tPart].filter(Boolean).join(" ");
     },
+
+    // สรุปค่าจ้าง
     jSalaryString() {
-      return this.buildSalaryString(this.job.salary_type, this.job.salary_min, this.job.salary_max);
+      const t = this.job.salary_type;
+      if (!t || t === "ตามตกลง") return "ตามตกลง";
+      if (this.job.salary_value != null) {
+        return `${t} ${Number(this.job.salary_value).toLocaleString()} บาท`;
+      }
+      return t;
     },
   },
   mounted() {
     const u = localStorage.getItem("user");
     if (!u) return this.$router.push("/login");
     this.user = JSON.parse(u);
-    this.setKind(this.ui.kind, "เหมางาน");
+
+    // ให้ชนิดงานเริ่มต้นเป็น "งานชิ้นเดียว" และผูกค่าจ้างเป็น "เหมางาน"
+    this.setKind("งานชิ้นเดียว", "เหมางาน");
   },
   methods: {
     setKind(kind, salaryType) {
       this.ui.kind = kind;
       this.job.salary_type = salaryType;
+
+      if (kind === "งานชิ้นเดียว") {
+        // ฟิกระยะเวลา และสรุปวันเวลาเป็นตามตกลง
+        this.ui.durationPreset = "งานชิ้นเดียว";
+        this.ui.daysSelected = ["จ", "อ", "พ", "พฤ", "ศ"]; // เก็บค่าไว้ แต่ UI จะไม่ใช้
+      } else {
+        // กลับสู่ค่า default
+        if (this.ui.durationPreset === "งานชิ้นเดียว") this.ui.durationPreset = "ต่อเนื่อง";
+      }
     },
+
     toggleDay(key) {
       const i = this.ui.daysSelected.indexOf(key);
       if (i >= 0) this.ui.daysSelected.splice(i, 1);
@@ -246,36 +298,41 @@ export default {
     toggleAllDays() {
       this.ui.daysSelected = this.ui.daysSelected.length === 7 ? [] : ["อา", "จ", "อ", "พ", "พฤ", "ศ", "ส"];
     },
+
     thaiDate(iso) {
       const d = new Date(iso);
       return isNaN(d) ? iso : d.toLocaleDateString("th-TH", { day: "2-digit", month: "2-digit", year: "numeric" });
     },
-    buildSalaryString(type, min, max) {
-      const toNum = (v) => (v==null||v==="") ? null : Number(String(v).replace(/[^\d.-]/g,""));
-      const mn = toNum(min), mx = toNum(max);
-      if (!type || type==="ตามตกลง") return "ตามตกลง";
-      if (mn!=null && mx!=null) return `${type} ${mn.toLocaleString()} – ${mx.toLocaleString()}`;
-      if (mn!=null) return `${type} ${mn.toLocaleString()}+`;
-      if (mx!=null) return `${type} สูงสุด ${mx.toLocaleString()}`;
+
+    // แปลงข้อมูลเป็น payload ที่ backend เข้าใจ (ยังคงกรอกลง j_salary เป็นข้อความเดียว)
+    buildSalaryString(type, value) {
+      if (!type || type === "ตามตกลง") return "ตามตกลง";
+      if (value != null) return `${type} ${Number(value).toLocaleString()}`;
       return type;
     },
+
     async submitJob() {
       if (!this.job.title || !this.job.category) return;
+
       const payload = {
         j_title: this.job.title,
         j_description: this.job.description,
         j_type: this.job.category,
         j_amount: this.job.vacancy || null,
+
+        // เก็บแบบ “type + value” แต่รวมเป็นสตริงใน j_salary (ตาม schema ปัจจุบัน)
+        j_salary: this.buildSalaryString(this.job.salary_type, this.job.salary_value),
+        // ถ้า API ของคุณรองรับเขตข้อมูลเพิ่ม ลองแนบไปด้วย (ฝั่ง server จะเมินก็ไม่เป็นไร)
         j_salary_type: this.job.salary_type || null,
-        j_salary_min: this.job.salary_type==='ตามตกลง' ? null : (this.job.salary_min ?? null),
-        j_salary_max: this.job.salary_type==='ตามตกลง' ? null : (this.job.salary_max ?? null),
-        j_salary: this.buildSalaryString(this.job.salary_type, this.job.salary_min, this.job.salary_max), // ✅
+        j_salary_value: this.job.salary_type === "ตามตกลง" ? null : (this.job.salary_value ?? null),
+
         j_worktime: this.jWorktimeString || null,
         j_deliverable: "",
         j_qualification: this.job.qualification || null,
         j_duration: this.jDurationString || null,
         employer_id: this.user.employer_id,
       };
+
       try {
         await this.$axios.post("http://localhost:3001/api/jobs", payload);
         alert("✅ โพสต์งานสำเร็จ");
@@ -289,8 +346,21 @@ export default {
 };
 </script>
 
-
 <style scoped>
+.form-group {
+  margin-bottom: 20px; /* ระยะห่างมาตรฐานทุกหัวข้อ */
+}
+
+.label {
+  font-weight: 700;
+  margin-bottom: 6px; /* label เว้นกับ input พอดีๆ */
+  display: block;
+}
+
+.input, .select, textarea.input {
+  margin: 0; /* เอา margin เองออก จะได้ใช้ margin ของ form-group คุมแทน */
+}
+
 /* Layout & card */
 .container { padding: 24px 16px; }
 .card {
@@ -302,11 +372,9 @@ export default {
 /* Grid helpers */
 .grid { display:grid; }
 .grid-2 { grid-template-columns: repeat(2, minmax(0,1fr)); }
-.grid-3 { grid-template-columns: repeat(3, minmax(0,1fr)); }
 .gap-4 { gap:16px; }
 .gap-5 { gap:20px; }
 .mt-2 { margin-top:8px; }
-.mb-2 { margin-bottom:8px; }
 
 /* Form controls */
 .label { font-weight:700; color:#0f172a; font-size:.95rem; margin-bottom:6px; display:block; }
@@ -324,16 +392,16 @@ export default {
 .chips { display:flex; flex-wrap:wrap; gap:8px; }
 .chip {
   border:1px solid #e6e9f0; background:#fff; padding:8px 12px; border-radius:999px;
-  font-weight:700; color:#0f172a; transition:.15s;
+  font-weight:700; color:#0f172a; transition:.15s; cursor:pointer;
 }
 .chip:hover { box-shadow:0 6px 18px rgba(16,24,40,.06); transform: translateY(-1px); }
 .chip.active { background:#fff5e6; border-color:#ffb380; color:#ff6600; }
 
-/* Days selector */
+/* Day selector */
 .days { display:flex; flex-wrap:wrap; gap:8px; }
 .day {
   border:1px solid #e5e7eb; background:#fff; color:#0f172a; border-radius:10px; padding:8px 10px;
-  min-width:42px; text-align:center; font-weight:700;
+  min-width:42px; text-align:center; font-weight:700; cursor:pointer;
 }
 .day.active { background:#0ea5e9; color:#fff; border-color:#0ea5e9; }
 
@@ -346,16 +414,27 @@ export default {
 .sum-title { color:#64748b; font-weight:700; font-size:.85rem; margin-bottom:4px; }
 .sum-val { color:#0f172a; font-weight:800; }
 
+/* Pills */
+.pill-fixed{
+  display:inline-block; padding:8px 12px; border-radius:999px;
+  background:#eef2ff; color:#1e3a8a; border:1px solid #c7d2fe; font-weight:800;
+}
+.pill-muted{
+  display:inline-block; padding:8px 12px; border-radius:999px;
+  background:#f1f5f9; color:#0f172a; border:1px dashed #cbd5e1; font-weight:700;
+}
+.hint{ color:#64748b; font-size:.85rem; margin-top:6px }
+
 /* Button */
 .btn-primary {
   width:100%; border:none; background:#ff6600; color:#fff; font-weight:800;
-  padding:12px 18px; border-radius:14px; transition:.15s;
+  padding:12px 18px; border-radius:14px; transition:.15s; cursor:pointer;
 }
 .btn-primary:hover { background:#e65c00; box-shadow:0 8px 20px rgba(255,102,0,.25); transform:translateY(-1px); }
 
 /* Responsive */
 @media (max-width: 900px) {
-  .grid-2, .grid-3 { grid-template-columns: 1fr; }
+  .grid-2 { grid-template-columns: 1fr; }
   .summary { grid-template-columns: 1fr; }
 }
 </style>

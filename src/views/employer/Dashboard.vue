@@ -1,4 +1,4 @@
-<template>
+<template> 
   <div>
     <NavbarEmployer />
 
@@ -14,7 +14,12 @@
         </div>
 
         <div class="text-center mb-4">
-          <img :src="editMode ? (photoPreview || imgUrl(user.profile_img_url)) : imgUrl(user.profile_img_url)" class="rounded mb-2" style="width:100px;height:100px;object-fit:cover" />
+          <img
+            :src="photoPreview || imgUrl(user.profile_img_url)"
+            class="rounded mb-2"
+            style="width:100px;height:100px;object-fit:cover"
+            alt="company-logo"
+          />
           <div v-if="editMode" class="mb-3">
             <input type="file" accept="image/*" class="form-control form-control-sm" @change="onPickPhoto" />
           </div>
@@ -28,21 +33,21 @@
         </div>
 
         <h6 class="fw-bold text-success mb-3">ข้อมูลติดต่อบริษัท</h6>
-        <ul class="list-unstyled small text-muted mb-4">
+        <ul class="list-unstyled small text-muted mb-4 profile-list">
           <li>
             <i class="bi bi-telephone me-2"></i><b>โทรศัพท์: </b>
             <template v-if="editMode"><input v-model="tempUser.e_phone" class="form-control form-control-sm"/></template>
-            <template v-else>{{ user.e_phone || '-' }}</template>
+            <template v-else>{{ user.e_phone || '—' }}</template>
           </li>
           <li>
             <i class="bi bi-person-circle me-2"></i><b>ผู้ติดต่อ: </b>
             <template v-if="editMode"><input v-model="tempUser.e_contact" class="form-control form-control-sm"/></template>
-            <template v-else>{{ user.e_contact || '-' }}</template>
+            <template v-else>{{ user.e_contact || '—' }}</template>
           </li>
           <li>
             <i class="bi bi-person-badge me-2"></i><b>ตำแหน่ง: </b>
             <template v-if="editMode"><input v-model="tempUser.e_position" class="form-control form-control-sm"/></template>
-            <template v-else>{{ user.e_position || '-' }}</template>
+            <template v-else>{{ user.e_position || '—' }}</template>
           </li>
           <li>
             <i class="bi bi-globe me-2"></i><b>เว็บไซต์: </b>
@@ -50,27 +55,53 @@
               <input v-model="tempUser.e_website" class="form-control form-control-sm" placeholder="https://your-company.com"/>
             </template>
             <template v-else>
-              <a v-if="user.e_website" :href="user.e_website" target="_blank">{{ user.e_website }}</a>
+              <a v-if="user.e_website" :href="user.e_website" target="_blank" rel="noopener">{{ user.e_website }}</a>
               <span v-else>—</span>
             </template>
           </li>
         </ul>
+        <h6 class="fw-bold text-success mb-2 mt-4">เกี่ยวกับบริษัท</h6>
+
+<!-- โหมดแก้ไข -->
+<div v-if="editMode">
+  <textarea
+    v-model.trim="tempUser.e_about"
+    class="form-control"
+    rows="4"
+    placeholder="อธิบายว่าบริษัททำอะไร จุดเด่น/บริการ/อุตสาหกรรม ลูกค้าที่ดูแล ฯลฯ (แนะนำ 50–300 ตัวอักษร)"
+    maxlength="1000"
+  ></textarea>
+  <div class="text-muted small mt-1">
+    {{ (tempUser.e_about?.length || 0).toLocaleString() }}/1,000
+  </div>
+</div>
+
+<!-- โหมดแสดงผล -->
+<p v-else class="small mb-3" style="white-space:pre-wrap">
+  {{ user.e_about || 'ยังไม่ระบุเกี่ยวกับบริษัท' }}
+</p>
+
 
         <h6 class="fw-bold text-success mb-2">แกลเลอรี่รูปภาพบริษัท</h6>
         <div class="d-flex gap-2 overflow-auto mb-3">
-          <img v-for="(img,idx) in user.e_gallery || []" :key="idx" :src="imgUrl(img)"
-               class="rounded" style="height:80px;object-fit:cover;cursor:pointer"
-               @click="showImage(imgUrl(img))"/>
+          <img
+            v-for="(img,idx) in (user.e_gallery || [])"
+            :key="idx"
+            :src="imgUrl(img)"
+            class="rounded thumb"
+            @click="showImage(imgUrl(img))"
+            alt="gallery"
+          />
+          <span v-if="!user.e_gallery || user.e_gallery.length === 0" class="text-muted small">ยังไม่มีรูปแกลเลอรี่</span>
         </div>
-
         <input v-if="editMode" type="file" multiple class="form-control form-control-sm mb-4" @change="onPickGallery"/>
 
-        <!-- modal ดูภาพ -->
+        <!-- modal รูป -->
         <div v-if="selectedImage" class="modal-backdrop" @click.self="selectedImage=null">
           <div class="modal-image-wrapper">
             <button class="close-btn" @click="selectedImage=null">✕</button>
             <button class="nav-btn left" @click="prevImage">‹</button>
-            <img :src="selectedImage" class="preview-image"/>
+            <img :src="selectedImage" class="preview-image" alt="preview"/>
             <button class="nav-btn right" @click="nextImage">›</button>
           </div>
         </div>
@@ -81,7 +112,12 @@
         </div>
         <p v-else class="small mb-2">{{ user.e_address || 'ยังไม่ระบุที่อยู่บริษัท' }}</p>
 
-        <iframe :src="user.e_map_iframe" width="100%" height="220" style="border:0;border-radius:8px" allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+        <template v-if="user.e_map_iframe">
+          <iframe :src="user.e_map_iframe" width="100%" height="220" style="border:0;border-radius:8px"
+                  allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+        </template>
+        <p v-else class="text-muted small">ยังไม่ระบุแผนที่บริษัท</p>
+
         <input v-if="editMode" v-model="tempUser.e_map_iframe" class="form-control form-control-sm mt-2" placeholder="วางลิงก์ iframe ของ Google Maps ที่นี่"/>
       </div>
 
@@ -135,7 +171,7 @@ export default {
   components: { NavbarEmployer },
   data() {
     return {
-      user: { e_gallery: [] },
+      user: { employer_id: null, e_gallery: [], e_about: "" }, // e_about = ใช้แสดงบนหน้า (map จาก e_description)
       tempUser: null,
       editMode: false,
 
@@ -171,36 +207,57 @@ export default {
   mounted() {
     const u = JSON.parse(localStorage.getItem("user") || "{}");
     if (!u?.employer_id) return this.$router.push("/login");
-    this.user = u;
+
+    // merge กัน key หาย และ normalize แกลเลอรี่
+    this.user = {
+      employer_id: u.employer_id,
+      ...u,
+      e_gallery: normalizeGallery(u.e_gallery),
+      e_about: u.e_about || u.e_description || "", // เผื่อเคย cache ไว้
+    };
+
     this.fetchUserProfile();
     this.fetchJobs();
   },
   methods: {
     // ---------- Helpers ----------
-    imgUrl(path) { return path ? `${BASE}${path}` : "/default-profile.jpg"; },
+    imgUrl(path) {
+      return path ? `${BASE}${path}` : "/default-profile.jpg";
+    },
     _toNum(v) {
       if (v == null || v === "") return null;
       const n = Number(String(v).replace(/[^\d.-]/g, ""));
       return Number.isFinite(n) ? n : null;
     },
     _parseLegacySalary(txt) {
-      // รองรับ "รายเดือน 15,000 – 20,000" / "เหมางาน 8000"
       if (!txt || typeof txt !== "string") return {};
-      const m = txt.match(/(รายชั่วโมง|รายวัน|รายเดือน|เหมางาน|ตามตกลง)?\s*([\d,]+)?\s*(?:[-–]\s*([\d,]+))?/);
+      const m = txt.match(
+        /(รายชั่วโมง|รายวัน|รายเดือน|เหมางาน|ตามตกลง)?\s*([\d,]+)?\s*(?:[-–]\s*([\d,]+))?/,
+      );
       if (!m) return {};
       return {
-        type: m[1] || "",
-        min: m[2] ? this._toNum(m[2]) : null,
-        max: m[3] ? this._toNum(m[3]) : null,
+        type: (m[1] || "").trim(),
+        min: this._toNum(m[2]),
+        max: this._toNum(m[3]),
       };
     },
 
     // ---------- API ----------
     async fetchUserProfile() {
       try {
-        const { data } = await axios.get(`${BASE}/api/employers/${this.user.employer_id}`);
-        const profile = { ...data, e_gallery: data.e_gallery ? JSON.parse(data.e_gallery) : [] };
-        this.user = profile;
+        const { employer_id } = this.user; // กันหาย
+        const { data } = await axios.get(`${BASE}/api/employers/${employer_id}`);
+
+        // ใช้ e_description จาก DB แล้ว map เป็น e_about สำหรับฝั่งหน้าเว็บ
+        const merged = {
+          ...this.user,
+          ...data,
+          employer_id,
+          e_gallery: normalizeGallery(data?.e_gallery),
+          e_about: data?.e_description ?? this.user.e_about ?? "",
+        };
+
+        this.user = merged;
         localStorage.setItem("user", JSON.stringify(this.user));
       } catch (e) {
         console.error("❌ โหลดโปรไฟล์ล้มเหลว:", e);
@@ -209,28 +266,16 @@ export default {
 
     async fetchJobs() {
       try {
-        const { data } = await axios.get(`${BASE}/api/jobs/employer/${this.user.employer_id}`);
-        // 🔧 Normalize: คืนชื่อคีย์ให้ตรงกับหน้าเว็บเสมอ
+        const { data } = await axios.get(
+          `${BASE}/api/jobs/employer/${this.user.employer_id}`,
+        );
         this.jobs = (data || []).map((j) => {
           const legacy = this._parseLegacySalary(j.j_salary);
           const type =
-            j.j_salary_type ??
-            j.salary_type ??
-            j.j_type_salary ??
-            legacy.type ??
-            ""; // ไม่มี = ค่าว่าง
-
-          const min =
-            this._toNum(j.j_salary_min ?? j.salary_min ?? legacy.min);
-          const max =
-            this._toNum(j.j_salary_max ?? j.salary_max ?? legacy.max);
-
-          return {
-            ...j,
-            j_salary_type: type,
-            j_salary_min: min,
-            j_salary_max: max,
-          };
+            j.j_salary_type ?? j.salary_type ?? j.j_type_salary ?? legacy.type ?? "";
+          const min = this._toNum(j.j_salary_min ?? j.salary_min ?? legacy.min);
+          const max = this._toNum(j.j_salary_max ?? j.salary_max ?? legacy.max);
+          return { ...j, j_salary_type: type, j_salary_min: min, j_salary_max: max };
         });
       } catch (e) {
         console.error("❌ โหลดข้อมูลงานล้มเหลว:", e);
@@ -245,54 +290,84 @@ export default {
 
       if (type === "ตามตกลง") return "ตามตกลง";
       if (min != null && max != null)
-        return `${min.toLocaleString()} – ${max.toLocaleString()} บาท${type ? ` (${type})` : ""}`;
-      if (min != null)
-        return `${min.toLocaleString()} บาทขึ้นไป${type ? ` (${type})` : ""}`;
-      if (max != null)
-        return `สูงสุด ${max.toLocaleString()} บาท${type ? ` (${type})` : ""}`;
-
-      // fallback สุดท้าย ถ้า backend เก่ายังส่งสตริงรวมมา
-      if (job.j_salary) return String(job.j_salary);
-
+        return `${min.toLocaleString()} – ${max.toLocaleString()} บาท${
+          type ? ` (${type})` : ""
+        }`;
+      if (min != null) return `${min.toLocaleString()} บาทขึ้นไป${type ? ` (${type})` : ""}`;
+      if (max != null) return `สูงสุด ${max.toLocaleString()} บาท${type ? ` (${type})` : ""}`;
+      if (job.j_salary) return String(job.j_salary); // legacy
       return "ยังไม่ระบุ";
     },
 
     // ---------- Edit flow ----------
     startEdit() {
       this.tempUser = JSON.parse(JSON.stringify(this.user));
-      this.photoFile = null; this.photoPreview = null; this.galleryFiles = [];
+      this.photoFile = null;
+      this.photoPreview = null;
+      this.galleryFiles = [];
       this.editMode = true;
     },
     cancelEdit() {
-      this.tempUser = null; this.photoFile = null; this.photoPreview = null; this.galleryFiles = [];
+      this.tempUser = null;
+      this.photoFile = null;
+      this.photoPreview = null;
+      this.galleryFiles = [];
       this.editMode = false;
       localStorage.setItem("user", JSON.stringify(this.user));
     },
     onPickPhoto(e) {
-      const f = e.target.files?.[0]; if (!f) return;
-      this.photoFile = f; this.photoPreview = URL.createObjectURL(f);
+      const f = e.target.files?.[0];
+      if (!f) return;
+      this.photoFile = f;
+      this.photoPreview = URL.createObjectURL(f);
     },
-    onPickGallery(e) { this.galleryFiles = Array.from(e.target.files || []); },
+    onPickGallery(e) {
+      this.galleryFiles = Array.from(e.target.files || []);
+    },
 
     async saveProfile() {
       try {
-        await axios.put(`${BASE}/api/employers/${this.user.employer_id}`, this.tempUser);
+        // map e_about (frontend) -> e_description (DB)
+        const payload = {
+          ...this.tempUser,
+          e_description: this.tempUser.e_about ?? "", // ✅ ตรงกับ backend
+        };
 
+        // 1) save fields
+        await axios.put(
+          `${BASE}/api/employers/${this.user.employer_id}`,
+          payload,
+        );
+
+        // 2) upload profile photo
         if (this.photoFile) {
-          const fd = new FormData(); fd.append("profile", this.photoFile);
-          const res = await axios.post(`${BASE}/api/employers/upload-profile-employer/${this.user.employer_id}`, fd);
-          if (res.data?.url) this.tempUser.profile_img_url = res.data.url;
-        }
-        if (this.galleryFiles.length) {
-          const fd2 = new FormData(); this.galleryFiles.forEach((f) => fd2.append("gallery", f));
-          const res2 = await axios.post(`${BASE}/api/employers/${this.user.employer_id}/upload-gallery`, fd2);
-          if (Array.isArray(res2.data?.urls)) this.tempUser.e_gallery = res2.data.urls;
+          const fd = new FormData();
+          fd.append("profile", this.photoFile);
+          await axios.post(
+            `${BASE}/api/employers/upload-profile-employer/${this.user.employer_id}`,
+            fd,
+          );
         }
 
-        this.user = JSON.parse(JSON.stringify(this.tempUser));
-        localStorage.setItem("user", JSON.stringify(this.user));
+        // 3) upload gallery
+        if (this.galleryFiles.length) {
+          const fd2 = new FormData();
+          this.galleryFiles.forEach((f) => fd2.append("gallery", f));
+          await axios.post(
+            `${BASE}/api/employers/${this.user.employer_id}/upload-gallery`,
+            fd2,
+          );
+        }
+
+        // 4) refresh from server (ให้แน่ใจว่าอ่านค่าล่าสุดจาก DB)
+        await this.fetchUserProfile();
+
+        // reset ui
         this.editMode = false;
-        this.tempUser = null; this.photoFile = null; this.photoPreview = null; this.galleryFiles = [];
+        this.tempUser = null;
+        this.photoFile = null;
+        this.photoPreview = null;
+        this.galleryFiles = [];
         alert("✅ บันทึกข้อมูลสำเร็จ");
       } catch (e) {
         console.error("❌ บันทึกโปรไฟล์ล้มเหลว:", e.response?.data || e.message);
@@ -302,26 +377,48 @@ export default {
 
     // ---------- modal รูป ----------
     showImage(url) {
-      this.currentImageIndex = (this.user.e_gallery || []).findIndex((img) => this.imgUrl(img) === url);
+      this.currentImageIndex = (this.user.e_gallery || []).findIndex(
+        (img) => this.imgUrl(img) === url,
+      );
       this.selectedImage = url;
     },
     nextImage() {
-      const total = (this.user.e_gallery || []).length; if (!total) return;
+      const total = (this.user.e_gallery || []).length;
+      if (!total) return;
       this.currentImageIndex = (this.currentImageIndex + 1) % total;
       this.selectedImage = this.imgUrl(this.user.e_gallery[this.currentImageIndex]);
     },
     prevImage() {
-      const total = (this.user.e_gallery || []).length; if (!total) return;
+      const total = (this.user.e_gallery || []).length;
+      if (!total) return;
       this.currentImageIndex = (this.currentImageIndex - 1 + total) % total;
       this.selectedImage = this.imgUrl(this.user.e_gallery[this.currentImageIndex]);
     },
   },
 };
+
+/* ===== util (นอก export) ===== */
+function normalizeGallery(g) {
+  try {
+    if (Array.isArray(g)) return g;
+    if (typeof g === "string" && g.trim().length) return JSON.parse(g);
+  } catch (_) {
+    // eslint-disable-next-line no-console
+    console.warn("normalizeGallery: invalid gallery format");
+  }
+  return [];
+}
 </script>
 
 
 <style scoped>
 .badge-category{background:#fff5e6;color:#ff6600;border:1px solid #ff6600;border-radius:999px;font-weight:500;padding:.1rem .5rem;font-size:12px}
+
+.profile-list li + li{ margin-top:6px; }
+
+.thumb{ height:80px; width:auto; object-fit:cover; cursor:pointer; border-radius:8px; }
+
+/* Modal */
 .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;z-index:9999}
 .modal-image-wrapper{position:relative;border-radius:16px;max-width:90vw;max-height:90vh;background:#fff;box-shadow:0 20px 50px rgba(0,0,0,.5);overflow:hidden;display:flex;align-items:center;justify-content:center}
 .preview-image{display:block;max-width:100%;max-height:90vh;object-fit:contain}

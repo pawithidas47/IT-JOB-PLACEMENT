@@ -5,21 +5,22 @@
     <div v-if="job" class="detail-wrap">
       <!-- Hero -->
       <header class="hero">
-  <div class="hero-meta">
-    <span class="date"><i class="bi bi-calendar-event me-1"></i>{{ formatDate(job?.j_posted_at) || '-' }}</span>
-  </div>
+        <div class="hero-meta">
+          <span class="date">
+            <i class="bi bi-calendar-event me-1"></i>{{ formatDate(job?.j_posted_at) || '-' }}
+          </span>
+        </div>
 
-  <h1 class="title">รับสมัคร {{ job?.j_title }}</h1>
+        <h1 class="title">รับสมัคร {{ job?.j_title }}</h1>
 
-  <!-- กลุ่มหมวดหมู่ + สถานะ ใต้ชื่อ -->
-  <div class="hero-tags">
-    <span class="chip type">{{ job?.j_type || '-' }}</span>
-    <span v-if="job?.j_status === 'closed'" class="chip closed">ปิดรับสมัคร</span>
-  </div>
+        <!-- กลุ่มหมวดหมู่ + สถานะ -->
+        <div class="hero-tags">
+          <span class="chip type">{{ job?.j_type || '-' }}</span>
+          <span v-if="job?.j_status === 'closed'" class="chip closed">ปิดรับสมัคร</span>
+        </div>
 
-  <p class="company">{{ job?.e_company_name || '-' }}</p>
-</header>
-
+        <p class="company">{{ job?.e_company_name || '-' }}</p>
+      </header>
 
       <!-- Content card -->
       <main class="card-pro">
@@ -44,15 +45,20 @@
         <!-- Description / Qualification -->
         <section class="section">
           <h3 class="section-title"><i class="bi bi-briefcase me-2"></i>ลักษณะงาน</h3>
-          <div class="text-block">
-            <div v-for="(line,i) in splitLines(job?.j_description)" :key="'d'+i" class="para">{{ line }}</div>
-          </div>
+          <ul class="bullet-list">
+            <li v-for="(line,i) in normalizeLines(job?.j_description)" :key="'d'+i">
+              {{ line }}
+            </li>
+          </ul>
+          <div v-if="!job?.j_description" class="muted">ไม่ระบุ</div>
         </section>
 
         <section class="section">
           <h3 class="section-title"><i class="bi bi-check2-circle me-2"></i>คุณสมบัติผู้สมัคร</h3>
           <ul class="bullet-list">
-            <li v-for="(line,i) in splitLines(job?.j_qualification)" :key="'q'+i">{{ line }}</li>
+            <li v-for="(line,i) in normalizeLines(job?.j_qualification)" :key="'q'+i">
+              {{ line }}
+            </li>
           </ul>
           <div v-if="!job?.j_qualification" class="muted">ไม่ระบุ</div>
         </section>
@@ -63,7 +69,7 @@
         </div>
       </main>
 
-      <!-- Action bar (desktop at top-right, mobile sticky bottom) -->
+      <!-- Action bar -->
       <nav class="action-bar" :class="{ fixed: isMobile }">
         <button
           type="button"
@@ -85,7 +91,9 @@
       </nav>
     </div>
   </div>
-</template><script>
+</template>
+
+<script>
 import axios from "axios";
 import NavbarEmployer from "@/components/NavbarEmployer.vue";
 
@@ -110,13 +118,12 @@ export default {
       .get(`http://localhost:3001/api/jobs/${jobId}`)
       .then((res) => {
         const j = res.data || {};
-
-        // 🔧 normalize field
+        // normalize salary fields
         let type = j.j_salary_type ?? j.salary_type ?? j.j_type_salary ?? "";
         let min = this._toNum(j.j_salary_min ?? j.salary_min);
         let max = this._toNum(j.j_salary_max ?? j.salary_max);
 
-        // ถ้าไม่มี → parse จาก j_salary (string)
+        // fallback parse from legacy string
         if ((!type || (!min && !max)) && j.j_salary) {
           const lg = this._parseLegacySalary(j.j_salary);
           type ||= lg.type || "";
@@ -124,12 +131,7 @@ export default {
           if (max == null) max = lg.max;
         }
 
-        this.job = {
-          ...j,
-          j_salary_type: type,
-          j_salary_min: min,
-          j_salary_max: max,
-        };
+        this.job = { ...j, j_salary_type: type, j_salary_min: min, j_salary_max: max };
       })
       .catch((err) => console.error("❌ โหลดงานไม่สำเร็จ:", err));
 
@@ -140,10 +142,17 @@ export default {
     window.addEventListener("resize", this.resizeHandler);
   },
   beforeUnmount() {
-    if (this.resizeHandler)
-      window.removeEventListener("resize", this.resizeHandler);
+    if (this.resizeHandler) window.removeEventListener("resize", this.resizeHandler);
   },
   methods: {
+    // แปลงข้อความหลายบรรทัด -> array พร้อมล้างนำหน้าด้วย •, -, * (ถ้ามี)
+    normalizeLines(text) {
+      return (text || "")
+        .split(/\r?\n/)
+        .map((s) => s.replace(/^\s*(•|-|\*)\s*/, "").trim())
+        .filter(Boolean);
+    },
+
     _toNum(v) {
       if (v == null || v === "") return null;
       const n = Number(String(v).replace(/[^\d.-]/g, ""));
@@ -156,11 +165,7 @@ export default {
       );
       return !m
         ? {}
-        : {
-            type: m[1] || "",
-            min: this._toNum(m[2]),
-            max: this._toNum(m[3]),
-          };
+        : { type: m[1] || "", min: this._toNum(m[2]), max: this._toNum(m[3]) };
     },
     _formatSalary(job) {
       const type = (job.j_salary_type || "").trim();
@@ -188,9 +193,7 @@ export default {
             year: "numeric",
           });
     },
-    splitLines(text) {
-      return (text || "").split(/\r?\n/).filter(Boolean);
-    },
+
     confirmDelete() {
       if (!confirm("คุณแน่ใจหรือไม่ว่าต้องการลบงานนี้?")) return;
       axios
@@ -204,6 +207,7 @@ export default {
           alert("เกิดข้อผิดพลาดในการลบงาน");
         });
     },
+
     closeJob() {
       const jobId = this.job?.job_id;
       if (!jobId) return;
@@ -223,20 +227,15 @@ export default {
 };
 </script>
 
-
 <style scoped>
 .hero-tags{display:flex;gap:8px;margin:6px 0 4px}
 
 /* Layout */
 .detail-wrap{max-width:1100px;margin:0 auto;padding:24px 16px 100px;}
 .hero {
-  background: #ffffff;
-  border: 1px solid #e5e7eb;
-  border-left: 4px solid #ff6600; /* ✅ เพิ่มเส้นนำสายตา */
-  border-radius: 12px;
-  padding: 28px 24px;
-  margin-bottom: 18px;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04);
+  background:#ffffff;border:1px solid #e5e7eb;border-left:4px solid #ff6600;
+  border-radius:12px;padding:28px 24px;margin-bottom:18px;
+  box-shadow:0 4px 14px rgba(0, 0, 0, 0.04);
 }
 
 .hero-meta{display:flex;flex-wrap:wrap;gap:8px 10px;margin-bottom:6px;align-items:center}
@@ -248,71 +247,36 @@ export default {
 .company{color:#6b7280;margin:0}
 
 /* Card body */
-.card-pro{
-  border-radius: 22px;
-  border:1px solid #eef2f7;
-  background:#fff;
-  box-shadow: 0 12px 30px rgba(16,24,40,.06);
-  padding: 20px;
-}
+.card-pro{border-radius:22px;border:1px solid #eef2f7;background:#fff;
+  box-shadow:0 12px 30px rgba(16,24,40,.06);padding:20px}
 
 /* Quick summary row */
-.quick-row{
-  display:grid;
-  grid-template-columns: 1fr auto 1fr auto 1fr;
-  gap: 14px;
-  align-items:center;
-  padding: 8px 4px 4px;
-}
+.quick-row{display:grid;grid-template-columns:1fr auto 1fr auto 1fr;
+  gap:14px;align-items:center;padding:8px 4px 4px}
 .divider{width:1px;height:40px;background:linear-gradient(#e5e7eb,#e5e7eb)}
-
-/* Quick items */
 .quick-box .q-label{color:#6b7280;font-size:.86rem;margin-bottom:2px}
 .quick-box .q-value{font-weight:700;color:#111827}
 
 /* Sections */
 .section{margin-top:22px}
-.section-title{
-  font-size:1.05rem;
-  font-weight:800;
-  color:#0f172a;
-  margin-bottom:10px;
-}
-.text-block .para{margin-bottom:.4rem; color:#111827}
+.section-title{font-size:1.05rem;font-weight:800;color:#0f172a;margin-bottom:10px}
 .muted{color:#94a3b8}
-.bullet-list{padding-left:1.1rem;margin:0}
-.bullet-list li{margin:.2rem 0; color:#111827}
+.bullet-list{padding-left:1.25rem;margin:0}
+.bullet-list li{margin:.28rem 0;color:#111827}
 
 /* Note */
-.alert-note{
-  margin-top:18px;
-  background:#f6f7fb;
-  border:1px dashed #cbd5e1;
-  color:#0f172a;
-  border-radius:14px;
-  padding:10px 12px;
-  font-weight:700;
-}
+.alert-note{margin-top:18px;background:#f6f7fb;border:1px dashed #cbd5e1;color:#0f172a;
+  border-radius:14px;padding:10px 12px;font-weight:700}
 
 /* Action bar */
-.action-bar{
-  display:flex; gap:10px;
-  justify-content:flex-end;
-  margin-top:16px;
-}
-.action-bar.fixed{
-  position:fixed; left:0; right:0; bottom:0;
-  padding:10px 16px; background:#ffffffea; backdrop-filter: blur(6px);
-  box-shadow: 0 -10px 30px rgba(0,0,0,.06);
-}
+.action-bar{display:flex;gap:10px;justify-content:flex-end;margin-top:16px}
+.action-bar.fixed{position:fixed;left:0;right:0;bottom:0;padding:10px 16px;
+  background:#ffffffea;backdrop-filter:blur(6px);box-shadow:0 -10px 30px rgba(0,0,0,.06)}
 
 /* Buttons */
-.btn-pill{
-  border:none; border-radius:999px; padding:10px 18px; font-weight:700;
-  display:inline-flex; align-items:center; justify-content:center;
-  transition:transform .08s ease, box-shadow .2s ease, background .2s ease;
-  white-space:nowrap;
-}
+.btn-pill{border:none;border-radius:999px;padding:10px 18px;font-weight:700;
+  display:inline-flex;align-items:center;justify-content:center;
+  transition:transform .08s ease, box-shadow .2s ease, background .2s ease;white-space:nowrap}
 .btn-pill:hover{transform:translateY(-1px)}
 .btn-pill.warn{background:#ffedd5;color:#9a3412;border:1px solid #fdba74}
 .btn-pill.warn:disabled{opacity:.7;cursor:not-allowed}

@@ -128,17 +128,28 @@
           <span class="text-muted small" style="font-size:1rem">{{ filteredJobs.length }} ตำแหน่ง</span>
         </div>
 
-        <div class="d-flex align-items-center gap-2 mb-4">
-          <div class="position-relative flex-grow-1">
-            <input type="text" class="form-control ps-5 py-2 rounded-pill shadow-sm" placeholder="ค้นหาชื่องาน..." v-model="search"/>
-            <i class="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
-          </div>
-          <select v-model="filterStatus" class="form-select form-select-sm rounded-pill shadow-sm" style="height:38px;padding-inline:14px;min-width:120px">
-            <option value="all">ทั้งหมด</option>
-            <option value="open">เปิดรับสมัคร</option>
-            <option value="closed">ปิดรับสมัคร</option>
-          </select>
-        </div>
+<!-- ใหม่ -->
+<div class="d-flex align-items-center gap-2 mb-4 searchbar">
+  <div class="position-relative flex-grow-1 search-input">
+    <input
+      type="text"
+      class="form-control ps-5 py-2 rounded-pill shadow-sm"
+      placeholder="ค้นหาชื่องาน..."
+      v-model="search"
+    />
+    <i class="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
+  </div>
+
+  <!-- เอา style inline ออก แล้วใส่คลาส .fit-select แทน -->
+  <select
+    v-model="filterStatus"
+    class="form-select form-select-sm rounded-pill shadow-sm fit-select"
+  >
+    <option value="all">ทั้งหมด</option>
+    <option value="open">เปิดรับสมัคร</option>
+    <option value="closed">ปิดรับสมัคร</option>
+  </select>
+</div>
 
         <div v-for="job in filteredJobs" :key="job.job_id" class="job-card border rounded-4 bg-white shadow-sm p-4 mb-4"
              @click="$router.push(`/employer/jobs/${job.job_id}`)" style="cursor:pointer">
@@ -412,6 +423,30 @@ function normalizeGallery(g) {
 
 
 <style scoped>
+/* แถวค้นหา: ให้ช่องค้นหายืดเต็มที่ ส่วน select กว้างเท่าข้อความ */
+.searchbar .form-control,
+.searchbar .form-select {
+  height: 42px;            /* ฟิกความสูง */
+  padding-top: 0.375rem;   /* เว้นขอบบน */
+  padding-bottom: 0.375rem;/* เว้นขอบล่าง */
+  font-size: 0.95rem;      /* ขนาดตัวอักษรให้เท่ากัน */
+  border-radius: 999px;    /* ทำให้โค้งมนพอๆ กัน */
+  box-sizing: border-box;  /* กัน padding ทำให้เพี้ยน */
+}
+
+/* ให้ select กว้างพอดีกับข้อความที่เลือก (override ของ bootstrap/form-select) */
+.fit-select {
+  flex: 0 0 auto;
+  width: -moz-fit-content;  /* Firefox */
+  width: -webkit-fit-content; /* Safari */
+  width: fit-content; 
+  display: inline-block;
+  white-space: nowrap;      /* ไม่ตัดบรรทัด */
+  height: 38px;             /* ให้สูงเท่าช่องค้นหา */
+  padding-inline: 14px;     /* เว้นซ้ายขวาพอดี */
+  min-width: unset;         /* ยกเลิก min-width ใด ๆ ที่เคยตั้ง */
+}
+
 .badge-category{background:#fff5e6;color:#ff6600;border:1px solid #ff6600;border-radius:999px;font-weight:500;padding:.1rem .5rem;font-size:12px}
 
 .profile-list li + li{ margin-top:6px; }

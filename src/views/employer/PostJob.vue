@@ -9,29 +9,28 @@
         <form @submit.prevent="submitJob" class="grid gap-5">
           <!-- ชื่องาน / หมวดหมู่ -->
           <div class="form-group grid grid-2 gap-4">
-  <div>
-    <label class="label">ชื่องาน <span class="req">*</span></label>
-    <input v-model.trim="job.title" class="input" placeholder="เช่น ออกแบบโปสเตอร์กิจกรรม" required />
-  </div>
-
+            <div>
+              <label class="label">ชื่องาน <span class="req">*</span></label>
+              <input v-model.trim="job.title" class="input" placeholder="เช่น ออกแบบโปสเตอร์กิจกรรม" required />
+            </div>
 
             <div>
               <label class="label">หมวดหมู่ <span class="req">*</span></label>
               <select v-model="job.category" class="select" required>
                 <option disabled value="">— เลือกหมวดหมู่ —</option>
-               <option value="การตลาดดิจิทัล">การตลาดดิจิทัล</option>
-  <option value="งานแปล / เขียนบทความ">งานแปล / เขียนบทความ</option>
-  <option value="งานตัดต่อวิดีโอ / สร้างคอนเทนต์">งานตัดต่อวิดีโอ / สร้างคอนเทนต์</option>
-  <option value="งานออกแบบ UX/UI">งานออกแบบ UX/UI</option>
-  <option value="งานออกแบบกราฟิก / มัลติมีเดีย">งานออกแบบกราฟิก / มัลติมีเดีย</option>
-  <option value="คีย์ข้อมูล / ป้อนข้อมูล">คีย์ข้อมูล / ป้อนข้อมูล</option>
-  <option value="ดูแลระบบเครือข่าย">ดูแลระบบเครือข่าย</option>
-  <option value="พัฒนาเว็บไซต์">พัฒนาเว็บไซต์</option>
-  <option value="พัฒนาแอปพลิเคชัน">พัฒนาแอปพลิเคชัน</option>
-  <option value="ผู้ดูแลเพจ / โซเชียลมีเดีย">ผู้ดูแลเพจ / โซเชียลมีเดีย</option>
-  <option value="ที่ปรึกษาด้านเทคโนโลยี">ที่ปรึกษาด้านเทคโนโลยี</option>
-  <option value="สนับสนุนงานไอที">สนับสนุนงานไอที (IT Support)</option>
-  <option value="อื่น ๆ">อื่น ๆ</option>
+                <option value="การตลาดดิจิทัล">การตลาดดิจิทัล</option>
+                <option value="งานแปล / เขียนบทความ">งานแปล / เขียนบทความ</option>
+                <option value="งานตัดต่อวิดีโอ / สร้างคอนเทนต์">งานตัดต่อวิดีโอ / สร้างคอนเทนต์</option>
+                <option value="งานออกแบบ UX/UI">งานออกแบบ UX/UI</option>
+                <option value="งานออกแบบกราฟิก / มัลติมีเดีย">งานออกแบบกราฟิก / มัลติมีเดีย</option>
+                <option value="คีย์ข้อมูล / ป้อนข้อมูล">คีย์ข้อมูล / ป้อนข้อมูล</option>
+                <option value="ดูแลระบบเครือข่าย">ดูแลระบบเครือข่าย</option>
+                <option value="พัฒนาเว็บไซต์">พัฒนาเว็บไซต์</option>
+                <option value="พัฒนาแอปพลิเคชัน">พัฒนาแอปพลิเคชัน</option>
+                <option value="ผู้ดูแลเพจ / โซเชียลมีเดีย">ผู้ดูแลเพจ / โซเชียลมีเดีย</option>
+                <option value="ที่ปรึกษาด้านเทคโนโลยี">ที่ปรึกษาด้านเทคโนโลยี</option>
+                <option value="สนับสนุนงานไอที">สนับสนุนงานไอที (IT Support)</option>
+                <option value="อื่น ๆ">อื่น ๆ</option>
               </select>
             </div>
           </div>
@@ -41,12 +40,12 @@
             <div>
               <label class="label">รายละเอียดงาน</label>
               <textarea v-model.trim="job.description" class="input" rows="4"
-                placeholder="สรุปลักษณะงานโดยรวม (bullet ได้)"></textarea>
+                        placeholder="สรุปลักษณะงานโดยรวม (bullet ได้)"></textarea>
             </div>
             <div>
               <label class="label">คุณสมบัติผู้สมัคร</label>
               <textarea v-model.trim="job.qualification" class="input" rows="4"
-                placeholder="เช่น มีโน้ตบุ๊ก, ใช้ Photoshop ได้, ทำงานเป็นทีม"></textarea>
+                        placeholder="เช่น มีโน้ตบุ๊ก, ใช้ Photoshop ได้, ทำงานเป็นทีม"></textarea>
             </div>
           </div>
 
@@ -76,8 +75,6 @@
           <!-- ระยะเวลางาน -->
           <div>
             <label class="label">ระยะเวลางาน</label>
-
-            <!-- ถ้าเป็นงานชิ้นเดียว ฟิกข้อความ และให้กรอกวันส่งงาน (ถ้ามี) -->
             <template v-if="ui.kind==='งานชิ้นเดียว'">
               <div class="pill-fixed">งานชิ้นเดียว</div>
               <div class="mt-2">
@@ -85,8 +82,6 @@
                 <input type="date" v-model="ui.dueDate" class="input"/>
               </div>
             </template>
-
-            <!-- ถ้าไม่ใช่งานชิ้นเดียว แสดง preset ตามปกติ -->
             <template v-else>
               <div class="chips">
                 <button type="button" class="chip" :class="{active: ui.durationPreset==='ต่อเนื่อง'}"
@@ -101,7 +96,7 @@
             </template>
           </div>
 
-          <!-- ค่าจ้าง (ดรอปดาวเลือกราคา) -->
+          <!-- ค่าจ้าง -->
           <div>
             <label class="label">ค่าจ้าง</label>
             <div class="grid grid-2 gap-4">
@@ -115,7 +110,6 @@
                   <option value="ตามตกลง">ตามตกลง</option>
                 </select>
               </div>
-
               <div v-if="job.salary_type !== 'ตามตกลง'">
                 <select v-model.number="job.salary_value" class="select">
                   <option disabled :value="null">เลือกราคา</option>
@@ -132,15 +126,12 @@
           <div>
             <label class="label">วัน-เวลาทำงาน</label>
 
-            <!-- งานชิ้นเดียว: ฟิกเป็น 'ตามตกลง/ขึ้นกับงาน' -->
-            <div v-if="ui.kind==='งานชิ้นเดียว'" class="pill-muted">
-              ตามตกลง/ขึ้นกับงาน
-            </div>
+            <div v-if="ui.kind==='งานชิ้นเดียว'" class="pill-muted">ตามตกลง/ขึ้นกับงาน</div>
 
-            <!-- งานประเภทอื่น: ให้เลือกวัน-เวลา -->
             <template v-else>
               <div class="chips mb-2">
                 <button type="button" class="chip" @click="selectWeekdays">เลือก จ.-ศ.</button>
+                <button type="button" class="chip" @click="selectEveryday">เลือกทุกวัน</button>
                 <button type="button" class="chip" @click="toggleAllDays">สลับเลือกทุกวัน</button>
               </div>
 
@@ -152,12 +143,22 @@
 
               <div class="grid grid-2 gap-4 mt-2">
                 <div>
-                  <label class="label sub">เริ่ม</label>
-                  <input type="time" v-model="ui.startTime" class="input" />
+                  <label class="label sub">เริ่ม (ไม่บังคับ)</label>
+                  <input
+                    type="time" lang="th" step="60"
+                    v-model="ui.startTime"
+                    class="input"
+                    placeholder="เช่น 09:00"
+                  />
                 </div>
                 <div>
-                  <label class="label sub">เลิก</label>
-                  <input type="time" v-model="ui.endTime" class="input" />
+                  <label class="label sub">เลิก (ไม่บังคับ)</label>
+                  <input
+                    type="time" lang="th" step="60"
+                    v-model="ui.endTime"
+                    class="input"
+                    placeholder="เช่น 18:00"
+                  />
                 </div>
               </div>
             </template>
@@ -203,15 +204,15 @@ export default {
         qualification: "",
         vacancy: "",
         salary_type: "",
-        salary_value: null, // เลือกราคาจากดรอปดาว
+        salary_value: null,
       },
       ui: {
-        kind: "งานชิ้นเดียว",           // ค่าเริ่มต้น
-        durationPreset: "ต่อเนื่อง",     // ใช้เมื่อไม่ใช่งานชิ้นเดียว
-        dueDate: "",                      // ใช้กับงานชิ้นเดียว (ถ้ามี)
+        kind: "งานชิ้นเดียว",         // ค่าเริ่มต้น
+        durationPreset: "ต่อเนื่อง",
+        dueDate: "",
         daysSelected: ["จ", "อ", "พ", "พฤ", "ศ"],
-        startTime: "09:00",
-        endTime: "17:00",
+        startTime: "",                 // ว่าง = ไม่บังคับ
+        endTime: "",                   // ว่าง = ไม่บังคับ
       },
       days: [
         { key: "อา", label: "อา" },
@@ -225,7 +226,7 @@ export default {
     };
   },
   computed: {
-    // options ราคาตามประเภทค่าจ้าง
+    // ตัวเลือกเงินเดือนตามประเภท
     salaryAmountOptions() {
       const t = this.job.salary_type;
       if (t === "รายชั่วโมง") return [50, 60, 80, 100, 120, 150, 200];
@@ -245,15 +246,24 @@ export default {
       return this.ui.durationPreset || "";
     },
 
-    // สรุปวันเวลา
+    // สรุปวัน + เวลา (ไทย 24 ชม.)
     jWorktimeString() {
       if (this.ui.kind === "งานชิ้นเดียว") return "ตามตกลง/ขึ้นกับงาน";
+
       const ds = this.ui.daysSelected.slice();
       if (!ds.length) return "";
-      const isWeekdays = ds.length === 5 && ["จ", "อ", "พ", "พฤ", "ศ"].every(k => ds.includes(k));
-      const dayPart = isWeekdays ? "จ.-ศ." : ds.join(", ");
-      const tPart = this.ui.startTime && this.ui.endTime ? `${this.ui.startTime} – ${this.ui.endTime}` : "";
-      return [dayPart, tPart].filter(Boolean).join(" ");
+
+      let dayPart = ds.join(", ");
+      const isWeekdays = ds.length === 5 && ["จ","อ","พ","พฤ","ศ"].every(k => ds.includes(k));
+      const isEveryday = ds.length === 7;
+
+      if (isEveryday) dayPart = "ทุกวัน";
+      else if (isWeekdays) dayPart = "จ.-ศ.";
+
+      const hasBothTime = this.ui.startTime && this.ui.endTime;
+      const timePart = hasBothTime ? `${this.timeTH(this.ui.startTime)} – ${this.timeTH(this.ui.endTime)}` : "";
+
+      return [dayPart, timePart].filter(Boolean).join(" • ");
     },
 
     // สรุปค่าจ้าง
@@ -271,20 +281,23 @@ export default {
     if (!u) return this.$router.push("/login");
     this.user = JSON.parse(u);
 
-    // ให้ชนิดงานเริ่มต้นเป็น "งานชิ้นเดียว" และผูกค่าจ้างเป็น "เหมางาน"
+    // เริ่มต้นให้เป็นงานชิ้นเดียว + ค่าจ้าง "เหมางาน"
     this.setKind("งานชิ้นเดียว", "เหมางาน");
   },
   methods: {
+    // ใช้เวลา 24 ชม. + "น."
+    timeTH(t) {
+      if (!t) return "";
+      // t เป็น "HH:MM" อยู่แล้วจาก input type="time"
+      return `${t} น.`;
+    },
+
     setKind(kind, salaryType) {
       this.ui.kind = kind;
       this.job.salary_type = salaryType;
-
       if (kind === "งานชิ้นเดียว") {
-        // ฟิกระยะเวลา และสรุปวันเวลาเป็นตามตกลง
         this.ui.durationPreset = "งานชิ้นเดียว";
-        this.ui.daysSelected = ["จ", "อ", "พ", "พฤ", "ศ"]; // เก็บค่าไว้ แต่ UI จะไม่ใช้
       } else {
-        // กลับสู่ค่า default
         if (this.ui.durationPreset === "งานชิ้นเดียว") this.ui.durationPreset = "ต่อเนื่อง";
       }
     },
@@ -295,8 +308,9 @@ export default {
       else this.ui.daysSelected.push(key);
     },
     selectWeekdays() { this.ui.daysSelected = ["จ", "อ", "พ", "พฤ", "ศ"]; },
+    selectEveryday() { this.ui.daysSelected = ["อา","จ","อ","พ","พฤ","ศ","ส"]; },
     toggleAllDays() {
-      this.ui.daysSelected = this.ui.daysSelected.length === 7 ? [] : ["อา", "จ", "อ", "พ", "พฤ", "ศ", "ส"];
+      this.ui.daysSelected = this.ui.daysSelected.length === 7 ? [] : ["อา","จ","อ","พ","พฤ","ศ","ส"];
     },
 
     thaiDate(iso) {
@@ -304,7 +318,6 @@ export default {
       return isNaN(d) ? iso : d.toLocaleDateString("th-TH", { day: "2-digit", month: "2-digit", year: "numeric" });
     },
 
-    // แปลงข้อมูลเป็น payload ที่ backend เข้าใจ (ยังคงกรอกลง j_salary เป็นข้อความเดียว)
     buildSalaryString(type, value) {
       if (!type || type === "ตามตกลง") return "ตามตกลง";
       if (value != null) return `${type} ${Number(value).toLocaleString()}`;
@@ -320,12 +333,11 @@ export default {
         j_type: this.job.category,
         j_amount: this.job.vacancy || null,
 
-        // เก็บแบบ “type + value” แต่รวมเป็นสตริงใน j_salary (ตาม schema ปัจจุบัน)
         j_salary: this.buildSalaryString(this.job.salary_type, this.job.salary_value),
-        // ถ้า API ของคุณรองรับเขตข้อมูลเพิ่ม ลองแนบไปด้วย (ฝั่ง server จะเมินก็ไม่เป็นไร)
         j_salary_type: this.job.salary_type || null,
         j_salary_value: this.job.salary_type === "ตามตกลง" ? null : (this.job.salary_value ?? null),
 
+        // ✅ ถ้าไม่กรอกเวลา จะส่งเฉพาะช่วงวัน
         j_worktime: this.jWorktimeString || null,
         j_deliverable: "",
         j_qualification: this.job.qualification || null,
@@ -347,21 +359,10 @@ export default {
 </script>
 
 <style scoped>
-.form-group {
-  margin-bottom: 20px; /* ระยะห่างมาตรฐานทุกหัวข้อ */
-}
+.form-group { margin-bottom: 20px; }
+.label { font-weight: 700; margin-bottom: 6px; display: block; }
+.input, .select, textarea.input { margin: 0; }
 
-.label {
-  font-weight: 700;
-  margin-bottom: 6px; /* label เว้นกับ input พอดีๆ */
-  display: block;
-}
-
-.input, .select, textarea.input {
-  margin: 0; /* เอา margin เองออก จะได้ใช้ margin ของ form-group คุมแทน */
-}
-
-/* Layout & card */
 .container { padding: 24px 16px; }
 .card {
   background:#fff; border:1px solid #eef2f7; border-radius:18px;
@@ -369,15 +370,13 @@ export default {
 }
 .title { color:#ff6600; font-weight:800; margin:2px 0 18px; }
 
-/* Grid helpers */
 .grid { display:grid; }
 .grid-2 { grid-template-columns: repeat(2, minmax(0,1fr)); }
 .gap-4 { gap:16px; }
 .gap-5 { gap:20px; }
 .mt-2 { margin-top:8px; }
 
-/* Form controls */
-.label { font-weight:700; color:#0f172a; font-size:.95rem; margin-bottom:6px; display:block; }
+.label { font-weight:700; color:#0f172a; font-size:.95rem; margin-bottom:6px; }
 .label.sub { font-weight:600; color:#475569; }
 .req { color:#ef4444; }
 .input, .select, textarea.input {
@@ -388,7 +387,6 @@ export default {
   border-color:#ffd4b3; box-shadow:0 0 0 4px rgba(255,102,0,.12);
 }
 
-/* Chips */
 .chips { display:flex; flex-wrap:wrap; gap:8px; }
 .chip {
   border:1px solid #e6e9f0; background:#fff; padding:8px 12px; border-radius:999px;
@@ -397,7 +395,6 @@ export default {
 .chip:hover { box-shadow:0 6px 18px rgba(16,24,40,.06); transform: translateY(-1px); }
 .chip.active { background:#fff5e6; border-color:#ffb380; color:#ff6600; }
 
-/* Day selector */
 .days { display:flex; flex-wrap:wrap; gap:8px; }
 .day {
   border:1px solid #e5e7eb; background:#fff; color:#0f172a; border-radius:10px; padding:8px 10px;
@@ -405,7 +402,6 @@ export default {
 }
 .day.active { background:#0ea5e9; color:#fff; border-color:#0ea5e9; }
 
-/* Summary */
 .summary {
   display:grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap:14px;
   border:1px dashed #dbe2ea; border-radius:14px; padding:14px; background:#f8fafc;
@@ -414,7 +410,6 @@ export default {
 .sum-title { color:#64748b; font-weight:700; font-size:.85rem; margin-bottom:4px; }
 .sum-val { color:#0f172a; font-weight:800; }
 
-/* Pills */
 .pill-fixed{
   display:inline-block; padding:8px 12px; border-radius:999px;
   background:#eef2ff; color:#1e3a8a; border:1px solid #c7d2fe; font-weight:800;
@@ -425,14 +420,12 @@ export default {
 }
 .hint{ color:#64748b; font-size:.85rem; margin-top:6px }
 
-/* Button */
 .btn-primary {
   width:100%; border:none; background:#ff6600; color:#fff; font-weight:800;
   padding:12px 18px; border-radius:14px; transition:.15s; cursor:pointer;
 }
 .btn-primary:hover { background:#e65c00; box-shadow:0 8px 20px rgba(255,102,0,.25); transform:translateY(-1px); }
 
-/* Responsive */
 @media (max-width: 900px) {
   .grid-2 { grid-template-columns: 1fr; }
   .summary { grid-template-columns: 1fr; }

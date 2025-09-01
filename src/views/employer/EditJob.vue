@@ -41,12 +41,12 @@
               <div>
                 <label class="label">รายละเอียดงาน</label>
                 <textarea v-model.trim="job.description" class="input" rows="4"
-                  placeholder="สรุปลักษณะงานโดยรวม (พิมพ์ทีละบรรทัด)"></textarea>
+                          placeholder="สรุปลักษณะงานโดยรวม (พิมพ์ทีละบรรทัด)"></textarea>
               </div>
               <div>
                 <label class="label">คุณสมบัติผู้สมัคร</label>
                 <textarea v-model.trim="job.qualification" class="input" rows="4"
-                  placeholder="เช่น มีโน้ตบุ๊ก, ใช้ Photoshop ได้, ทำงานเป็นทีม"></textarea>
+                          placeholder="เช่น มีโน้ตบุ๊ก, ใช้ Photoshop ได้, ทำงานเป็นทีม"></textarea>
               </div>
             </div>
 
@@ -76,8 +76,6 @@
             <!-- ระยะเวลางาน -->
             <div>
               <label class="label">ระยะเวลางาน</label>
-
-              <!-- ถ้าเป็นงานชิ้นเดียว ฟิกข้อความ + วันส่งงาน -->
               <template v-if="ui.kind==='งานชิ้นเดียว'">
                 <div class="pill-fixed">งานชิ้นเดียว</div>
                 <div class="mt-2">
@@ -85,8 +83,6 @@
                   <input type="date" v-model="ui.dueDate" class="input"/>
                 </div>
               </template>
-
-              <!-- อื่น ๆ ใช้ preset -->
               <template v-else>
                 <div class="chips">
                   <button type="button" class="chip" :class="{active: ui.durationPreset==='ต่อเนื่อง'}"
@@ -112,6 +108,7 @@
               <template v-else>
                 <div class="chips mb-2">
                   <button type="button" class="chip" @click="selectWeekdays">เลือก จ.-ศ.</button>
+                  <button type="button" class="chip" @click="selectEveryday">เลือกทุกวัน</button>
                   <button type="button" class="chip" @click="toggleAllDays">สลับเลือกทุกวัน</button>
                 </div>
 
@@ -123,12 +120,12 @@
 
                 <div class="grid grid-2 gap-4 mt-2">
                   <div>
-                    <label class="label sub">เริ่ม</label>
-                    <input type="time" v-model="ui.startTime" class="input" />
+                    <label class="label sub">เริ่ม (ไม่บังคับ)</label>
+                    <input type="time" lang="th" step="60" v-model="ui.startTime" class="input" />
                   </div>
                   <div>
-                    <label class="label sub">เลิก</label>
-                    <input type="time" v-model="ui.endTime" class="input" />
+                    <label class="label sub">เลิก (ไม่บังคับ)</label>
+                    <input type="time" lang="th" step="60" v-model="ui.endTime" class="input" />
                   </div>
                 </div>
               </template>
@@ -148,7 +145,6 @@
                     <option value="ตามตกลง">ตามตกลง</option>
                   </select>
                 </div>
-
                 <div v-if="job.salary_type !== 'ตามตกลง'">
                   <select v-model.number="job.salary_value" class="select">
                     <option disabled :value="null">เลือกราคา</option>
@@ -219,8 +215,8 @@ export default {
         durationPreset: "ต่อเนื่อง",
         dueDate: "",
         daysSelected: ["จ", "อ", "พ", "พฤ", "ศ"],
-        startTime: "09:00",
-        endTime: "17:00",
+        startTime: "", // ไม่บังคับ
+        endTime: "",   // ไม่บังคับ
       },
       days: [
         { key: "อา", label: "อา" },
@@ -252,12 +248,21 @@ export default {
     },
     jWorktimeString() {
       if (this.ui.kind === "งานชิ้นเดียว") return "ตามตกลง/ขึ้นกับงาน";
+
       const ds = this.ui.daysSelected.slice();
       if (!ds.length) return "";
+
+      let dayPart = ds.join(", ");
       const isWeekdays = ds.length === 5 && ["จ", "อ", "พ", "พฤ", "ศ"].every(k => ds.includes(k));
-      const dayPart = isWeekdays ? "จ.-ศ." : ds.join(", ");
-      const tPart = this.ui.startTime && this.ui.endTime ? `${this.ui.startTime} – ${this.ui.endTime}` : "";
-      return [dayPart, tPart].filter(Boolean).join(" ");
+      const isEveryday = ds.length === 7;
+
+      if (isEveryday) dayPart = "ทุกวัน";
+      else if (isWeekdays) dayPart = "จ.-ศ.";
+
+      const hasBoth = this.ui.startTime && this.ui.endTime;
+      const timePart = hasBoth ? `${this.ui.startTime} – ${this.ui.endTime}` : "";
+
+      return [dayPart, timePart].filter(Boolean).join(" • ");
     },
     jSalaryString() {
       const t = this.job.salary_type;
@@ -280,7 +285,6 @@ export default {
     }
   },
   methods: {
-    // ---------- Helpers ----------
     thaiDate(iso) {
       const d = new Date(iso);
       return isNaN(d) ? iso : d.toLocaleDateString("th-TH", { day: "2-digit", month: "2-digit", year: "numeric" });
@@ -294,22 +298,27 @@ export default {
       // รองรับสตริงจากหน้า Post: "รายชั่วโมง 80", "เหมางาน 1500", "ตามตกลง"
       if (!txt) return { type: "", value: null };
       const m = String(txt).match(/(รายชั่วโมง|รายวัน|รายเดือน|เหมางาน|ตามตกลง)\s*([\d,]+)?/);
-      return {
-        type: m?.[1] || "",
-        value: m?.[2] ? this.toNum(m[2]) : null,
-      };
+      return { type: m?.[1] || "", value: m?.[2] ? this.toNum(m[2]) : null };
     },
     parseWorktime(str) {
       if (!str) return;
-      const parts = String(str).split(" ");
-      const dayPart = parts[0] || "";
-      const timeMatch = str.match(/(\d{1,2}:\d{2}).*?(\d{1,2}:\d{2})/);
-      if (dayPart.includes("จ.-ศ.")) this.ui.daysSelected = ["จ", "อ", "พ", "พฤ", "ศ"];
-      else {
-        const ds = dayPart.split(",").map(s => s.trim()).filter(Boolean);
+      const s = String(str);
+
+      // วัน
+      if (s.includes("ทุกวัน")) {
+        this.ui.daysSelected = ["อา","จ","อ","พ","พฤ","ศ","ส"];
+      } else if (s.includes("จ.-ศ.")) {
+        this.ui.daysSelected = ["จ","อ","พ","พฤ","ศ"];
+      } else {
+        const dayToken = s.split("•")[0] || s.split(" ")[0] || "";
+        const ds = dayToken.split(",").map(x => x.trim()).filter(Boolean);
         if (ds.length) this.ui.daysSelected = ds;
       }
-      if (timeMatch) { this.ui.startTime = timeMatch[1]; this.ui.endTime = timeMatch[2]; }
+
+      // เวลา (ไม่บังคับ)
+      const timeMatch = s.match(/(\d{1,2}:\d{2}).*?(\d{1,2}:\d{2})/);
+      this.ui.startTime = timeMatch ? timeMatch[1] : "";
+      this.ui.endTime   = timeMatch ? timeMatch[2] : "";
     },
     buildSalaryString(type, value) {
       if (!type || type === "ตามตกลง") return "ตามตกลง";
@@ -317,7 +326,6 @@ export default {
       return type;
     },
 
-    // ---------- Mapping API -> Form ----------
     hydrateFormFromApi(j) {
       this.job.title         = j.j_title || "";
       this.job.category      = j.j_type || "";
@@ -325,15 +333,15 @@ export default {
       this.job.qualification = j.j_qualification || "";
       this.job.vacancy       = j.j_amount || "";
 
-      // salary: รองรับทั้งฟิลด์เก่า/ใหม่ และสตริง
+      // เงินเดือน: รองรับทั้งฟิลด์ใหม่/เก่า + string
       const got = {
         type: j.j_salary_type || j.salary_type || this.parseSalaryFromString(j.j_salary).type,
-        value: j.j_salary_value ?? this.toNum(this.parseSalaryFromString(j.j_salary).value),
+        value: j.j_salary_value ?? this.parseSalaryFromString(j.j_salary).value,
       };
       this.job.salary_type  = got.type || "";
       this.job.salary_value = got.value ?? null;
 
-      // ชนิดงานจากประเภทค่าจ้าง (map แบบเดียวกับ Post)
+      // ชนิดงาน (ให้สอดคล้องกับ Post)
       if (this.job.salary_type === "รายชั่วโมง") this.ui.kind = "รายชั่วโมง";
       else if (this.job.salary_type === "รายวัน") this.ui.kind = "พาร์ทไทม์(รายวัน)";
       else if (this.job.salary_type === "รายเดือน") this.ui.kind = "ฟูลไทม์(รายเดือน)";
@@ -353,18 +361,17 @@ export default {
         }
       }
 
-      // วัน-เวลาทำงาน
+      // วัน-เวลา
       this.parseWorktime(j.j_worktime);
     },
 
-    // ---------- UI actions ----------
     setKind(kind, salaryType) {
       this.ui.kind = kind;
       this.job.salary_type = salaryType;
       if (kind === "งานชิ้นเดียว") {
         this.ui.durationPreset = "งานชิ้นเดียว";
-      } else {
-        if (this.ui.durationPreset === "งานชิ้นเดียว") this.ui.durationPreset = "ต่อเนื่อง";
+      } else if (this.ui.durationPreset === "งานชิ้นเดียว") {
+        this.ui.durationPreset = "ต่อเนื่อง";
       }
     },
     toggleDay(key) {
@@ -373,11 +380,11 @@ export default {
       else this.ui.daysSelected.push(key);
     },
     selectWeekdays() { this.ui.daysSelected = ["จ", "อ", "พ", "พฤ", "ศ"]; },
+    selectEveryday() { this.ui.daysSelected = ["อา","จ","อ","พ","พฤ","ศ","ส"]; },
     toggleAllDays() {
       this.ui.daysSelected = this.ui.daysSelected.length === 7 ? [] : ["อา","จ","อ","พ","พฤ","ศ","ส"];
     },
 
-    // ---------- Submit ----------
     async submitEdit() {
       const id = this.$route.params.id;
 
@@ -387,7 +394,7 @@ export default {
         j_type: this.job.category,
         j_amount: this.job.vacancy || null,
 
-        // เก็บแบบเดียวกับหน้า Post
+        // เก็บรูปแบบเดียวกับหน้า Post
         j_salary: this.buildSalaryString(this.job.salary_type, this.job.salary_value),
         j_salary_type: this.job.salary_type || null,
         j_salary_value: this.job.salary_type === "ตามตกลง" ? null : (this.job.salary_value ?? null),
@@ -490,6 +497,7 @@ export default {
   width:100%; border:1px solid #e5e7eb; background:#fff; color:#0f172a; font-weight:700;
   padding:12px 18px; border-radius:14px;
 }
+
 @media (max-width: 900px) {
   .grid-2 { grid-template-columns: 1fr; }
   .summary { grid-template-columns: 1fr; }

@@ -270,24 +270,66 @@ export default {
     },
   },
 };
-</script>
-
-<style scoped>
+</script><style scoped>
 .company-card{
-  background:#fff;border:1px solid #eef2f7;border-radius:12px;padding:16px;
+  background:#fff;
+  border:1px solid #eef2f7;
+  border-radius:12px;
+  padding:16px;
   box-shadow:0 8px 20px rgba(16,24,40,.06);
 }
-.left-card{margin-top:0;}
-.right-card{margin-top:0;}
 
-.detail-wrap{max-width:1100px;margin:0 auto;padding:24px 16px 60px}
+.left-card {
+  background:#ffffff; /* ขาว */
+  border:1px solid #e5e7eb;
+  border-radius:12px;
+  padding:16px;
+  box-shadow:0 2px 8px rgba(0,0,0,0.04);
+}
+
+/* ---------- การ์ดขวา (ข้อมูลบริษัท) ---------- */
+.company-card.right-card {
+  background:#fdf6ec;          /* สีไข่อ่อน */
+  border:1px solid #f5e6d8;    /* ขอบครีมอ่อน */
+  border-radius:12px;
+  padding:16px;
+  box-shadow:0 2px 8px rgba(0,0,0,0.05);
+  color:#0f172a !important;    /* ดำเข้มทั้งหมด */
+}
+.company-card.right-card h1,
+.company-card.right-card h2,
+.company-card.right-card h3,
+.company-card.right-card h4,
+.company-card.right-card h5,
+.company-card.right-card h6,
+.company-card.right-card .snap-title,
+.company-card.right-card .snap-label,
+.company-card.right-card .snap-text,
+.company-card.right-card p,
+.company-card.right-card li,
+.company-card.right-card a,
+.company-card.right-card span,
+.company-card.right-card *[class*="text-"] {
+  color:#0f172a !important;
+}
+
+/* layout หลัก */
+.detail-wrap {
+  max-width:1100px;
+  margin:0 auto;
+  padding:24px 16px 60px;
+}
 
 /* HERO */
-.hero{
+.hero {
   position:relative;
-  background:#fff;border:1px solid #e5e7eb;border-left:4px solid #ff6600;
-  border-radius:12px;padding:16px 20px 56px;
-  box-shadow:0 4px 14px rgba(0,0,0,.04);margin-bottom:16px
+  background:#fff;
+  border:1px solid #e5e7eb;
+  border-left:4px solid #ff6600;
+  border-radius:12px;
+  padding:16px 20px 56px;
+  box-shadow:0 4px 14px rgba(0,0,0,.04);
+  margin-bottom:16px;
 }
 .hero-top{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
 .co-inline{display:flex;align-items:center;gap:12px}
@@ -304,39 +346,80 @@ export default {
 .hero-apply{position:absolute;right:18px;bottom:14px}
 
 /* GRID */
-.main-grid{}
-.grid{display:grid;grid-template-columns:1.6fr .95fr;gap:18px;align-items:start}
+.grid{
+  display:grid;
+  grid-template-columns:1.6fr .95fr;
+  gap:18px;
+  align-items:start;
+}
 .col-left{min-width:0}
-.col-right{min-width:0} /* เอาเส้นคั่นออกแล้ว เพราะแต่ละฝั่งเป็นการ์ดของตัวเอง */
+.col-right{min-width:0}
 
 /* Quick summary */
-.quick-row{display:grid;grid-template-columns:1fr auto 1fr auto 1fr;gap:14px;align-items:center;padding:4px 0 12px}
+.quick-row{
+  display:grid;
+  grid-template-columns:1fr auto 1fr auto 1fr;
+  gap:14px;
+  align-items:center;
+  padding:4px 0 12px;
+}
 .divider{width:1px;height:40px;background:#e5e7eb}
 .q-label{color:#6b7280;font-size:.86rem}
 .q-value{font-weight:700;color:#111827}
 
 /* Sections */
 .section{margin-top:14px}
-.card-section{border:1px solid #eef2f7;border-radius:12px;padding:14px 14px 10px;background:#fff}
+.card-section{
+  border:1px solid #eef2f7;
+  border-radius:12px;
+  padding:14px 14px 10px;
+  background:#fff;
+}
 .section-title{font-size:1.05rem;font-weight:800;color:#0f172a;margin-bottom:10px}
 .text-block .para{margin-bottom:.4rem;color:#111827}
 .bullet-list{padding-left:1.1rem;margin:0}
 .bullet-list li{margin:.25rem 0;color:#111827}
 .muted{color:#94a3b8}
-.alert-note{margin-top:14px;background:#f6f7fb;border:1px dashed #cbd5e1;color:#0f172a;border-radius:12px;padding:10px 12px;font-weight:700}
+.alert-note{
+  margin-top:14px;
+  background:#f6f7fb;
+  border:1px dashed #cbd5e1;
+  color:#0f172a;
+  border-radius:12px;
+  padding:10px 12px;
+  font-weight:700;
+}
 
-/* ขวา */
-.snap-title{font-size:1rem;font-weight:800;margin-bottom:8px;color:#0f172a}
+/* การ์ดขวา */
+.snap-title{font-size:1rem;font-weight:800;margin-bottom:8px}
 .snap-block{margin-top:14px}
-.snap-label{font-weight:700;color:#0f172a;margin-bottom:4px}
-.snap-text{color:#111827;margin:0}
+.snap-label{font-weight:700;margin-bottom:4px}
+.snap-text{margin:0}
 .snap-list{list-style:none;padding-left:0;margin:0}
 .gallery{display:flex;gap:8px;overflow:auto}
-.g-thumb{height:70px;width:110px;object-fit:cover;border-radius:8px;border:1px solid #e5e7eb;cursor:pointer}
+.g-thumb{
+  height:70px;
+  width:110px;
+  object-fit:cover;
+  border-radius:8px;
+  border:1px solid #e5e7eb;
+  cursor:pointer;
+}
 
 /* ปุ่ม */
 .company-actions{margin-top:20px;text-align:center}
-.btn-pill{border:none;border-radius:999px;padding:10px 18px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;transition:transform .08s ease,box-shadow .2s ease;min-width:160px;text-align:center}
+.btn-pill{
+  border:none;
+  border-radius:999px;
+  padding:10px 18px;
+  font-weight:700;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  transition:transform .08s ease,box-shadow .2s ease;
+  min-width:160px;
+  text-align:center
+}
 .btn-pill:hover{transform:translateY(-1px)}
 .btn-pill.apply{background:linear-gradient(135deg,#ff6600,#e55d00);color:#fff}
 .btn-pill.ghost{background:#fff;border:1px solid #dbe2ea;color:#0f172a}

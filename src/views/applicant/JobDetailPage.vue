@@ -293,18 +293,39 @@ export default {
     },
   },
 };
-</script>
+</script><style scoped>
+/* ---------- ปุ่ม ---------- */
+.btn-pill.apply {
+  background: linear-gradient(135deg,#ff6600,#e55d00);
+  color: #fff;
+}
+.btn-pill.applied {
+  background:#22c55e;
+  color:#fff;
+  cursor:not-allowed;
+  opacity:.9;
+}
+.btn-pill {
+  border:none;
+  border-radius:999px;
+  padding:10px 18px;
+  font-weight:700;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  transition:transform .08s ease,box-shadow .2s ease;
+  min-width:160px;
+}
 
-<style scoped>
-/* ปุ่มปกติ สมัครงาน */
-.btn-pill.apply{background:linear-gradient(135deg,#ff6600,#e55d00);color:#fff}
-/* ปุ่มสมัครแล้ว */
-.btn-pill.applied{background:#22c55e;color:#fff;cursor:not-allowed;opacity:.9}
+/* ---------- โครงหน้า ---------- */
+.detail-wrap { max-width:1100px; margin:0 auto; padding:24px 16px 60px; }
 
-.detail-wrap{max-width:1100px;margin:0 auto;padding:24px 16px 60px}
+/* HERO */
 .hero{
-  position:relative;background:#fff;border:1px solid #e5e7eb;border-left:4px solid #ff6600;
-  border-radius:12px;padding:16px 20px 56px;box-shadow:0 4px 14px rgba(0,0,0,.04);margin-bottom:16px
+  position:relative;
+  background:#fff; border:1px solid #e5e7eb; border-left:4px solid #ff6600;
+  border-radius:12px; padding:16px 20px 56px;
+  box-shadow:0 4px 14px rgba(0,0,0,.04); margin-bottom:16px;
 }
 .hero-top{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
 .co-inline{display:flex;align-items:center;gap:12px}
@@ -319,17 +340,22 @@ export default {
 .chip.type{background:#fff5e6;color:#ff6600;border:1px solid #ffb380}
 .chip.closed{background:#f1f5f9;color:#0f172a;border:1px dashed #cbd5e1}
 .hero-apply{position:absolute;right:18px;bottom:14px}
-.btn-pill{border:none;border-radius:999px;padding:10px 18px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;transition:transform .08s ease,box-shadow .2s ease;min-width:160px}
 
+/* ---------- Layout 2 คอลัมน์ ---------- */
 .grid{display:grid;grid-template-columns:1.6fr .95fr;gap:18px;align-items:start}
-.company-card{background:#fff;border:1px solid #eef2f7;border-radius:12px;padding:16px;box-shadow:0 8px 20px rgba(16,24,40,.06)}
 
-.left-card{margin-top:0}
+/* ---------- การ์ดซ้าย ---------- */
+.company-card.left-card{
+  background:#ffffff !important;
+  border:1px solid #eef2f7 !important;
+  border-radius:14px;
+  padding:16px;
+  box-shadow:0 8px 20px rgba(16,24,40,.06);
+}
 .quick-row{display:grid;grid-template-columns:1fr auto 1fr auto 1fr;gap:14px;align-items:center;padding:4px 0 12px}
 .divider{width:1px;height:40px;background:#e5e7eb}
 .q-label{color:#6b7280;font-size:.86rem}
 .q-value{font-weight:800;color:#111827}
-
 .section{margin-top:14px}
 .card-section{border:1px solid #eef2f7;border-radius:12px;padding:14px 14px 10px;background:#fff}
 .section-title{font-size:1.05rem;font-weight:800;color:#0f172a;margin-bottom:10px}
@@ -339,16 +365,52 @@ export default {
 .muted{color:#94a3b8}
 .alert-note{margin-top:14px;background:#f6f7fb;border:1px dashed #cbd5e1;color:#0f172a;border-radius:12px;padding:10px 12px;font-weight:700}
 
-.snap-title{font-size:1rem;font-weight:800;margin-bottom:8px;color:#0f172a}
+/* ---------- การ์ดขวา (ข้อมูลบริษัท) ---------- */
+/* พื้น/ขอบ: สีไข่อ่อนตามตัวอย่าง + ข้อความเป็นดำเข้มทั้งหมด */
+.company-card.right-card{
+  background:#fdf6ec !important;     /* eggshell */
+  border:1px solid #f5e6d8 !important;
+  border-radius:14px;
+  padding:16px;
+  box-shadow:0 2px 8px rgba(0,0,0,.05);
+  color:#0f172a !important;
+}
+/* ทำให้ทุกข้อความภายในเป็นดำเข้ม */
+.company-card.right-card h1,
+.company-card.right-card h2,
+.company-card.right-card h3,
+.company-card.right-card h4,
+.company-card.right-card h5,
+.company-card.right-card h6,
+.company-card.right-card .snap-title,
+.company-card.right-card .snap-label,
+.company-card.right-card .snap-text,
+.company-card.right-card p,
+.company-card.right-card li,
+.company-card.right-card a,
+.company-card.right-card span {
+  color:#0f172a !important;
+}
+
+.snap-title{font-size:1rem;font-weight:800;margin-bottom:8px}
 .snap-block{margin-top:14px}
-.snap-label{font-weight:700;color:#0f172a;margin-bottom:4px}
-.snap-text{color:#111827;margin:0}
+.snap-label{font-weight:700;margin-bottom:4px}
+.snap-text{margin:0}
 .snap-list{list-style:none;padding-left:0;margin:0}
+
+/* แกลเลอรี่: กรอบเทาอ่อน */
 .gallery{display:flex;gap:8px;overflow:auto}
-.g-thumb{height:70px;width:110px;object-fit:cover;border-radius:8px;border:1px solid #e5e7eb;cursor:pointer}
+.g-thumb{
+  height:70px;width:110px;object-fit:cover;border-radius:8px;
+  border:1px solid #e5e7eb;background:#fff;cursor:pointer;
+}
+
+/* ปุ่ม */
 .company-actions{margin-top:20px;text-align:center}
 .btn-pill.ghost{background:#fff;border:1px solid #dbe2ea;color:#0f172a}
+.btn-pill.ghost:hover{box-shadow:0 6px 18px rgba(16,24,40,.08)}
 
+/* ---------- Modal ---------- */
 .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;z-index:1050}
 .modal-image-wrapper{position:relative;max-width:min(92vw,980px);max-height:90vh}
 .preview-image{max-width:100%;max-height:90vh;border-radius:12px}
@@ -357,6 +419,7 @@ export default {
 .nav-btn.left{left:-16px;top:50%;transform:translateY(-50%)}
 .nav-btn.right{right:-16px;top:50%;transform:translateY(-50%)}
 
+/* ---------- Responsive ---------- */
 @media (max-width:991px){
   .grid{grid-template-columns:1fr}
   .hero{padding-bottom:64px}

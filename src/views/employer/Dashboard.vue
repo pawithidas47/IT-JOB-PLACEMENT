@@ -1,4 +1,4 @@
-<template> 
+<template>  
   <div>
     <NavbarEmployer />
 
@@ -36,7 +36,14 @@
         <ul class="list-unstyled small text-muted mb-4 profile-list">
           <li>
             <i class="bi bi-telephone me-2"></i><b>โทรศัพท์: </b>
-            <template v-if="editMode"><input v-model="tempUser.e_phone" class="form-control form-control-sm"/></template>
+            <template v-if="editMode">
+              <input
+                type="tel"
+                v-model="tempUser.e_phone"
+                class="form-control form-control-sm"
+                placeholder="+66xxxxxxxxx"
+              />
+            </template>
             <template v-else>{{ user.e_phone || '—' }}</template>
           </li>
           <li>
@@ -60,27 +67,23 @@
             </template>
           </li>
         </ul>
+
         <h6 class="fw-bold text-success mb-2 mt-4">เกี่ยวกับบริษัท</h6>
-
-<!-- โหมดแก้ไข -->
-<div v-if="editMode">
-  <textarea
-    v-model.trim="tempUser.e_about"
-    class="form-control"
-    rows="4"
-    placeholder="อธิบายว่าบริษัททำอะไร จุดเด่น/บริการ/อุตสาหกรรม ลูกค้าที่ดูแล ฯลฯ (แนะนำ 50–300 ตัวอักษร)"
-    maxlength="1000"
-  ></textarea>
-  <div class="text-muted small mt-1">
-    {{ (tempUser.e_about?.length || 0).toLocaleString() }}/1,000
-  </div>
-</div>
-
-<!-- โหมดแสดงผล -->
-<p v-else class="small mb-3" style="white-space:pre-wrap">
-  {{ user.e_about || 'ยังไม่ระบุเกี่ยวกับบริษัท' }}
-</p>
-
+        <div v-if="editMode">
+          <textarea
+            v-model.trim="tempUser.e_about"
+            class="form-control"
+            rows="4"
+            placeholder="อธิบายว่าบริษัททำอะไร จุดเด่น/บริการ/อุตสาหกรรม ลูกค้าที่ดูแล ฯลฯ (แนะนำ 50–300 ตัวอักษร)"
+            maxlength="1000"
+          ></textarea>
+          <div class="text-muted small mt-1">
+            {{ (tempUser.e_about?.length || 0).toLocaleString() }}/1,000
+          </div>
+        </div>
+        <p v-else class="small mb-3" style="white-space:pre-wrap">
+          {{ user.e_about || 'ยังไม่ระบุเกี่ยวกับบริษัท' }}
+        </p>
 
         <h6 class="fw-bold text-success mb-2">แกลเลอรี่รูปภาพบริษัท</h6>
         <div class="d-flex gap-2 overflow-auto mb-3">
@@ -94,7 +97,7 @@
           />
           <span v-if="!user.e_gallery || user.e_gallery.length === 0" class="text-muted small">ยังไม่มีรูปแกลเลอรี่</span>
         </div>
-        <input v-if="editMode" type="file" multiple class="form-control form-control-sm mb-4" @change="onPickGallery"/>
+        <input v-if="editMode" type="file" multiple accept="image/*" class="form-control form-control-sm mb-4" @change="onPickGallery"/>
 
         <!-- modal รูป -->
         <div v-if="selectedImage" class="modal-backdrop" @click.self="selectedImage=null">
@@ -128,28 +131,26 @@
           <span class="text-muted small" style="font-size:1rem">{{ filteredJobs.length }} ตำแหน่ง</span>
         </div>
 
-<!-- ใหม่ -->
-<div class="d-flex align-items-center gap-2 mb-4 searchbar">
-  <div class="position-relative flex-grow-1 search-input">
-    <input
-      type="text"
-      class="form-control ps-5 py-2 rounded-pill shadow-sm"
-      placeholder="ค้นหาชื่องาน..."
-      v-model="search"
-    />
-    <i class="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
-  </div>
+        <div class="d-flex align-items-center gap-2 mb-4 searchbar">
+          <div class="position-relative flex-grow-1 search-input">
+            <input
+              type="text"
+              class="form-control ps-5 py-2 rounded-pill shadow-sm"
+              placeholder="ค้นหาชื่องาน..."
+              v-model="search"
+            />
+            <i class="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
+          </div>
 
-  <!-- เอา style inline ออก แล้วใส่คลาส .fit-select แทน -->
-  <select
-    v-model="filterStatus"
-    class="form-select form-select-sm rounded-pill shadow-sm fit-select"
-  >
-    <option value="all">ทั้งหมด</option>
-    <option value="open">เปิดรับสมัคร</option>
-    <option value="closed">ปิดรับสมัคร</option>
-  </select>
-</div>
+          <select
+            v-model="filterStatus"
+            class="form-select form-select-sm rounded-pill shadow-sm fit-select"
+          >
+            <option value="all">ทั้งหมด</option>
+            <option value="open">เปิดรับสมัคร</option>
+            <option value="closed">ปิดรับสมัคร</option>
+          </select>
+        </div>
 
         <div v-for="job in filteredJobs" :key="job.job_id" class="job-card border rounded-4 bg-white shadow-sm p-4 mb-4"
              @click="$router.push(`/employer/jobs/${job.job_id}`)" style="cursor:pointer">
@@ -182,7 +183,7 @@ export default {
   components: { NavbarEmployer },
   data() {
     return {
-      user: { employer_id: null, e_gallery: [], e_about: "" }, // e_about = ใช้แสดงบนหน้า (map จาก e_description)
+      user: { employer_id: null, e_gallery: [], e_about: "" },
       tempUser: null,
       editMode: false,
 
@@ -199,6 +200,9 @@ export default {
       // modal รูป
       selectedImage: null,
       currentImageIndex: 0,
+
+      // cache-buster
+      versionStamp: Date.now(),
     };
   },
   computed: {
@@ -219,12 +223,11 @@ export default {
     const u = JSON.parse(localStorage.getItem("user") || "{}");
     if (!u?.employer_id) return this.$router.push("/login");
 
-    // merge กัน key หาย และ normalize แกลเลอรี่
     this.user = {
       employer_id: u.employer_id,
       ...u,
       e_gallery: normalizeGallery(u.e_gallery),
-      e_about: u.e_about || u.e_description || "", // เผื่อเคย cache ไว้
+      e_about: u.e_about || u.e_description || "",
     };
 
     this.fetchUserProfile();
@@ -233,7 +236,10 @@ export default {
   methods: {
     // ---------- Helpers ----------
     imgUrl(path) {
-      return path ? `${BASE}${path}` : "/default-profile.jpg";
+      if (!path) return "/default-profile.jpg";
+      const url = `${BASE}${path}`;
+      const v = this.user?.updated_at || this.versionStamp;
+      return url + (url.includes("?") ? "&" : "?") + "v=" + encodeURIComponent(v);
     },
     _toNum(v) {
       if (v == null || v === "") return null;
@@ -242,9 +248,7 @@ export default {
     },
     _parseLegacySalary(txt) {
       if (!txt || typeof txt !== "string") return {};
-      const m = txt.match(
-        /(รายชั่วโมง|รายวัน|รายเดือน|เหมางาน|ตามตกลง)?\s*([\d,]+)?\s*(?:[-–]\s*([\d,]+))?/,
-      );
+      const m = txt.match(/(รายชั่วโมง|รายวัน|รายเดือน|เหมางาน|ตามตกลง)?\s*([\d,]+)?\s*(?:[-–]\s*([\d,]+))?/);
       if (!m) return {};
       return {
         type: (m[1] || "").trim(),
@@ -252,23 +256,32 @@ export default {
         max: this._toNum(m[3]),
       };
     },
+    pick(obj, keys) {
+      const out = {};
+      keys.forEach(k => { if (k in obj) out[k] = obj[k]; });
+      return out;
+    },
 
     // ---------- API ----------
     async fetchUserProfile() {
       try {
-        const { employer_id } = this.user; // กันหาย
+        const { employer_id } = this.user;
         const { data } = await axios.get(`${BASE}/api/employers/${employer_id}`);
 
-        // ใช้ e_description จาก DB แล้ว map เป็น e_about สำหรับฝั่งหน้าเว็บ
+        // map phone จากทั้งสองชื่อฟิลด์
+        const phone = data?.e_phone ?? data?.phone ?? this.user.e_phone ?? "";
+
         const merged = {
           ...this.user,
           ...data,
           employer_id,
           e_gallery: normalizeGallery(data?.e_gallery),
           e_about: data?.e_description ?? this.user.e_about ?? "",
+          e_phone: phone,
         };
 
         this.user = merged;
+        this.versionStamp = Date.now();
         localStorage.setItem("user", JSON.stringify(this.user));
       } catch (e) {
         console.error("❌ โหลดโปรไฟล์ล้มเหลว:", e);
@@ -277,15 +290,12 @@ export default {
 
     async fetchJobs() {
       try {
-        const { data } = await axios.get(
-          `${BASE}/api/jobs/employer/${this.user.employer_id}`,
-        );
+        const { data } = await axios.get(`${BASE}/api/jobs/employer/${this.user.employer_id}`);
         this.jobs = (data || []).map((j) => {
           const legacy = this._parseLegacySalary(j.j_salary);
-          const type =
-            j.j_salary_type ?? j.salary_type ?? j.j_type_salary ?? legacy.type ?? "";
-          const min = this._toNum(j.j_salary_min ?? j.salary_min ?? legacy.min);
-          const max = this._toNum(j.j_salary_max ?? j.salary_max ?? legacy.max);
+          const type = j.j_salary_type ?? j.salary_type ?? j.j_type_salary ?? legacy.type ?? "";
+          const min  = this._toNum(j.j_salary_min ?? j.salary_min ?? legacy.min);
+          const max  = this._toNum(j.j_salary_max ?? j.salary_max ?? legacy.max);
           return { ...j, j_salary_type: type, j_salary_min: min, j_salary_max: max };
         });
       } catch (e) {
@@ -301,12 +311,10 @@ export default {
 
       if (type === "ตามตกลง") return "ตามตกลง";
       if (min != null && max != null)
-        return `${min.toLocaleString()} – ${max.toLocaleString()} บาท${
-          type ? ` (${type})` : ""
-        }`;
+        return `${min.toLocaleString()} – ${max.toLocaleString()} บาท${type ? ` (${type})` : ""}`;
       if (min != null) return `${min.toLocaleString()} บาทขึ้นไป${type ? ` (${type})` : ""}`;
       if (max != null) return `สูงสุด ${max.toLocaleString()} บาท${type ? ` (${type})` : ""}`;
-      if (job.j_salary) return String(job.j_salary); // legacy
+      if (job.j_salary) return String(job.j_salary);
       return "ยังไม่ระบุ";
     },
 
@@ -338,42 +346,43 @@ export default {
 
     async saveProfile() {
       try {
-        // map e_about (frontend) -> e_description (DB)
-        const payload = {
-          ...this.tempUser,
-          e_description: this.tempUser.e_about ?? "", // ✅ ตรงกับ backend
-        };
+        // 1) เตรียม payload ที่อนุญาต และ map e_about -> e_description
+        const editableKeys = [
+          "e_company_name","e_phone","e_contact","e_position",
+          "e_website","e_address","e_map_iframe"
+        ];
+        const payload = this.pick(this.tempUser, editableKeys);
 
-        // 1) save fields
-        await axios.put(
-          `${BASE}/api/employers/${this.user.employer_id}`,
-          payload,
-        );
+        // ทำความสะอาดเบอร์ + ใส่ทั้งสองชื่อฟิลด์ (กัน backend ใช้คนละชื่อ)
+        const cleanPhone = (payload.e_phone ?? this.tempUser.phone ?? "")
+          .toString()
+          .replace(/[^\d+]/g, "")
+          .slice(0, 20); // กันยาวเกิน
+        payload.e_phone = cleanPhone;
+        payload.phone   = cleanPhone;
 
-        // 2) upload profile photo
+        payload.e_description = this.tempUser.e_about ?? "";
+
+        await axios.put(`${BASE}/api/employers/${this.user.employer_id}`, payload, {
+          headers: { "Content-Type": "application/json" },
+        });
+
+        // 2) อัปโหลดโลโก้
         if (this.photoFile) {
           const fd = new FormData();
           fd.append("profile", this.photoFile);
-          await axios.post(
-            `${BASE}/api/employers/upload-profile-employer/${this.user.employer_id}`,
-            fd,
-          );
+          await axios.post(`${BASE}/api/employers/upload-profile-employer/${this.user.employer_id}`, fd);
         }
 
-        // 3) upload gallery
+        // 3) อัปโหลดแกลเลอรี่
         if (this.galleryFiles.length) {
           const fd2 = new FormData();
           this.galleryFiles.forEach((f) => fd2.append("gallery", f));
-          await axios.post(
-            `${BASE}/api/employers/${this.user.employer_id}/upload-gallery`,
-            fd2,
-          );
+          await axios.post(`${BASE}/api/employers/${this.user.employer_id}/upload-gallery`, fd2);
         }
 
-        // 4) refresh from server (ให้แน่ใจว่าอ่านค่าล่าสุดจาก DB)
+        // 4) ดึงข้อมูลล่าสุด + ปิดโหมดแก้ไข
         await this.fetchUserProfile();
-
-        // reset ui
         this.editMode = false;
         this.tempUser = null;
         this.photoFile = null;
@@ -414,46 +423,34 @@ function normalizeGallery(g) {
     if (Array.isArray(g)) return g;
     if (typeof g === "string" && g.trim().length) return JSON.parse(g);
   } catch (_) {
-    // eslint-disable-next-line no-console
     console.warn("normalizeGallery: invalid gallery format");
   }
   return [];
 }
 </script>
 
-
 <style scoped>
-/* แถวค้นหา: ให้ช่องค้นหายืดเต็มที่ ส่วน select กว้างเท่าข้อความ */
 .searchbar .form-control,
 .searchbar .form-select {
-  height: 42px;            /* ฟิกความสูง */
-  padding-top: 0.375rem;   /* เว้นขอบบน */
-  padding-bottom: 0.375rem;/* เว้นขอบล่าง */
-  font-size: 0.95rem;      /* ขนาดตัวอักษรให้เท่ากัน */
-  border-radius: 999px;    /* ทำให้โค้งมนพอๆ กัน */
-  box-sizing: border-box;  /* กัน padding ทำให้เพี้ยน */
+  height: 42px;
+  padding-top: 0.375rem;
+  padding-bottom: 0.375rem;
+  font-size: 0.95rem;
+  border-radius: 999px;
+  box-sizing: border-box;
 }
-
-/* ให้ select กว้างพอดีกับข้อความที่เลือก (override ของ bootstrap/form-select) */
 .fit-select {
   flex: 0 0 auto;
-  width: -moz-fit-content;  /* Firefox */
-  width: -webkit-fit-content; /* Safari */
-  width: fit-content; 
+  width: fit-content;
   display: inline-block;
-  white-space: nowrap;      /* ไม่ตัดบรรทัด */
-  height: 38px;             /* ให้สูงเท่าช่องค้นหา */
-  padding-inline: 14px;     /* เว้นซ้ายขวาพอดี */
-  min-width: unset;         /* ยกเลิก min-width ใด ๆ ที่เคยตั้ง */
+  white-space: nowrap;
+  height: 38px;
+  padding-inline: 14px;
+  min-width: unset;
 }
-
 .badge-category{background:#fff5e6;color:#ff6600;border:1px solid #ff6600;border-radius:999px;font-weight:500;padding:.1rem .5rem;font-size:12px}
-
 .profile-list li + li{ margin-top:6px; }
-
 .thumb{ height:80px; width:auto; object-fit:cover; cursor:pointer; border-radius:8px; }
-
-/* Modal */
 .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;z-index:9999}
 .modal-image-wrapper{position:relative;border-radius:16px;max-width:90vw;max-height:90vh;background:#fff;box-shadow:0 20px 50px rgba(0,0,0,.5);overflow:hidden;display:flex;align-items:center;justify-content:center}
 .preview-image{display:block;max-width:100%;max-height:90vh;object-fit:contain}

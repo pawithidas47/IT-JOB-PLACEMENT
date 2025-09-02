@@ -128,22 +128,7 @@ router.post("/:id/upload-gallery", upload.array("gallery", 10), async (req, res)
     res.status(500).json({ error: "เกิดข้อผิดพลาดในการอัปโหลดแกลเลอรี่" });
   }
 });
-router.post("/:id/upload-gallery", upload.array("gallery", 10), async (req, res) => {
-  const employerId = req.params.id;
-  const urls = req.files.map((file) => "/uploads/" + file.filename);
 
-  try {
-    // อัปเดตแกลเลอรี่แบบ JSON string
-    await db.promise().query(
-      "UPDATE employers SET e_gallery = ? WHERE employer_id = ?",
-      [JSON.stringify(urls), employerId]
-    );
-    res.json({ message: "อัปโหลดแกลเลอรี่สำเร็จ", urls });
-  } catch (err) {
-    console.error("❌ อัปโหลดแกลเลอรี่ผิดพลาด:", err);
-    res.status(500).json({ error: "เกิดข้อผิดพลาดในการอัปโหลด" });
-  }
-});
 // Node.js (Express)
 router.put('/api/jobs/:id', async (req, res) => {
   const { j_amount } = req.body;
@@ -218,48 +203,63 @@ router.put("/:id/profile", async (req, res) => {
 });
 
 /* -------------------------------
-✅ PUT ข้อมูลบริษัท (e_description, e_address, e_map_iframe, e_website)
+✅ PUT ข้อมูลบริษัท (รวมเบอร์โทรด้วย)
 -------------------------------- */
 router.put("/:id", async (req, res) => {
   const employerId = req.params.id;
 
+  // รับค่าจาก body (ถ้าไม่ส่งมาก็จะเป็น undefined)
   const {
     e_company_name,
     e_contact,
     e_position,
-    e_description,
+    e_description,   // = e_about (frontend) ที่ map มาแล้ว
     e_address,
     e_map_iframe,
     e_website,
-    e_type // ✅ อย่าลืมเพิ่มตรงนี้ด้วย
+    e_type,
+    e_phone,         // ✅ เพิ่มใน schema
+    phone            // ✅ เผื่อบางที่ส่งเป็น phone
   } = req.body;
 
   try {
-    await db.promise().query(
-      `UPDATE employers
-       SET 
-         e_company_name = ?, 
-         e_contact = ?, 
-         e_position = ?, 
-         e_description = ?, 
-         e_address = ?, 
-         e_map_iframe = ?, 
-         e_website = ?, 
-         e_type = ?,              -- ✅ เพิ่มตรงนี้
-         e_updated = NOW()
-       WHERE employer_id = ?`,
-      [
-        e_company_name,
-        e_contact,
-        e_position,
-        e_description,
-        e_address,
-        e_map_iframe,
-        e_website,
-        e_type,                  // ✅ และตรงนี้
-        employerId
-      ]
-    );
+    // สร้าง SET แบบ dynamic เฉพาะ field ที่ถูกส่งมา
+    const fields = {
+      e_company_name,
+      e_contact,
+      e_position,
+      e_description,
+      e_address,
+      e_map_iframe,
+      e_website,
+      e_type,
+      // ✅ รองรับได้ทั้ง e_phone และ phone
+      e_phone: (e_phone ?? phone)
+    };
+
+    const setKeys = [];
+    const setVals = [];
+    for (const [k, v] of Object.entries(fields)) {
+      if (typeof v !== "undefined") {   // ใช้เฉพาะที่ส่งมาเท่านั้น
+        setKeys.push(`${k} = ?`);
+        setVals.push(v);
+      }
+    }
+
+    if (setKeys.length === 0) {
+      return res.status(400).json({ error: "ไม่มีฟิลด์สำหรับอัปเดต" });
+    }
+
+    // เติม timestamp
+    setKeys.push("e_updated = NOW()");
+
+    const sql = `UPDATE employers SET ${setKeys.join(", ")} WHERE employer_id = ?`;
+    setVals.push(employerId);
+
+    const [result] = await db.promise().query(sql, setVals);
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: "ไม่พบผู้ว่าจ้าง" });
+    }
 
     res.json({ message: "อัปเดตข้อมูลบริษัทสำเร็จ" });
   } catch (err) {
@@ -267,6 +267,7 @@ router.put("/:id", async (req, res) => {
     res.status(500).json({ error: "ไม่สามารถอัปเดตข้อมูลบริษัทได้" });
   }
 });
+
 
 
 /* -------------------------------

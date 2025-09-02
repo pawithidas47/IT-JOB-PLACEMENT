@@ -13,7 +13,6 @@
               <div class="co-type">{{ job?.e_type || 'ประเภทธุรกิจ' }}</div>
             </div>
           </div>
-          <div class="hero-date">{{ formatDate(job?.j_posted_at) || '-' }}</div>
         </div>
 
         <h1 class="title">รับสมัคร {{ job?.j_title }}</h1>
@@ -58,21 +57,24 @@
                 </div>
               </div>
 
-              <!-- ลักษณะงาน -->
+              <!-- ลักษณะงาน (แปลงบรรทัด -> bullet อัตโนมัติ) -->
               <section class="section card-section">
                 <h3 class="section-title"><i class="bi bi-briefcase me-2"></i>ลักษณะงาน</h3>
-                <div class="text-block">
-                  <div v-for="(line,i) in splitLines(job?.j_description)" :key="'d'+i" class="para">
+                <ul class="bullet-list" v-if="job?.j_description">
+                  <li v-for="(line,i) in normalizeLines(job?.j_description)" :key="'d'+i">
                     {{ line }}
-                  </div>
-                </div>
+                  </li>
+                </ul>
+                <div v-else class="muted">ไม่ระบุ</div>
               </section>
 
-              <!-- คุณสมบัติ -->
+              <!-- คุณสมบัติผู้สมัคร (แปลงบรรทัด -> bullet อัตโนมัติ) -->
               <section class="section card-section">
                 <h3 class="section-title"><i class="bi bi-check2-circle me-2"></i>คุณสมบัติผู้สมัคร</h3>
                 <ul class="bullet-list" v-if="job?.j_qualification">
-                  <li v-for="(line,i) in splitLines(job?.j_qualification)" :key="'q'+i">{{ line }}</li>
+                  <li v-for="(line,i) in normalizeLines(job?.j_qualification)" :key="'q'+i">
+                    {{ line }}
+                  </li>
                 </ul>
                 <div v-else class="muted">ไม่ระบุ</div>
               </section>
@@ -190,8 +192,12 @@ export default {
         const { data } = await axios.get(`http://localhost:3001/api/jobs/${id}`);
         this.job = data;
 
-        try { this.galleryArray = JSON.parse(this.job.e_gallery || "[]"); }
-        catch { this.galleryArray = []; }
+        try {
+          this.galleryArray = JSON.parse(this.job.e_gallery || "[]");
+        } catch (e) {
+          console.warn("parse gallery failed:", e);
+          this.galleryArray = [];
+        }
 
         if (this.isLoggedIn && this.job?.job_id) await this.checkStatus();
       } catch (e) {
@@ -263,14 +269,22 @@ export default {
         return "-";
       }
     },
-    splitLines(t) { return (t || "").split(/\r?\n/).filter(Boolean); },
+    // ✅ แปลงข้อความหลายบรรทัด -> bullet อัตโนมัติ และล้างสัญลักษณ์นำหน้า (•, -, *)
+    normalizeLines(text) {
+      return (text || "")
+        .split(/\r?\n/)
+        .map(s => s.replace(/^\s*(•|-|\*)\s*/, "").trim())
+        .filter(Boolean);
+    },
     openImage(path) {
       const url = "http://localhost:3001" + path;
       window.open(url, "_blank", "noopener");
     },
   },
 };
-</script><style scoped>
+</script>
+
+<style scoped>
 .company-card{
   background:#fff;
   border:1px solid #eef2f7;
@@ -280,7 +294,7 @@ export default {
 }
 
 .left-card {
-  background:#ffffff; /* ขาว */
+  background:#ffffff;
   border:1px solid #e5e7eb;
   border-radius:12px;
   padding:16px;
@@ -289,29 +303,14 @@ export default {
 
 /* ---------- การ์ดขวา (ข้อมูลบริษัท) ---------- */
 .company-card.right-card {
-  background:#fdf6ec;          /* สีไข่อ่อน */
-  border:1px solid #f5e6d8;    /* ขอบครีมอ่อน */
+  background:#fdf6ec;
+  border:1px solid #f5e6d8;
   border-radius:12px;
   padding:16px;
   box-shadow:0 2px 8px rgba(0,0,0,0.05);
-  color:#0f172a !important;    /* ดำเข้มทั้งหมด */
-}
-.company-card.right-card h1,
-.company-card.right-card h2,
-.company-card.right-card h3,
-.company-card.right-card h4,
-.company-card.right-card h5,
-.company-card.right-card h6,
-.company-card.right-card .snap-title,
-.company-card.right-card .snap-label,
-.company-card.right-card .snap-text,
-.company-card.right-card p,
-.company-card.right-card li,
-.company-card.right-card a,
-.company-card.right-card span,
-.company-card.right-card *[class*="text-"] {
   color:#0f172a !important;
 }
+.company-card.right-card * { color:#0f172a !important; }
 
 /* layout หลัก */
 .detail-wrap {
@@ -337,7 +336,6 @@ export default {
 .co-text{display:flex;flex-direction:column}
 .co-name{font-weight:800;color:#0f172a;line-height:1}
 .co-type{color:#64748b;font-size:.9rem}
-.hero-date{color:#6b7280;font-size:.95rem;white-space:nowrap;margin-top:-4px}
 .title{font-weight:800;color:#0f172a;margin:8px 0 8px;line-height:1.2}
 .hero-meta{display:flex;gap:8px;align-items:center}
 .chip{padding:4px 10px;border-radius:999px;font-weight:600;font-size:.82rem}
@@ -376,19 +374,9 @@ export default {
   background:#fff;
 }
 .section-title{font-size:1.05rem;font-weight:800;color:#0f172a;margin-bottom:10px}
-.text-block .para{margin-bottom:.4rem;color:#111827}
+.muted{color:#94a3b8}
 .bullet-list{padding-left:1.1rem;margin:0}
 .bullet-list li{margin:.25rem 0;color:#111827}
-.muted{color:#94a3b8}
-.alert-note{
-  margin-top:14px;
-  background:#f6f7fb;
-  border:1px dashed #cbd5e1;
-  color:#0f172a;
-  border-radius:12px;
-  padding:10px 12px;
-  font-weight:700;
-}
 
 /* การ์ดขวา */
 .snap-title{font-size:1rem;font-weight:800;margin-bottom:8px}

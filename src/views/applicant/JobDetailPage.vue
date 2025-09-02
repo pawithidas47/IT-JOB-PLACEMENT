@@ -1,4 +1,4 @@
-<template>
+<template> 
   <div>
     <NavbarApplicant />
 
@@ -7,7 +7,7 @@
       <header class="hero">
         <div class="hero-top">
           <div class="co-inline">
-            <!-- ✅ ใช้ companyLogoSrc + key เพื่อบังคับ re-render -->
+            <!-- ใช้ companyLogoSrc + key เพื่อบังคับ re-render -->
             <img :src="companyLogoSrc" :key="companyLogoSrc" class="co-logo" alt="company" />
             <div class="co-text">
               <div class="co-name">{{ job?.e_company_name || '-' }}</div>
@@ -60,19 +60,20 @@
                 </div>
               </div>
 
+              <!-- ลักษณะงาน: บูลเล็ตอัตโนมัติ -->
               <section class="section card-section">
                 <h3 class="section-title"><i class="bi bi-briefcase me-2"></i>ลักษณะงาน</h3>
-                <div class="text-block">
-                  <div v-for="(line,i) in splitLines(job?.j_description)" :key="'d'+i" class="para">
-                    {{ line }}
-                  </div>
-                </div>
+                <ul class="bullet-list" v-if="job?.j_description">
+                  <li v-for="(line,i) in normalizeLines(job?.j_description)" :key="'d'+i">{{ line }}</li>
+                </ul>
+                <div v-else class="muted">ไม่ระบุ</div>
               </section>
 
+              <!-- คุณสมบัติผู้สมัคร: บูลเล็ตอัตโนมัติ -->
               <section class="section card-section">
                 <h3 class="section-title"><i class="bi bi-check2-circle me-2"></i>คุณสมบัติผู้สมัคร</h3>
                 <ul class="bullet-list" v-if="job?.j_qualification">
-                  <li v-for="(line,i) in splitLines(job?.j_qualification)" :key="'q'+i">{{ line }}</li>
+                  <li v-for="(line,i) in normalizeLines(job?.j_qualification)" :key="'q'+i">{{ line }}</li>
                 </ul>
                 <div v-else class="muted">ไม่ระบุ</div>
               </section>
@@ -172,14 +173,14 @@ export default {
     };
   },
   computed: {
-    /* ✅ โลโก้แบบกันแคช + รองรับหลายฟิลด์ */
+    /* โลโก้แบบกันแคช + รองรับหลายฟิลด์ */
     companyLogoSrc() {
       const base = this.base;
       const p =
         this.job?.e_profile_img_url ||
         this.job?.profile_img_url ||
         this.job?.e_profile_img ||
-        this.job?.e_profile; // กันชื่อฟิลด์หลากหลาย
+        this.job?.e_profile;
 
       if (!p) return "/default-profile.jpg";
 
@@ -273,7 +274,15 @@ export default {
       } catch { return "-"; }
     },
 
-    splitLines(t) { return (t || "").split(/\r?\n/).filter(Boolean); },
+    /* ✅ แปลงข้อความหลายบรรทัด → บูลเล็ตอัตโนมัติ
+       - ตัดบรรทัดว่าง
+       - ล้างสัญลักษณ์นำหน้า (•, -, *) ถ้ามี */
+    normalizeLines(text) {
+      return (text || "")
+        .split(/\r?\n/)
+        .map(s => s.replace(/^\s*(•|-|\*)\s*/, "").trim())
+        .filter(Boolean);
+    },
 
     showImage(url) {
       this.currentImageIndex = this.galleryArray.findIndex(img => this.base + img === url);
@@ -293,7 +302,9 @@ export default {
     },
   },
 };
-</script><style scoped>
+</script>
+
+<style scoped>
 /* ---------- ปุ่ม ---------- */
 .btn-pill.apply {
   background: linear-gradient(135deg,#ff6600,#e55d00);
@@ -359,23 +370,20 @@ export default {
 .section{margin-top:14px}
 .card-section{border:1px solid #eef2f7;border-radius:12px;padding:14px 14px 10px;background:#fff}
 .section-title{font-size:1.05rem;font-weight:800;color:#0f172a;margin-bottom:10px}
-.text-block .para{margin-bottom:.4rem;color:#111827}
 .bullet-list{padding-left:1.1rem;margin:0}
 .bullet-list li{margin:.25rem 0;color:#111827}
 .muted{color:#94a3b8}
 .alert-note{margin-top:14px;background:#f6f7fb;border:1px dashed #cbd5e1;color:#0f172a;border-radius:12px;padding:10px 12px;font-weight:700}
 
 /* ---------- การ์ดขวา (ข้อมูลบริษัท) ---------- */
-/* พื้น/ขอบ: สีไข่อ่อนตามตัวอย่าง + ข้อความเป็นดำเข้มทั้งหมด */
 .company-card.right-card{
-  background:#fdf6ec !important;     /* eggshell */
+  background:#fdf6ec !important;
   border:1px solid #f5e6d8 !important;
   border-radius:14px;
   padding:16px;
   box-shadow:0 2px 8px rgba(0,0,0,.05);
   color:#0f172a !important;
 }
-/* ทำให้ทุกข้อความภายในเป็นดำเข้ม */
 .company-card.right-card h1,
 .company-card.right-card h2,
 .company-card.right-card h3,
@@ -398,7 +406,7 @@ export default {
 .snap-text{margin:0}
 .snap-list{list-style:none;padding-left:0;margin:0}
 
-/* แกลเลอรี่: กรอบเทาอ่อน */
+/* แกลเลอรี่ */
 .gallery{display:flex;gap:8px;overflow:auto}
 .g-thumb{
   height:70px;width:110px;object-fit:cover;border-radius:8px;

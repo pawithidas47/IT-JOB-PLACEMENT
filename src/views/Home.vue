@@ -1,156 +1,140 @@
-<template>
+<template> 
   <div>
     <NavbarHome />
-
     <div class="container-fluid px-4 py-4">
-      <div class="main-layout align-items-start">
-
-        <!-- Sidebar Filter -->
-        <aside
-          class="filter-panel shadow-popup text-start bg-white"
-          style="padding: 24px; border-radius: 12px; width: 260px; box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);"
-        >
-          <form class="d-flex flex-column gap-3" @submit.prevent="searchJobs">
-            <div>
-              <label class="form-label mb-1 fw-semibold text-dark">คำที่ต้องการค้นหา</label>
-              <div class="position-relative">
+      <div class="main-layout">
+        <!-- === FILTER PANEL === -->
+        <aside class="filter-panel">
+          <form class="stack" @submit.prevent="searchJobs">
+            <!-- คำค้น -->
+            <div class="field">
+              <label class="label">คำที่ต้องการค้นหา</label>
+              <div class="input-icon">
+                <i class="bi bi-search"></i>
                 <input
                   v-model="filter.keyword"
                   @input="searchJobs"
                   type="text"
-                  class="form-control"
                   placeholder="เช่น เขียนโปรแกรม, บริษัท"
-                  style="border-radius: 10px; height: 38px; font-size: 14px; padding-left: 2.2rem;"
                 />
-                <span class="position-absolute top-50 translate-middle-y text-muted" style="left: 12px;">
-                  <i class="bi bi-search"></i>
-                </span>
               </div>
             </div>
 
-            <div>
-              <label class="form-label mb-1 fw-semibold text-dark">หมวดหมู่งาน</label>
-              <select
-                v-model="filter.type"
-                @change="searchJobs"
-                class="form-select"
-                style="border-radius: 10px; height: 38px; font-size: 14px;"
-              >
+            <hr class="divider" />
+
+            <!-- หมวดหมู่ -->
+            <div class="field">
+              <label class="label">หมวดหมู่งาน</label>
+              <select v-model="filter.type" @change="searchJobs">
                 <option value="">ทั้งหมด</option>
-                <option value="ออกแบบกราฟิก / มัลติมีเดีย">ออกแบบกราฟิก / มัลติมีเดีย</option>
-                <option value="UX/UI Design">UX/UI Design</option>
+                <option value="การตลาดดิจิทัล">การตลาดดิจิทัล</option>
+                <option value="งานแปล / เขียนบทความ">งานแปล / เขียนบทความ</option>
+                <option value="งานตัดต่อวิดีโอ / สร้างคอนเทนต์">งานตัดต่อวิดีโอ / สร้างคอนเทนต์</option>
+                <option value="งานออกแบบ UX/UI">งานออกแบบ UX/UI</option>
+                <option value="งานออกแบบกราฟิก / มัลติมีเดีย">งานออกแบบกราฟิก / มัลติมีเดีย</option>
+                <option value="คีย์ข้อมูล / ป้อนข้อมูล">คีย์ข้อมูล / ป้อนข้อมูล</option>
+                <option value="ดูแลระบบเครือข่าย">ดูแลระบบเครือข่าย</option>
                 <option value="พัฒนาเว็บไซต์">พัฒนาเว็บไซต์</option>
                 <option value="พัฒนาแอปพลิเคชัน">พัฒนาแอปพลิเคชัน</option>
-                <option value="เขียนโปรแกรม / Coding">เขียนโปรแกรม / Coding</option>
-                <option value="คีย์ข้อมูล / Data Entry">คีย์ข้อมูล / Data Entry</option>
-                <option value="เขียน / แปลบทความไอที">เขียน / แปลบทความไอที</option>
-                <option value="การตลาดดิจิทัล / คอนเทนต์">การตลาดดิจิทัล / คอนเทนต์</option>
-                <option value="แอดมินเพจ / โซเชียลมีเดีย">แอดมินเพจ / โซเชียลมีเดีย</option>
-                <option value="ตัดต่อวิดีโอ / สร้างคอนเทนต์">ตัดต่อวิดีโอ / สร้างคอนเทนต์</option>
-                <option value="ช่วยเหลือด้าน IT / Remote Support">ช่วยเหลือด้าน IT / Remote Support</option>
-                <option value="ติวเตอร์ / เทรนเนอร์ด้านเทคโนโลยี">ติวเตอร์ / เทรนเนอร์ด้านเทคโนโลยี</option>
-                <option value="ผู้ช่วยวิจัย / รวบรวมข้อมูล">ผู้ช่วยวิจัย / รวบรวมข้อมูล</option>
+                <option value="ผู้ดูแลเพจ / โซเชียลมีเดีย">ผู้ดูแลเพจ / โซเชียลมีเดีย</option>
+                <option value="ที่ปรึกษาด้านเทคโนโลยี">ที่ปรึกษาด้านเทคโนโลยี</option>
+                <option value="สนับสนุนงานไอที">สนับสนุนงานไอที (IT Support)</option>
+                <option value="อื่น ๆ">อื่น ๆ</option>
               </select>
             </div>
 
-            <div>
-              <label class="form-label mb-1 fw-semibold text-dark">ทักษะที่ใช้</label>
+            <!-- ทักษะ -->
+            <div class="field">
+              <label class="label">ทักษะที่ใช้</label>
               <input
                 v-model="filter.skills"
                 @input="searchJobs"
                 type="text"
-                class="form-control"
                 placeholder="เช่น HTML, Photoshop"
-                style="border-radius: 10px; height: 38px; font-size: 14px;"
               />
             </div>
 
-            <div>
-              <label class="form-label mb-1 fw-semibold text-dark">ค่าจ้าง (บาท)</label>
-              <div class="d-flex align-items-center">
-                <select
-                  v-model="filter.salaryMin"
-                  @change="searchJobs"
-                  class="form-select me-2"
-                  style="border-radius: 10px; height: 38px; font-size: 14px;"
+            <hr class="divider" />
+
+            <!-- ชนิดงาน -->
+            <div class="field">
+              <label class="label">ชนิดงาน</label>
+              <div class="chips two-cols">
+                <button
+                  v-for="opt in workTypeOptions"
+                  :key="opt.value"
+                  type="button"
+                  class="chip"
+                  :class="{ active: filter.workType === opt.value }"
+                  @click="toggleWorkType(opt.value)"
                 >
-                  <option value="">ต่ำสุด</option>
-                  <option value="100">100</option>
-                  <option value="300">300</option>
-                  <option value="500">500</option>
-                  <option value="1000">1000</option>
-                  <option value="2000">2000</option>
-                  <option value="5000">5000</option>
-                  <option value="10000">10000</option>
-                </select>
-                <span>-</span>
-                <select
-                  v-model="filter.salaryMax"
-                  @change="searchJobs"
-                  class="form-select ms-2"
-                  style="border-radius: 10px; height: 38px; font-size: 14px;"
-                >
-                  <option value="">สูงสุด</option>
-                  <option value="500">500</option>
-                  <option value="1000">1000</option>
-                  <option value="2000">2000</option>
-                  <option value="5000">5000</option>
-                  <option value="10000">10000</option>
-                  <option value="20000">20000</option>
-                  <option value="9999999">มากกว่า 20000</option>
-                </select>
+                  {{ opt.label }}
+                </button>
               </div>
             </div>
 
-            <div>
-              <label class="form-label mb-1 fw-semibold text-dark">ผู้ว่าจ้าง</label>
-              <select
-                v-model="filter.employerType"
-                @change="searchJobs"
-                class="form-select mb-2"
-                style="border-radius: 10px; height: 38px; font-size: 14px;"
-              >
-                <option value="">ทั้งหมด</option>
-                <option value="บริษัท">บริษัท</option>
-                <option value="ร้านค้า">ร้านค้า</option>
-                <option value="หน่วยงานภาครัฐ">หน่วยงานภาครัฐ</option>
-                <option value="องค์กรไม่แสวงหากำไร">องค์กรไม่แสวงหากำไร</option>
-                <option value="บุคคลทั่วไป">บุคคลทั่วไป</option>
-                <option value="นักศึกษา">นักศึกษา</option>
-                <option value="สตาร์ทอัป">สตาร์ทอัป</option>
-                <option value="ฟรีแลนซ์">ฟรีแลนซ์</option>
-              </select>
+            <!-- วันทำงาน -->
+            <div class="field">
+              <label class="label">วันทำงาน</label>
+              <div class="chips two-cols">
+                <button
+                  v-for="p in dayPresets"
+                  :key="p.value"
+                  type="button"
+                  class="chip"
+                  :class="{ active: filter.dayPreset === p.value }"
+                  @click="selectDayPreset(p.value)"
+                >
+                  {{ p.label }}
+                </button>
+              </div>
+
+              <!-- โชว์เมื่อเลือกกำหนดเอง -->
+              <div v-if="filter.dayPreset === 'custom'" class="days-grid">
+                <label v-for="d in dayOptions" :key="d.value" class="day-item">
+                  <input
+                    type="checkbox"
+                    :value="d.value"
+                    v-model="filter.workDaysCustom"
+                    @change="searchJobs"
+                  />
+                  <span>{{ d.label }}</span>
+                </label>
+              </div>
             </div>
 
-            <div class="text-center">
-              <button
-                class="btn text-white fw-bold"
-                style="width: 100%; background: linear-gradient(135deg,#ff6600,#e55d00); border-radius: 10px; height: 40px; font-size: 14px; box-shadow: 0 2px 10px rgba(255, 102, 0, 0.3);"
-                type="submit"
-              >
-                ค้นหา
-              </button>
+            <!-- ช่วงเวลา -->
+            <div class="field">
+              <label class="label">ช่วงเวลาทำงาน</label>
+              <div class="time-row">
+                <div class="time-input">
+                  <i class="bi bi-clock"></i>
+                  <input type="time" v-model="filter.timeFrom" @change="searchJobs" />
+                </div>
+                <span class="sep">–</span>
+                <div class="time-input">
+                  <i class="bi bi-clock"></i>
+                  <input type="time" v-model="filter.timeTo" @change="searchJobs" />
+                </div>
+              </div>
+            </div>
+
+            <!-- ปุ่ม -->
+            <div class="actions">
+              <button type="button" class="btn-outline" @click="resetForm">รีเซ็ต</button>
+              <button type="submit" class="btn-primary">ค้นหา</button>
             </div>
           </form>
         </aside>
 
+        <!-- === RESULTS === -->
         <div class="vertical-divider"></div>
-
-        <!-- Job Results -->
         <section class="job-results">
-
-          <!-- ส่วนหัวผลลัพธ์ -->
           <div class="results-header">
             <h5 class="mb-1 text-orange">พบ {{ filteredJobs.length }} งาน</h5>
-
             <div class="sort-row">
-              <label for="sortSelect" class="me-2 mb-0 text-muted small">เรียงตาม</label>
-              <select
-                id="sortSelect"
-                v-model="viewFilter"
-                @change="searchJobs"
-                class="form-select custom-pill"
-              >
+              <label class="me-2 mb-0 text-muted small">เรียงตาม</label>
+              <select v-model="viewFilter" @change="searchJobs" class="sort-pill">
                 <option value="all">ทั้งหมด</option>
                 <option value="latest">ล่าสุด</option>
                 <option value="applied">สมัครแล้ว</option>
@@ -159,17 +143,13 @@
             </div>
           </div>
 
-          <br />
-
           <div class="job-grid">
             <div
-              class="job-card p-4 bg-white border rounded-3 shadow-sm position-relative"
               v-for="job in filteredJobs"
               :key="job.job_id"
+              class="job-card"
               @click="openJob(job.job_id)"
-              style="cursor:pointer"
             >
-              <!-- ปุ่มบันทึก -->
               <div class="card-meta">
                 <button
                   class="icon-btn"
@@ -182,83 +162,89 @@
                 </button>
               </div>
 
-              <!-- บริษัท -->
-              <div class="d-flex align-items-center mb-3">
+              <div class="co">
                 <img
                   :src="job.e_profile_img_url ? `http://localhost:3001${job.e_profile_img_url}` : '/default-profile.jpg'"
-                  alt="โลโก้บริษัท"
-                  class="rounded-circle shadow-sm me-3"
-                  style="width: 42px; height: 42px; object-fit: cover"
+                  alt="company"
                 />
-                <div class="text-truncate">
-                  <div class="fw-semibold">{{ job.e_company_name || 'ชื่อบริษัทไม่ระบุ' }}</div>
-                </div>
+                <div class="co-name">{{ job.e_company_name || 'ชื่อบริษัทไม่ระบุ' }}</div>
               </div>
 
-              <!-- หัวข้อ -->
-              <div class="d-flex align-items-center flex-wrap gap-2 mb-2">
-                <h5 class="fw-bold text-dark mb-0">{{ job.j_title }}</h5>
+              <div class="title-row">
+                <h5 class="title">{{ job.j_title }}</h5>
                 <span v-if="isBookmarked(job.job_id)" class="chip-saved">บันทึกแล้ว</span>
               </div>
 
-              <!-- หมวดหมู่ -->
-              <div v-if="job.j_type" class="mb-2">
-                <span class="badge-category">{{ job.j_type }}</span>
+              <div v-if="displayCategory(job)" class="badge-category">{{ displayCategory(job) }}</div>
+              <div v-if="displayWorkType(job)" class="muted">
+                <i class="bi bi-briefcase me-1"></i>{{ displayWorkType(job) }}
               </div>
 
-              <!-- รายละเอียดสั้น -->
-              <p class="mb-1 text-muted">
-                <i class="bi bi-people-fill me-1"></i> รับจำนวน: {{ job.j_amount || '-' }} คน
-              </p>
-              <p class="mb-0 text-muted">
-                <i class="bi bi-cash-coin me-1"></i> ค่าจ้าง: {{ salaryDisplay(job) }}
-              </p>
+              <div class="muted"><i class="bi bi-people-fill me-1"></i>รับ: {{ job.j_amount || '-' }} คน</div>
+              <div class="muted"><i class="bi bi-cash-coin me-1"></i>ค่าจ้าง: {{ salaryDisplay(job) }}</div>
 
-              <!-- เวลาที่ผ่านมา -->
-              <div class="ago-badge">
-                {{ timeAgo(job.j_posted_at) }}
-              </div>
+              <div class="ago">{{ timeAgo(job.j_posted_at) }}</div>
             </div>
           </div>
         </section>
-
       </div>
     </div>
   </div>
 </template>
-
 <script>
 import NavbarHome from '@/components/NavbarHome.vue';
 import axios from 'axios';
 import Swal from 'sweetalert2';
 
 export default {
-  name: 'GuestJobListWithPopup',
+  name: 'GuestJobListNeat',
   components: { NavbarHome },
   data() {
     return {
       isLoggedIn: localStorage.getItem('authToken') !== null,
-      viewFilter: 'all', // 'all' | 'latest' | 'applied' | 'not_applied'
+      viewFilter: 'all',
       filter: {
         keyword: '',
         type: '',
-        salaryMin: '',
-        salaryMax: '',
-        employerType: '',
-        sort: '',
         skills: '',
+        workType: '',
+        dayPreset: 'any',
+        workDaysCustom: [],
+        timeFrom: '',
+        timeTo: ''
       },
       jobs: [],
       filtered: [],
       bookmarkedIds: [],
       user: null,
       appliedJobIds: new Set(),
+
+      workTypeOptions: [
+        { value: 'one-shot', label: 'งานชิ้นเดียว' },
+        { value: 'hourly',   label: 'รายชั่วโมง' },
+        { value: 'parttime', label: 'พาร์ทไทม์ (รายวัน)' },
+        { value: 'fulltime', label: 'ฟูลไทม์ (รายเดือน)' },
+      ],
+      dayPresets: [
+        { value: 'any',     label: 'ไม่ระบุ' },
+        { value: 'alldays', label: 'ทุกวัน' },
+        { value: 'weekday', label: 'จันทร์–ศุกร์' },
+        { value: 'weekend', label: 'เสาร์–อาทิตย์' },
+        { value: 'custom',  label: 'กำหนดเอง' },
+      ],
+      dayOptions: [
+        { value: 'mon', label: 'จันทร์' },
+        { value: 'tue', label: 'อังคาร' },
+        { value: 'wed', label: 'พุธ' },
+        { value: 'thu', label: 'พฤหัสฯ' },
+        { value: 'fri', label: 'ศุกร์' },
+        { value: 'sat', label: 'เสาร์' },
+        { value: 'sun', label: 'อาทิตย์' },
+      ],
     };
   },
   computed: {
-    filteredJobs() {
-      return this.filtered;
-    },
+    filteredJobs() { return this.filtered; }
   },
   mounted() {
     this.user = JSON.parse(localStorage.getItem("user"));
@@ -268,232 +254,349 @@ export default {
       this.bookmarkedIds = saved.map(j => j.job_id);
       this.loadAppliedJobs();
     }
-
     axios.get('http://localhost:3001/api/jobs')
-      .then((res) => {
-        this.jobs = res.data;
-        this.searchJobs();
-      })
-      .catch((err) => {
-        console.error('❌ ดึงข้อมูลงานล้มเหลว:', err);
-      });
+      .then(res => { this.jobs = res.data; this.searchJobs(); })
+      .catch(err => console.error('❌ ดึงข้อมูลงานล้มเหลว:', err));
   },
   methods: {
     async loadAppliedJobs() {
+      if (!this.user) return;
       try {
-        if (!this.user) return;
         const res = await axios.get(`http://localhost:3001/api/applications/${this.user.applicant_id}`);
         this.appliedJobIds = new Set(res.data.map(a => a.job_id));
       } catch (e) {
-        console.warn('โหลดงานที่สมัครแล้วไม่สำเร็จ (ข้ามได้)', e);
+        /* no-op: กรณีผู้ใช้ยังไม่มีการสมัคร หรือ API error */
+        this.appliedJobIds = this.appliedJobIds || new Set();
       }
     },
 
     openJob(id) {
-      const path = this.isLoggedIn ? `/applicant/jobs/${id}` : `/jobs/${id}`;
-      this.$router.push(path);
+      this.$router.push(this.isLoggedIn ? `/applicant/jobs/${id}` : `/jobs/${id}`);
     },
 
-    // ---- แก้เงื่อนไขเงินเดือนให้รองรับข้อความ/ช่วง/ตามตกลง ----
-    parseSalaryRange(s) {
-      if (s === null || s === undefined) return null;
-      const str = String(s);
-      const nums = str.match(/\d+(?:[.,]\d+)?/g);
-      if (!nums) return null;
-      const values = nums
-        .map(n => parseInt(n.replace(/[^\d]/g, ''), 10))
-        .filter(v => !isNaN(v));
-      if (!values.length) return null;
-      return { min: Math.min(...values), max: Math.max(...values) };
+    // --- UI handlers ---
+    toggleWorkType(val) {
+      this.filter.workType = this.filter.workType === val ? '' : val;
+      this.searchJobs();
+    },
+    selectDayPreset(val) {
+      this.filter.dayPreset = val;
+      if (val !== 'custom') this.filter.workDaysCustom = [];
+      this.searchJobs();
+    },
+    resetForm() {
+      this.filter = {
+        keyword: '', type: '', skills: '', workType: '',
+        dayPreset: 'any', workDaysCustom: [], timeFrom: '', timeTo: ''
+      };
+      this.searchJobs();
+    },
+
+    // --- helpers ---
+    _norm(s){ return (s || '').toString().trim().toLowerCase(); },
+    _mapWorkType(str){
+      const s=this._norm(str); if(!s) return '';
+      if (s.includes('ชิ้น')) return 'one-shot';
+      if (s.includes('รายชั่วโมง') || s.includes('ชั่วโมง')) return 'hourly';
+      if (s.includes('พาร์ท') || s.includes('รายวัน') || s.includes('part')) return 'parttime';
+      if (s.includes('ฟูล') || s.includes('รายเดือน') || s.includes('full')) return 'fulltime';
+      return '';
+    },
+    _getCategory(job){ return (job.category || job.j_category || job.j_type || '').toString().trim(); },
+    _extractWorkDays(job){
+      const val = job.j_work_days || job.j_days || job.work_days;
+      if (!val) return [];
+      const map = {
+        'จันทร์':'mon','อังคาร':'tue','พุธ':'wed','พฤหัสบดี':'thu','พฤหัสฯ':'thu',
+        'ศุกร์':'fri','เสาร์':'sat','อาทิตย์':'sun',
+        'จ.':'mon','อ.':'tue','พ.':'wed','พฤ.':'thu','ศ.':'fri','ส.':'sat','อา.':'sun',
+        'mon':'mon','tue':'tue','wed':'wed','thu':'thu','fri':'fri','sat':'sat','sun':'sun'
+      };
+      const out=[]; 
+      const push=(k)=>{ const m=map[k]; if(m && !out.includes(m)) out.push(m); };
+      if(Array.isArray(val)){ val.forEach(v=>push(this._norm(v))); }
+      else {
+        const txt=this._norm(val);
+        Object.keys(map).forEach(k=>{ if (txt.includes(k)) push(k); });
+        if (txt.includes('จันทร์') && txt.includes('ศุกร์'))
+          ['mon','tue','wed','thu','fri'].forEach(d=>!out.includes(d)&&out.push(d));
+      }
+      return out;
+    },
+    _extractTimeRange(job){
+      let s = job.j_work_time || job.work_time || '';
+      let start = job.j_work_time_start || job.work_time_start || '';
+      let end   = job.j_work_time_end   || job.work_time_end   || '';
+      const toMin = (t)=>{ 
+        const m=(t||'').toString().match(/(\d{1,2}):?(\d{2})?/);
+        if(!m) return null; 
+        const hh=+m[1], mm=m[2]?+m[2]:0;
+        return isNaN(hh)||isNaN(mm)?null:hh*60+mm; 
+      };
+      if ((!start || !end) && s) {
+        const m = s.match(/(\d{1,2}:\d{2}).*?(\d{1,2}:\d{2})/);
+        if (m) { start=m[1]; end=m[2]; }
+      }
+      const a=toMin(start), b=toMin(end); 
+      if(a==null||b==null) return null; 
+      return {from:a,to:b};
+    },
+
+    displayCategory(job){ return this._getCategory(job); },
+    displayWorkType(job) {
+      const raw = (job.j_work_type || job.j_kind || job.j_employment_type || '').toString();
+      return raw.trim();
     },
     salaryDisplay(job) {
       const s = job?.j_salary;
-      if (s === null || s === undefined || s === '') return 'ไม่ระบุ';
+      if (s===null || s===undefined || s==='') return 'ไม่ระบุ';
       const n = Number(s);
-      if (!isNaN(n)) return n.toLocaleString() + ' บาท';
-      return String(s);
+      return isNaN(n) ? String(s) : n.toLocaleString()+' บาท';
     },
 
+    // --- filtering ---
     searchJobs() {
-      const keyword = this.filter.keyword.toLowerCase();
-      const skillKeyword = this.filter.skills?.toLowerCase() || '';
-      const salaryMin = this.filter.salaryMin ? parseInt(this.filter.salaryMin, 10) : null;
-      const salaryMax = this.filter.salaryMax ? parseInt(this.filter.salaryMax, 10) : null;
+      const keyword=this._norm(this.filter.keyword);
+      const skillKeyword=this._norm(this.filter.skills);
+      const wantWorkType=this.filter.workType;
 
-      let result = this.jobs.filter((job) => {
-        const matchesKeyword =
-          job.j_title?.toLowerCase().includes(keyword) ||
-          job.j_description?.toLowerCase().includes(keyword) ||
-          job.j_type?.toLowerCase().includes(keyword) ||
-          job.e_company_name?.toLowerCase().includes(keyword);
+      // preset → days
+      let wantDays=[];
+      if(this.filter.dayPreset==='alldays')      wantDays=['mon','tue','wed','thu','fri','sat','sun'];
+      else if(this.filter.dayPreset==='weekday') wantDays=['mon','tue','wed','thu','fri'];
+      else if(this.filter.dayPreset==='weekend') wantDays=['sat','sun'];
+      else if(this.filter.dayPreset==='custom')  wantDays=[...this.filter.workDaysCustom];
 
-        const matchesSkills =
-          skillKeyword === '' ||
-          job.j_qualification?.toLowerCase().includes(skillKeyword);
+      const toMin = (t)=> t ? (+t.slice(0,2))*60 + (+t.slice(3,5)) : null;
+      const wantFromMin=toMin(this.filter.timeFrom);
+      const wantToMin  =toMin(this.filter.timeTo);
 
-        const matchesType =
-          this.filter.type === '' || job.j_type === this.filter.type;
+      let result=this.jobs.filter(job=>{
+        const cat = this._getCategory(job);
 
-        // เงินเดือน: ถ้าไม่ตั้งช่วง -> ไม่กรอง, ถ้าตั้งช่วงพยายาม parse
-        let matchesSalary = true;
-        if (salaryMin !== null || salaryMax !== null) {
-          const r = this.parseSalaryRange(job.j_salary);
-          if (!r) {
-            // งานแบบ “ตามตกลง/ไม่มีตัวเลข” ให้ผ่านเมื่อไม่ได้กำหนดเงื่อนไขเข้มงวด
-            matchesSalary = true;
-          } else {
-            const passMin = salaryMin !== null ? r.max >= salaryMin : true;
-            const passMax = salaryMax !== null ? r.min <= salaryMax : true;
-            matchesSalary = passMin && passMax;
+        const matchesKeyword = !keyword ||
+          this._norm(job.j_title).includes(keyword) ||
+          this._norm(job.j_description).includes(keyword) ||
+          this._norm(cat).includes(keyword) ||
+          this._norm(job.e_company_name).includes(keyword);
+
+        const matchesSkills = !skillKeyword || this._norm(job.j_qualification).includes(skillKeyword);
+        const matchesType   = !this.filter.type || cat === this.filter.type;
+
+        let matchesWorkType = true;
+        if (wantWorkType) {
+          const mapped = this._mapWorkType(job.j_work_type || job.j_kind || job.j_employment_type || '');
+          matchesWorkType = mapped === wantWorkType;
+        }
+
+        let matchesDays = true;
+        if (wantDays.length) {
+          const jobDays = this._extractWorkDays(job);
+          matchesDays = jobDays.some(d => wantDays.includes(d));
+        }
+
+        let matchesTime = true;
+        if (wantFromMin!=null || wantToMin!=null) {
+          const jt=this._extractTimeRange(job);
+          if (!jt) matchesTime = true;
+          else {
+            const qFrom = (wantFromMin!=null)?wantFromMin:jt.from;
+            const qTo   = (wantToMin  !=null)?wantToMin  :jt.to;
+            matchesTime = Math.max(qFrom, jt.from) < Math.min(qTo, jt.to);
           }
         }
 
-        const matchesEmployer =
-          !this.filter.employerType || job.employer_type === this.filter.employerType;
-
-        // ถ้า j_status ไม่มี ให้ถือว่า open
-        const isOpen = !job.j_status || job.j_status === 'open';
-
-        return (
-          matchesKeyword &&
-          matchesSkills &&
-          matchesType &&
-          matchesSalary &&
-          matchesEmployer &&
-          isOpen
-        );
+        const isOpen = !job.j_status || job.j_status==='open';
+        return matchesKeyword && matchesSkills && matchesType &&
+               matchesWorkType && matchesDays && matchesTime && isOpen;
       });
 
-      // เรียง/คัดกรองตามดรอปดาว
-      if (this.viewFilter === 'latest') {
-        const safeDate = (x) => (x ? new Date(x) : new Date(0));
-        result = result.sort((a, b) => safeDate(b.j_posted_at) - safeDate(a.j_posted_at));
-      } else if (this.viewFilter === 'applied') {
-        result = result.filter(j => this.appliedJobIds.has(j.job_id));
-      } else if (this.viewFilter === 'not_applied') {
-        result = result.filter(j => !this.appliedJobIds.has(j.job_id));
+      if (this.viewFilter==='latest') {
+        const safe = x => (x ? new Date(x) : new Date(0));
+        result = result.sort((a,b)=> safe(b.j_posted_at)-safe(a.j_posted_at));
+      } else if (this.viewFilter==='applied') {
+        result = result.filter(j=> this.appliedJobIds.has(j.job_id));
+      } else if (this.viewFilter==='not_applied') {
+        result = result.filter(j=> !this.appliedJobIds.has(j.job_id));
       }
 
-      this.filtered = result;
+      this.filtered=result;
     },
 
-    isBookmarked(jobId) {
-      return this.bookmarkedIds.includes(jobId);
-    },
-    bookmarkJob(job) {
+    isBookmarked(id){ return this.bookmarkedIds.includes(id); },
+    bookmarkJob(job){
       if (!this.isLoggedIn || !this.user) {
         Swal.fire({
-          icon: 'warning',
-          title: 'กรุณาเข้าสู่ระบบก่อน',
-          text: 'คุณต้องเข้าสู่ระบบเพื่อบันทึกงาน',
-          showCancelButton: true,
-          confirmButtonText: 'เข้าสู่ระบบ',
-          cancelButtonText: 'ยกเลิก',
-          confirmButtonColor: '#6a5acd',
-          cancelButtonColor: '#aaa'
-        }).then((result) => {
-          if (result.isConfirmed) this.$router.push('/login');
-        });
+          icon:'warning',
+          title:'กรุณาเข้าสู่ระบบก่อน',
+          text:'คุณต้องเข้าสู่ระบบเพื่อบันทึกงาน',
+          showCancelButton:true,
+          confirmButtonText:'เข้าสู่ระบบ',
+          cancelButtonText:'ยกเลิก',
+          confirmButtonColor:'#6a5acd',
+          cancelButtonColor:'#aaa'
+        }).then(r=>{ if(r.isConfirmed) this.$router.push('/login'); });
         return;
       }
-
-      const key = `bookmarkedJobs_${this.user.applicant_id}`;
-      let existing = JSON.parse(localStorage.getItem(key)) || [];
-      const index = existing.findIndex(j => j.job_id === job.job_id);
-
-      if (index !== -1) {
-        existing.splice(index, 1);
-        this.bookmarkedIds = this.bookmarkedIds.filter(id => id !== job.job_id);
-        Swal.fire({ toast: true, position: 'bottom-end', icon: 'info', title: 'ยกเลิกบันทึกงานแล้ว', showConfirmButton: false, timer: 1500 });
-      } else {
-        existing.push(job);
+      const key=`bookmarkedJobs_${this.user.applicant_id}`;
+      let arr=JSON.parse(localStorage.getItem(key))||[];
+      const i=arr.findIndex(j=>j.job_id===job.job_id);
+      if(i!==-1){
+        arr.splice(i,1);
+        this.bookmarkedIds=this.bookmarkedIds.filter(x=>x!==job.job_id);
+        Swal.fire({ toast:true, position:'bottom-end', icon:'info', title:'ยกเลิกบันทึกงานแล้ว', showConfirmButton:false, timer:1400 });
+      }else{
+        arr.push(job);
         this.bookmarkedIds.push(job.job_id);
-        Swal.fire({ toast: true, position: 'bottom-end', icon: 'success', title: 'บันทึกงานเรียบร้อย', showConfirmButton: false, timer: 1500 });
+        Swal.fire({ toast:true, position:'bottom-end', icon:'success', title:'บันทึกงานเรียบร้อย', showConfirmButton:false, timer:1400 });
       }
-      localStorage.setItem(key, JSON.stringify(existing));
+      localStorage.setItem(key, JSON.stringify(arr));
     },
 
-    timeAgo(input) {
-      if (!input) return '';
-      const d = new Date(input);
-      if (isNaN(d)) return '';
-      const now = new Date();
-      let diff = Math.floor((now - d) / 1000);
-      const units = [
-        { sec: 31536000, name: 'ปี' },
-        { sec: 2592000,  name: 'เดือน' },
-        { sec: 604800,   name: 'สัปดาห์' },
-        { sec: 86400,    name: 'วัน' },
-        { sec: 3600,     name: 'ชั่วโมง' },
-        { sec: 60,       name: 'นาที' },
-        { sec: 1,        name: 'วินาที' },
+    timeAgo(input){
+      if(!input) return '';
+      const d=new Date(input); if(isNaN(d)) return '';
+      const now=new Date(); let diff=Math.floor((now-d)/1000);
+      const u=[
+        {sec:31536000,name:'ปี'},
+        {sec:2592000,name:'เดือน'},
+        {sec:604800,name:'สัปดาห์'},
+        {sec:86400,name:'วัน'},
+        {sec:3600,name:'ชั่วโมง'},
+        {sec:60,name:'นาที'},
+        {sec:1,name:'วินาที'}
       ];
-      for (const u of units) {
-        const val = Math.floor(diff / u.sec);
-        if (val >= 1) return `${val} ${u.name}ที่ผ่านมา`;
-      }
+      for(const x of u){ const v=Math.floor(diff/x.sec); if(v>=1) return `${v} ${x.name}ที่ผ่านมา`; }
       return 'เมื่อสักครู่ที่ผ่านมา';
     }
   }
 };
 </script>
 
+
 <style scoped>
-/* กล่องหัวข้อ + เรียงตาม (สองบรรทัด) */
-.results-header{ display:flex; flex-direction:column; gap:6px; }
-.sort-row{ display:flex; justify-content:flex-end; align-items:center; }
+/* ===== Base / Layout ===== */
+*,
+*::before,
+*::after { box-sizing: border-box; }
 
-/* pill select ขวาบน */
-.form-select.custom-pill{
-  width: 220px !important;
-  display: inline-block;
-  height: 38px; font-size: 14px; padding: 0 14px;
-  border-radius: 999px; border: 1px solid #ddd; background-color: #fff;
-  box-shadow: 0 2px 6px rgba(0,0,0,.05); transition: all .2s ease;
+.main-layout{ display:flex; gap:20px; align-items:flex-start; }
+.vertical-divider{ width:2px; background:#000; opacity:.06; align-self:stretch; }
+
+/* ให้ขอบในฟอร์มพอดีและเท่ากัน */
+.filter-panel{
+  width: 260px;
+  background:#fff;
+  border:none;
+  border-radius:12px;
+  padding:16px;                 /* ระยะห่างขอบฟอร์ม */
+  box-shadow: 0 8px 20px rgba(0,0,0,.08);
 }
-.form-select.custom-pill:focus{
-  border-color: #ff6600; box-shadow: 0 0 0 3px rgba(255,102,0,.20);
+.stack{ display:flex; flex-direction:column; gap:12px; }
+.field + .field{ margin-top:0; } /* ช่องไฟคุมด้วย gap แล้ว */
+.divider{ border:none; height:1px; background:rgba(0,0,0,.06); margin:4px 0; }
+
+/* ===== Fields ===== */
+.label{ font-weight:600; color:#222; font-size:12.5px; margin-bottom:6px; display:block; }
+
+.input-icon{ position:relative; }
+.input-icon i{
+  position:absolute; left:12px; top:50%; transform:translateY(-50%);
+  color:#9aa0a6; font-size:16px; pointer-events:none;
+}
+.input-icon input{
+  width:100%;
+  height:36px;
+  padding:0 12px 0 46px;        /* กันข้อความทับไอคอน */
+  border:1px solid #e3e3e3;
+  border-radius:10px;
+  background:#fcfcfc;
+  font-size:13px; line-height:36px;
 }
 
-/* Layout */
-.main-layout { display: flex; gap: 24px; align-items: stretch; }
-.filter-panel { width: 280px; background: #fff; border: none; min-height: auto; }
-.shadow-popup { box-shadow: 0 0 30px rgba(0,0,0,0.1); }
-.vertical-divider { width: 2px; background-color: #000; opacity: 0.08; align-self: stretch; }
-.job-results { flex: 1; }
+select, input[type="text"]{
+  height:36px; font-size:13px;
+  border:1px solid #e3e3e3; border-radius:10px; background:#fcfcfc; padding:0 12px;
+}
+::placeholder{ color:#b6bcc3; }
 
-/* Grid การ์ด */
-.job-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
-@media (max-width: 1200px) { .job-grid { grid-template-columns: repeat(2, 1fr); } }
-@media (max-width: 768px)  {
-  .main-layout { flex-direction: column; gap: 16px; }
-  .filter-panel { width: 100%; max-height: 600px; overflow-y: auto; }
-  .vertical-divider { display: none; }
-  .job-grid { grid-template-columns: 1fr; gap: 16px; }
+/* Chips */
+.chips{ display:grid; gap:6px; }
+.chips.two-cols{ grid-template-columns: repeat(2, 1fr); }
+.chip{
+  padding:6px 10px; border:1px solid #e6e6e6; border-radius:999px; background:#fff; font-size:12.5px; text-align:center;
+  transition:.15s ease; white-space:nowrap;
+}
+.chip:hover{ transform:translateY(-1px); }
+.chip.active{ color:#ff6600; background:#fff5e6; border-color:#ff6600; }
+
+/* Days custom */
+.days-grid{ display:grid; grid-template-columns:repeat(2, 1fr); gap:6px; margin-top:6px; }
+.day-item{ display:flex; align-items:center; gap:8px; font-size:12.5px; }
+
+/* Time row */
+.time-row{ display:flex; align-items:center; gap:6px; }
+.time-input{ position:relative; }
+.time-input i{ position:absolute; left:10px; top:50%; transform:translateY(-50%); color:#9aa0a6; font-size:14px; pointer-events:none; }
+.time-input input{
+  height:36px; width:110px; padding-left:30px;
+  border:1px solid #e3e3e3; border-radius:10px; background:#fcfcfc; font-size:13px;
+}
+.time-input input::-webkit-calendar-picker-indicator{ margin-right:4px; }
+
+/* Buttons */
+.actions{
+  display:flex;
+  gap:10px;
+  justify-content:center;      /* ปุ่มทั้งคู่กึ่งกลาง */
+  padding-top:4px;
+}
+.btn-primary{
+  min-width:96px; height:38px; border:none; border-radius:10px; font-weight:700; color:#fff;
+  background:linear-gradient(135deg,#ff6600,#e55d00); box-shadow:0 3px 10px rgba(255,102,0,.25);
+}
+.btn-outline{
+  min-width:84px; height:38px; padding:0 12px; border-radius:10px; font-weight:700; background:#fff; color:#ff6600; border:1px solid #ff6600;
 }
 
-/* Card & Meta */
-.job-card { border-radius: 12px; background: #fff; transition: transform .2s ease, box-shadow .2s ease; box-shadow: 0 6px 18px rgba(0,0,0,0.06); }
-.job-card:hover { transform: translateY(-2px); box-shadow: 0 10px 24px rgba(0,0,0,0.08); }
+/* ===== Results ===== */
+.results-header{ display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; }
+.sort-row{ display:flex; align-items:center; gap:8px; }
+.sort-pill{
+  width:180px; height:34px; padding:0 12px; border-radius:999px; border:1px solid #e3e3e3; background:#fff; font-size:13px;
+}
+.job-results{ flex:1; }
+.job-grid{ display:grid; grid-template-columns:repeat(3, 1fr); gap:20px; }
+@media (max-width:1200px){ .job-grid{ grid-template-columns:repeat(2, 1fr);} }
+@media (max-width:768px){
+  .main-layout{ flex-direction:column; gap:16px; }
+  .vertical-divider{ display:none; }
+  .filter-panel{ width:100%; }
+  .job-grid{ grid-template-columns:1fr; }
+}
 
-.card-meta { position: absolute; top: 12px; right: 12px; display: flex; align-items: center; gap: 10px; }
-.icon-btn { width: 36px; height: 36px; border-radius: 999px; border: 1px solid #e5e5e5; background: #fff; display: inline-flex; align-items: center; justify-content: center; transition: all .15s ease; }
-.icon-btn i { font-size: 16px; color: #6b7280; }
-.icon-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(0,0,0,.08); }
-.icon-btn.saved { border-color: #ffc107; background: #fff9e6; }
-.icon-btn.saved i { color: #ff9900; }
+/* Cards */
+.job-card{
+  position:relative; padding:16px; border-radius:12px; background:#fff; box-shadow:0 6px 16px rgba(0,0,0,.06);
+  transition:.2s ease; cursor:pointer;
+}
+.job-card:hover{ transform:translateY(-2px); box-shadow:0 10px 20px rgba(0,0,0,.08); }
+.card-meta{ position:absolute; top:10px; right:10px; }
+.icon-btn{ width:34px; height:34px; border-radius:999px; border:1px solid #e5e5e5; background:#fff; display:inline-flex; align-items:center; justify-content:center; }
+.icon-btn.saved{ border-color:#ffc107; background:#fff9e6; }
+.icon-btn.saved i{ color:#ff9900; }
 
-.chip-saved { font-size: 12px; padding: 2px 8px; border-radius: 999px; border: 1px solid #ffc107; color: #b26b00; background: #fff9e6; }
+.co{ display:flex; align-items:center; gap:10px; margin-bottom:8px; }
+.co img{ width:40px; height:40px; border-radius:50%; object-fit:cover; box-shadow:0 1px 3px rgba(0,0,0,.08); }
+.co-name{ font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 
-/* ป้ายหมวดหมู่ */
-.badge-category { background-color: #fff5e6; color: #ff6600; border: 1px solid #ff6600; border-radius: 999px; font-weight: 500; padding: 0.15rem 0.6rem; font-size: 14px; }
+.title-row{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:6px; }
+.title{ margin:0; font-weight:700; font-size:16px; }
+.chip-saved{ font-size:12px; padding:2px 8px; border-radius:999px; border:1px solid #ffc107; color:#b26b00; background:#fff9e6; }
 
-/* เวลา “…ที่ผ่านมา” */
-.ago-badge { position: absolute; right: 12px; bottom: 10px; font-size: 12px; color: #6b7280; background: #f3f4f6; padding: 4px 10px; border-radius: 999px; box-shadow: inset 0 1px 0 rgba(255,255,255,.6); }
+.badge-category{ display:inline-block; padding:.1rem .55rem; font-size:12.5px; border-radius:999px; border:1px solid #ff6600; color:#ff6600; background:#fff5e6; margin-bottom:4px; }
+.muted{ color:#6b7280; font-size:12.5px; }
+.ago{ position:absolute; right:12px; bottom:10px; font-size:12px; color:#6b7280; }
 
-/* ช่องกรอง */
-select, input.form-control { background-color: #fcfcfc; border-color: #ddd; }
-
-/* สีส้มแบรนด์ */
-.text-orange { color: #ff6600; }
+.text-orange{ color:#ff6600; }
 </style>

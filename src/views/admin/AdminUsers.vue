@@ -1,9 +1,10 @@
-<template>
+<template> 
   <div>
     <AdminNavbar />
     <div class="d-flex">
       <AdminSidebar />
       <div class="p-4 flex-1">
+        <!-- Header -->
         <div class="d-flex justify-content-between align-items-center mb-4">
           <h4 class="fw-bold text-orange mb-0">
             <i class="bi bi-people-fill me-2"></i> ผู้ใช้ทั้งหมด
@@ -13,17 +14,17 @@
           </button>
         </div>
 
-        <!-- Filters -->
+        <!-- Filters (uniform) -->
         <div class="filter-row mb-3">
           <input v-model="searchQuery" class="form-control search" placeholder="🔍 ค้นหาชื่อ/อีเมล/เบอร์โทร" />
-          <select v-model="userTypeFilter" class="form-select compact">
+          <select v-model="userTypeFilter" class="form-select compact select-fit">
             <option value="">ผู้ใช้ทั้งหมด</option>
             <option value="applicant">ผู้สมัครงาน</option>
             <option value="employer">ผู้ว่าจ้าง</option>
           </select>
         </div>
 
-        <!-- Users table -->
+        <!-- Table -->
         <table class="table table-hover align-middle user-table">
           <thead>
             <tr>
@@ -43,30 +44,29 @@
               <td>{{ user.email || '—' }}</td>
               <td>{{ user.phone || '—' }}</td>
 
-              <!-- chips (no background) -->
               <td>
                 <span class="chip"
                   :class="{
-                    'chip-slate': user.role === 'applicant',
-                    'chip-indigo': user.role === 'employer'
+                    'chip-slate': user.roleRaw === 'applicant',
+                    'chip-indigo': user.roleRaw === 'employer'
                   }">
-                  {{ user.role }}
+                  {{ user.roleTh }}
                 </span>
               </td>
               <td>
-                <span class="chip" :class="user.status === 'ใช้งาน' ? 'chip-emerald' : 'chip-rose'">
-                  {{ user.status }}
+                <span class="chip" :class="user.statusTh === 'ใช้งาน' ? 'chip-emerald' : 'chip-rose'">
+                  {{ user.statusTh }}
                 </span>
               </td>
 
-              <td class="text-nowrap">
+              <td class="text-nowrap">  <button class="btn-pill btn-violet me-1" @click="viewUser(user)">
+                  <i class="bi bi-person-badge me-1"></i>ดูโปรไฟล์
+                </button>
+               
                 <button class="btn-pill btn-sky me-1" @click="openEdit(user)">
                   <i class="bi bi-pencil-square me-1"></i>แก้ไข
                 </button>
-                <button class="btn-pill btn-violet me-1" @click="viewUser(user)">
-                  <i class="bi bi-person-badge me-1"></i>ดูโปรไฟล์
-                </button>
-                <button class="btn-pill btn-rose" @click="confirmDelete(user)">
+               <button class="btn-pill btn-rose" @click="confirmDelete(user)">
                   <i class="bi bi-trash me-1"></i>ลบ
                 </button>
               </td>
@@ -90,8 +90,8 @@
                 <p><strong>ชื่อ:</strong> {{ selectedUser.name }}</p>
                 <p><strong>อีเมล:</strong> {{ selectedUser.email || '—' }}</p>
                 <p><strong>เบอร์โทร:</strong> {{ selectedUser.phone || '—' }}</p>
-                <p><strong>ประเภท:</strong> {{ selectedUser.role }}</p>
-                <p><strong>สถานะ:</strong> {{ selectedUser.status }}</p>
+                <p><strong>ประเภท:</strong> {{ selectedUser.roleTh }}</p>
+                <p><strong>สถานะ:</strong> {{ selectedUser.statusTh }}</p>
               </div>
             </div>
           </div>
@@ -187,7 +187,7 @@ export default {
     filteredUsers() {
       const k = this.searchQuery.toLowerCase().trim();
       return this.users.filter(u => {
-        const matchType = !this.userTypeFilter || u.role === this.userTypeFilter;
+        const matchType = !this.userTypeFilter || u.roleRaw === this.userTypeFilter;
         const matchSearch = !k ||
           (u.name || '').toLowerCase().includes(k) ||
           (u.email || '').toLowerCase().includes(k) ||
@@ -202,6 +202,17 @@ export default {
     await this.fetchUsers();
   },
   methods: {
+    roleToTh(role){
+      if (role === 'applicant') return 'ผู้สมัครงาน';
+      if (role === 'employer')  return 'ผู้ว่าจ้าง';
+      return role || '—';
+    },
+    statusToTh(status){
+      if (!status) return '—';
+      const s = String(status).toLowerCase();
+      if (s.includes('ban') || s.includes('แบน')) return 'แบนแล้ว';
+      return 'ใช้งาน';
+    },
     authHeader() {
       const token = localStorage.getItem("admin_token");
       if (!token) return {};
@@ -210,9 +221,15 @@ export default {
     },
     async fetchUsers() {
       try {
-        const res = await fetch(API, { headers: { ...this.authHeader() } });
+        const res = await fetch(API, { headers: { ...this.authHeader() }, cache: "no-store" });
         if (!res.ok) throw new Error("โหลดผู้ใช้ล้มเหลว");
-        this.users = await res.json();
+        const rows = await res.json();
+        this.users = (rows || []).map(u => ({
+          ...u,
+          roleRaw: u.role,
+          roleTh : this.roleToTh(u.role),
+          statusTh: this.statusToTh(u.status),
+        }));
       } catch (err) {
         console.error(err);
       }
@@ -235,8 +252,8 @@ export default {
         name: user.name || "",
         email: user.email || "",
         phone: user.phone || "",
-        role: user.role || "",
-        status: user.status || "ใช้งาน",
+        role: user.roleRaw || "",
+        status: user.statusTh || "ใช้งาน",
         password: "",
       };
       this.modals.upsert.show();
@@ -266,14 +283,13 @@ export default {
               name: this.form.name,
               email: this.form.email,
               phone: this.form.phone,
-              role: this.form.role,       // applicant | employer
-              status: this.form.status,   // ใช้งาน | แบนแล้ว
+              role: this.form.role,
+              status: this.form.status,
               password: this.form.password,
             }),
           });
-          if (!res.ok) throw new Error(await safeText(res) || "บันทึกไม่สำเร็จ");
-          const created = await safeJson(res);
-          if (created?.id) this.users.unshift(created); else await this.fetchUsers();
+          if (!res.ok) throw new Error(await res.text() || "บันทึกไม่สำเร็จ");
+          await this.fetchUsers();
         } else {
           const res = await fetch(`${API}/${this.form.id}`, {
             method: "PUT",
@@ -286,15 +302,8 @@ export default {
               status: this.form.status,
             }),
           });
-          if (!res.ok) throw new Error(await safeText(res) || "บันทึกไม่สำเร็จ");
-          const updated = await safeJson(res);
-          if (updated?.id) {
-            const i = this.users.findIndex(u => u.id === updated.id);
-            if (i !== -1) this.users.splice(i, 1, updated);
-            if (this.selectedUser?.id === updated.id) this.selectedUser = updated;
-          } else {
-            await this.fetchUsers();
-          }
+          if (!res.ok) throw new Error(await res.text() || "บันทึกไม่สำเร็จ");
+          await this.fetchUsers();
         }
 
         this.modals.upsert.hide();
@@ -311,7 +320,7 @@ export default {
     async deleteUser(userId) {
       try {
         const res = await fetch(`${API}/${userId}`, { method: "DELETE", headers: { ...this.authHeader() } });
-        if (!res.ok) throw new Error(await safeText(res) || "ลบผู้ใช้ล้มเหลว");
+        if (!res.ok) throw new Error(await res.text() || "ลบผู้ใช้ล้มเหลว");
         this.users = this.users.filter(u => u.id !== userId);
       } catch (err) {
         console.error(err);
@@ -320,39 +329,32 @@ export default {
     },
   },
 };
-
-async function safeText(res){ try{ return await res.text(); } catch{ return ""; } }
-async function safeJson(res){
-  try { const t = await res.text(); if(!t || !t.trim()) return null; return JSON.parse(t); }
-  catch { return null; }
-}
 </script>
 
 <style scoped>
+/* shared */
 .flex-1 { flex: 1; }
 .text-orange { color: #ff6600; }
 
-/* Filter bar */
+/* Filter bar – same look both pages */
 .filter-row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
 .filter-row .search{flex:1 1 360px}
 .form-select.compact{height:36px;padding:.25rem .75rem;font-size:.9rem}
+.select-fit{width:auto;min-width:160px;max-width:240px}
 
-/* Table */
+/* Table – same look both pages */
 .user-table thead tr{background:#fafafa}
 .user-table th{font-weight:700;color:#333;border-bottom:1px solid #eee}
 .user-table td{border-bottom:1px solid #f1f1f1}
 
-/* Chip outline (no background) */
-.chip{
-  display:inline-block;padding:4px 10px;border-radius:999px;font-size:12.5px;line-height:1;
-  border:1px solid currentColor;background:transparent;text-transform:capitalize
-}
-.chip-slate{color:#475569}   /* applicant */
-.chip-indigo{color:#4f46e5}  /* employer  */
-.chip-emerald{color:#059669} /* ใช้งาน    */
-.chip-rose{color:#e11d48}    /* แบนแล้ว   */
+/* Chips */
+.chip{display:inline-block;padding:4px 10px;border-radius:999px;font-size:12.5px;line-height:1;border:1px solid currentColor;background:transparent}
+.chip-slate{color:#475569}
+.chip-indigo{color:#4f46e5}
+.chip-emerald{color:#059669}
+.chip-rose{color:#e11d48}
 
-/* Buttons: same style, different colors */
+/* Buttons – shared palette */
 .btn-pill{
   border:none;padding:8px 14px;border-radius:999px;font-weight:600;font-size:13.5px;
   box-shadow:0 2px 8px rgba(0,0,0,.08);transition:transform .05s ease, filter .2s ease

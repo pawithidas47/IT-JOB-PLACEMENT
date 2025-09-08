@@ -1,47 +1,55 @@
-<template>
+<template>   
   <div>
     <AdminNavbar />
     <div class="d-flex">
       <AdminSidebar />
       <div class="p-4 flex-1">
-        <div class="d-flex justify-content-between align-items-center mb-3">
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
           <h4 class="fw-bold text-orange mb-0">
             <i class="bi bi-briefcase-fill me-2"></i> งานทั้งหมด
           </h4>
-          <button class="btn btn-primary" @click="openCreate">
+          <button class="btn-pill btn-emerald" @click="openCreate">
             <i class="bi bi-plus-lg me-1"></i> เพิ่มงาน
           </button>
         </div>
 
-        <!-- ตัวกรองเล็กๆ (ถ้าอยากใช้) -->
-        <div class="d-flex gap-2 mb-3 flex-wrap">
-          <input v-model="searchQuery" class="form-control" style="max-width: 320px" placeholder="🔍 ค้นหาชื่องาน" />
-          
+        <!-- Filters -->
+        <div class="filter-row mb-3">
+          <input v-model="searchQuery" class="form-control search" placeholder="🔍 ค้นหาชื่องาน/สถานที่" />
+          <select v-model="typeFilter" class="form-select compact select-fit">
+            <option value="">— เลือกหมวดหมู่ —</option>
+            <option v-for="c in categories" :key="c" :value="c">{{ c }}</option>
+          </select>
         </div>
 
-        <table class="table table-bordered table-hover align-middle">
-          <thead class="table-light">
+        <!-- Table -->
+        <table class="table table-hover align-middle user-table">
+          <thead>
             <tr>
-              <th style="width: 60px">#</th>
+              <th style="width:60px">#</th>
               <th>ชื่องาน</th>
-              <th style="width: 140px">หมวดหมู่</th>
-              <th style="width: 160px">ค่าจ้าง</th>
+              <th style="width:200px">หมวดหมู่</th>
+              <th style="width:160px">ค่าจ้าง</th>
               <th>ผู้โพสต์</th>
-              <th style="width: 240px">การจัดการ</th>
+              <th style="width:300px">การจัดการ</th>
             </tr>
           </thead>
           <tbody>
             <tr v-for="(job, index) in filteredJobs" :key="job.id">
               <td>{{ index + 1 }}</td>
               <td class="fw-semibold">{{ job.j_title }}</td>
-              <td><span class="badge bg-secondary">{{ job.j_type }}</span></td>
-              <td>{{ formatSalary(job.j_salary) }}</td>
+              <td><span class="chip chip-slate">{{ job.j_type || "-" }}</span></td>
+              <td>{{ displaySalary(job) }}</td>
               <td>{{ job.employer_name || "-" }}</td>
               <td class="text-nowrap">
-                <button class="btn btn-sm btn-outline-primary me-1" @click="openEdit(job)">
+                <button class="btn-pill btn-violet me-1" @click="viewJob(job)">
+                  <i class="bi bi-eye me-1"></i>ดูงาน
+                </button>
+                <button class="btn-pill btn-sky me-1" @click="openEdit(job)">
                   <i class="bi bi-pencil-square me-1"></i>แก้ไข
                 </button>
-                <button class="btn btn-sm btn-danger" @click="confirmDelete(job)">
+                <button class="btn-pill btn-rose" @click="confirmDelete(job)">
                   <i class="bi bi-trash me-1"></i>ลบ
                 </button>
               </td>
@@ -67,7 +75,13 @@
                     <label class="form-label">ชื่องาน <span class="text-danger">*</span></label>
                     <input v-model.trim="form.j_title" type="text" class="form-control" required />
                   </div>
-                  
+                  <div class="col-md-4">
+                    <label class="form-label">หมวดหมู่ <span class="text-danger">*</span></label>
+                    <select v-model="form.j_type" class="form-select compact" required>
+                      <option disabled value="">— เลือกหมวดหมู่ —</option>
+                      <option v-for="c in categories" :key="c" :value="c">{{ c }}</option>
+                    </select>
+                  </div>
 
                   <div class="col-md-4">
                     <label class="form-label">ค่าจ้าง (บาท) <span class="text-danger">*</span></label>
@@ -81,12 +95,6 @@
                     <label class="form-label">ผู้โพสต์ (ชื่อบริษัท/ผู้ว่าจ้าง)</label>
                     <input v-model.trim="form.employer_name" type="text" class="form-control" />
                   </div>
-
-                  <div class="col-12">
-                    <label class="form-label">รายละเอียดงาน</label>
-                    <textarea v-model.trim="form.j_description" rows="4" class="form-control"
-                              placeholder="หน้าที่ งานที่ต้องทำ ทักษะที่ต้องมี ฯลฯ"></textarea>
-                  </div>
                 </div>
 
                 <div v-if="errorMsg" class="alert alert-danger mt-3 py-2">
@@ -95,13 +103,34 @@
               </div>
 
               <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ยกเลิก</button>
-                <button type="submit" class="btn btn-primary" :disabled="loading">
+                <button type="button" class="btn-pill btn-slate" data-bs-dismiss="modal">ยกเลิก</button>
+                <button type="submit" class="btn-pill btn-emerald" :disabled="loading">
                   <span v-if="loading" class="spinner-border spinner-border-sm me-1"></span>
                   {{ formMode === 'create' ? 'บันทึกงาน' : 'บันทึกการแก้ไข' }}
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+
+        <!-- Modal ดูงาน -->
+        <div class="modal fade" id="viewJobModal" tabindex="-1">
+          <div class="modal-dialog modal-lg">
+            <div class="modal-content p-3">
+              <div class="modal-header">
+                <h5 class="modal-title">รายละเอียดงาน</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+              </div>
+              <div class="modal-body">
+                <p><strong>ชื่องาน:</strong> {{ selectedJob.j_title }}</p>
+                <p><strong>หมวดหมู่:</strong> {{ selectedJob.j_type }}</p>
+                <p><strong>ค่าจ้าง:</strong> {{ displaySalary(selectedJob) }}</p>
+                <p><strong>สถานที่:</strong> {{ selectedJob.j_location || '-' }}</p>
+                <p><strong>ผู้โพสต์:</strong> {{ selectedJob.employer_name || '-' }}</p>
+                <p><strong>รายละเอียด:</strong></p>
+                <p>{{ selectedJob.j_description || '—' }}</p>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -117,61 +146,84 @@ import * as bootstrap from "bootstrap";
 
 const API = "http://localhost:3001/api/admin/jobs";
 
+const CATEGORIES = [
+  "การตลาดดิจิทัล","งานแปล / เขียนบทความ","งานตัดต่อวิดีโอ / สร้างคอนเทนต์",
+  "งานออกแบบ UX/UI","งานออกแบบกราฟิก / มัลติมีเดีย","คีย์ข้อมูล / ป้อนข้อมูล",
+  "ดูแลระบบเครือข่าย","พัฒนาเว็บไซต์","พัฒนาแอปพลิเคชัน",
+  "ผู้ดูแลเพจ / โซเชียลมีเดีย","ที่ปรึกษาด้านเทคโนโลยี","สนับสนุนงานไอที (IT Support)","อื่น ๆ",
+];
+
 export default {
   components: { AdminNavbar, AdminSidebar },
   data() {
     return {
+      categories: CATEGORIES,
       jobs: [],
       searchQuery: "",
       typeFilter: "",
-      // modal + form
-      modals: { upsert: null },
-      formMode: "create", // 'create' | 'edit'
-      form: {
-        id: null,
-        j_title: "",
-        j_type: "",
-        j_salary: 0,
-        j_location: "",
-        j_description: "",
-        employer_name: ""
-      },
+      modals: { upsert: null, view: null },
+      formMode: "create",
+      form: { id: null, j_title: "", j_type: "", j_salary: null, j_location: "", j_description: "", employer_name: "", employer_id: null },
+      selectedJob: {},
       loading: false,
       errorMsg: "",
     };
   },
+
   computed: {
     filteredJobs() {
       const key = this.searchQuery.toLowerCase().trim();
       return this.jobs.filter((j) => {
-        const matchType = !this.typeFilter || j.j_type === this.typeFilter;
-        const matchKey =
-          !key ||
-          j.j_title?.toLowerCase().includes(key) ||
-          j.j_location?.toLowerCase().includes(key);
-        return matchType && matchKey;
+        const byType = !this.typeFilter || j.j_type === this.typeFilter;
+        const byKey  = !key || j.j_title?.toLowerCase().includes(key) || j.j_location?.toLowerCase().includes(key);
+        return byType && byKey;
       });
     },
   },
+
   async mounted() {
     this.modals.upsert = new bootstrap.Modal(document.getElementById("upsertJobModal"));
+    this.modals.view   = new bootstrap.Modal(document.getElementById("viewJobModal"));
     await this.fetchJobs();
   },
+
   methods: {
+    viewJob(job) {
+      this.selectedJob = job;
+      this.modals.view.show();
+    },
     authHeader() {
       const token = localStorage.getItem("admin_token");
       return token ? { Authorization: token } : {};
     },
+    normalizeSalary(...vals) {
+      for (const v of vals) {
+        if (v == null) continue;
+        const n = Number(v);
+        if (Number.isFinite(n)) return n;
+        if (typeof v === "string") {
+          const m = v.match(/([\d,]+)/);
+          if (m) {
+            const num = Number(m[1].replace(/,/g, ""));
+            if (Number.isFinite(num)) return num;
+          }
+        }
+      }
+      return null;
+    },
+    isNegotiable(v) {
+      return typeof v === "string" && /ตามตกลง|negotiable/i.test(v.trim());
+    },
     async fetchJobs() {
       try {
-        const res = await fetch(API, { headers: { ...this.authHeader() } });
-        if (!res.ok) throw new Error("โหลดงานล้มเหลว");
-        this.jobs = await res.json();
-      } catch (err) {
-        console.error(err);
+        const res = await fetch(`${API}?t=${Date.now()}`, { headers: { ...this.authHeader() }, cache: "no-store" });
+        if (!res.ok) throw new Error(await res.text());
+        const rows = await res.json();
+        this.jobs = Array.isArray(rows) ? rows : [];
+      } catch (e) {
+        console.error(e);
       }
     },
-    // ----- Create/Edit -----
     openCreate() {
       this.formMode = "create";
       this.resetForm();
@@ -180,103 +232,92 @@ export default {
     openEdit(job) {
       this.formMode = "edit";
       this.resetForm();
-      this.form = {
-        id: job.id,
-        j_title: job.j_title || "",
-        j_type: job.j_type || "",
-        j_salary: Number(job.j_salary) || 0,
-        j_location: job.j_location || "",
-        j_description: job.j_description || "",
-        employer_name: job.employer_name || "",
-      };
+      this.form = { ...job };
       this.modals.upsert.show();
     },
     resetForm() {
       this.errorMsg = "";
-      this.form = {
-        id: null,
-        j_title: "",
-        j_type: "",
-        j_salary: 0,
-        j_location: "",
-        j_description: "",
-        employer_name: "",
-      };
+      this.form = { id: null, j_title: "", j_type: "", j_salary: null, j_location: "", j_description: "", employer_name: "", employer_id: null };
     },
     async submitJob() {
       this.loading = true;
       this.errorMsg = "";
       try {
-        if (!this.form.j_title || !this.form.j_type || this.form.j_salary === null) {
+        const payload = { ...this.form, j_salary: Number(this.normalizeSalary(this.form.j_salary)) };
+        if (!payload.j_title || !payload.j_type || isNaN(payload.j_salary)) {
           this.errorMsg = "กรอกข้อมูลที่จำเป็นให้ครบถ้วน";
           return;
         }
+        let res;
         if (this.formMode === "create") {
-          const res = await fetch(API, {
-            method: "POST",
-            headers: { "Content-Type": "application/json", ...this.authHeader() },
-            body: JSON.stringify(this.form),
-          });
-          if (!res.ok) throw new Error(await res.text());
-          const created = await res.json();
-          this.jobs.unshift(created);
+          res = await fetch(API, { method: "POST", headers: { "Content-Type": "application/json", ...this.authHeader() }, body: JSON.stringify(payload) });
         } else {
-          const res = await fetch(`${API}/${this.form.id}`, {
-            method: "PUT",
-            headers: { "Content-Type": "application/json", ...this.authHeader() },
-            body: JSON.stringify({
-              j_title: this.form.j_title,
-              j_type: this.form.j_type,
-              j_salary: this.form.j_salary,
-              j_location: this.form.j_location,
-              j_description: this.form.j_description,
-              employer_name: this.form.employer_name,
-            }),
-          });
-          if (!res.ok) throw new Error(await res.text());
-          const updated = await res.json();
-          const idx = this.jobs.findIndex((j) => j.id === updated.id);
-          if (idx !== -1) this.jobs.splice(idx, 1, updated);
+          res = await fetch(`${API}/${this.form.id}`, { method: "PUT", headers: { "Content-Type": "application/json", ...this.authHeader() }, body: JSON.stringify(payload) });
         }
+        if (!res.ok) throw new Error(await res.text());
+        await this.fetchJobs();
         this.modals.upsert.hide();
       } catch (err) {
         console.error(err);
-        this.errorMsg = "บันทึกไม่สำเร็จ";
+        this.errorMsg = err.message || "บันทึกไม่สำเร็จ";
       } finally {
         this.loading = false;
       }
     },
-    // ----- Delete -----
     confirmDelete(job) {
-      if (confirm(`ยืนยันลบงาน: ${job.j_title}?`)) {
-        this.deleteJob(job.id);
-      }
+      if (confirm(`ยืนยันลบงาน: ${job.j_title}?`)) this.deleteJob(job.id);
     },
     async deleteJob(id) {
       try {
-        const res = await fetch(`${API}/${id}`, {
-          method: "DELETE",
-          headers: { ...this.authHeader() },
-        });
+        const res = await fetch(`${API}/${id}`, { method: "DELETE", headers: { ...this.authHeader() } });
         if (!res.ok) throw new Error(await res.text());
-        this.jobs = this.jobs.filter((j) => j.id !== id);
-      } catch (err) {
-        console.error(err);
+        this.jobs = this.jobs.filter(j => j.id !== id);
+      } catch (e) {
+        console.error(e);
         alert("ลบงานไม่สำเร็จ");
       }
     },
-    // ----- Utils -----
-    formatSalary(v) {
-      const n = Number(v || 0);
-      return `${n.toLocaleString()} บาท`;
-    },
-  },
+    displaySalary(job) {
+      if (this.isNegotiable(job?.j_salary)) return "ตามตกลง";
+      const n = this.normalizeSalary(job?.j_salary);
+      return Number.isFinite(n) ? `${n.toLocaleString()} บาท` : "-";
+    }
+  }
 };
 </script>
 
 <style scoped>
+/* shared */
 .flex-1 { flex: 1; }
 .text-orange { color: #ff6600; }
-.table td, .table th { vertical-align: middle; }
-.modal .form-label { font-weight: 600; }
+
+/* Filter bar */
+.filter-row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.filter-row .search{flex:1 1 360px}
+.form-select.compact{height:36px;padding:.25rem .75rem;font-size:.9rem}
+.select-fit{width:auto;min-width:160px;max-width:240px}
+
+/* Table */
+.user-table thead tr{background:#fafafa}
+.user-table th{font-weight:700;color:#333;border-bottom:1px solid #eee}
+.user-table td{border-bottom:1px solid #f1f1f1}
+
+/* Chip */
+.chip{display:inline-block;padding:4px 10px;border-radius:999px;font-size:12.5px;line-height:1;border:1px solid currentColor;background:transparent}
+.chip-slate{color:#475569}
+
+/* Buttons */
+.btn-pill{
+  border:none;padding:8px 14px;border-radius:999px;font-weight:600;font-size:13.5px;
+  box-shadow:0 2px 8px rgba(0,0,0,.08);transition:transform .05s ease, filter .2s ease
+}
+.btn-pill:active{transform:translateY(1px)}
+.btn-sky{background:#0ea5e9;color:#fff}
+.btn-violet{background:#7c3aed;color:#fff}
+.btn-rose{background:#e11d48;color:#fff}
+.btn-emerald{background:#10b981;color:#fff}
+.btn-slate{background:#64748b;color:#fff}
+.btn-sky:hover,.btn-violet:hover,.btn-rose:hover,.btn-emerald:hover,.btn-slate:hover{filter:brightness(.95)}
+
+.modal .form-label{font-weight:600}
 </style>

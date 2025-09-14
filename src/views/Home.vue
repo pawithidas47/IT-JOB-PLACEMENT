@@ -1,4 +1,4 @@
-<template>  
+<template>   
   <div>
     <NavbarHome />
     <div class="container-fluid px-4 py-4">
@@ -22,7 +22,7 @@
 
             <hr class="divider" />
 
-            <!-- หมวดหมู่ -->
+            <!-- หมวดหมู่งาน -->
             <div class="field">
               <label class="label">หมวดหมู่งาน</label>
               <select v-model="filter.type" @change="searchJobs">
@@ -103,7 +103,7 @@
               </div>
             </div>
 
-            <!-- ช่วงเวลาทำงาน (dropdown แบบช่วงเวลา) -->
+            <!-- ช่วงเวลาทำงาน -->
             <div class="field">
               <label class="label">ช่วงเวลาทำงาน</label>
               <select v-model="filter.timeSlot" @change="searchJobs">
@@ -129,10 +129,7 @@
         <section class="job-results">
           <div class="results-header">
             <h5 class="mb-1 text-orange">พบ {{ filteredJobs.length }} งาน</h5>
-            <div class="sort-row">
-              
-            
-            </div>
+            <div class="sort-row"></div>
           </div>
 
           <!-- สรุปผลการค้นหา -->
@@ -144,11 +141,12 @@
             </template>
           </div>
 
+          <!-- การ์ดงาน -->
           <div class="job-grid">
             <div
               v-for="job in filteredJobs"
               :key="job.job_id"
-              class="job-card"
+              class="job-card p-4 bg-white border rounded-3 shadow-sm position-relative"
               @click="openJob(job.job_id)"
             >
               <div class="card-meta">
@@ -163,31 +161,40 @@
                 </button>
               </div>
 
-              <div class="co">
+              <!-- บริษัท -->
+              <div class="d-flex align-items-center mb-3">
                 <img
                   :src="job.e_profile_img_url ? `http://localhost:3001${job.e_profile_img_url}` : '/default-profile.jpg'"
-                  alt="company"
+                  alt="โลโก้บริษัท"
+                  class="rounded-circle shadow-sm me-3"
+                  style="width:42px;height:42px;object-fit:cover"
                 />
-                <div class="co-name">{{ job.e_company_name || 'ชื่อบริษัทไม่ระบุ' }}</div>
+                <div class="text-truncate">
+                  <div class="fw-semibold">{{ job.e_company_name || 'ชื่อบริษัทไม่ระบุ' }}</div>
+                </div>
               </div>
 
-              <div class="title-row">
-                <h5 class="title">{{ job.j_title }}</h5>
-                <span v-if="isBookmarked(job.job_id)" class="chip-saved">บันทึกแล้ว</span>
+              <!-- ชื่อเรื่อง -->
+              <div class="d-flex align-items-center flex-wrap gap-2 mb-2">
+                <h5 class="fw-bold text-dark mb-0">{{ job.j_title }}</h5>
               </div>
 
-              <div v-if="displayCategory(job)" class="badge-category">{{ displayCategory(job) }}</div>
-
-              <!-- ชนิดงาน -->
-              <div v-if="displayWorkType(job)" class="muted">
-                <i class="bi bi-briefcase me-1"></i>{{ displayWorkType(job) }}
+              <!-- หมวดงาน -->
+              <div v-if="job.j_type" class="mb-2">
+                <span class="badge-category">{{ job.j_type }}</span>
               </div>
 
+              <!-- รายละเอียดสั้น ๆ -->
+              <p class="mb-1 text-muted">
+                <i class="bi bi-people-fill me-1"></i> รับจำนวน: {{ job.j_amount || '-' }} คน
+              </p>
+              <p class="mb-0 text-muted">
+                <i class="bi bi-cash-coin me-1"></i> ค่าจ้าง:
+                <span v-html="renderSalary(job)"></span>
+              </p>
 
-              <div class="muted"><i class="bi bi-people-fill me-1"></i>รับ: {{ job.j_amount || '-' }} คน</div>
-              <div class="muted"><i class="bi bi-cash-coin me-1"></i>ค่าจ้าง: {{ salaryDisplay(job) }}</div>
-
-              <div class="ago">{{ timeAgo(job.j_posted_at) }}</div>
+              <!-- เวลาที่ลงประกาศ -->
+              <div class="ago-badge">{{ timeAgo(job.j_posted_at) }}</div>
             </div>
           </div>
         </section>
@@ -195,6 +202,7 @@
     </div>
   </div>
 </template>
+
 <script>
 /* eslint-disable */
 import NavbarHome from '@/components/NavbarHome.vue';
@@ -207,7 +215,6 @@ export default {
   data() {
     return {
       isLoggedIn: localStorage.getItem('authToken') !== null,
-      viewFilter: 'all',
 
       filter: {
         keyword: '',
@@ -223,7 +230,6 @@ export default {
       filtered: [],
       bookmarkedIds: [],
       user: null,
-      appliedJobIds: new Set(),
 
       workTypeOptions: [
         { value: 'one-shot', label: 'งานชิ้นเดียว' },
@@ -290,7 +296,6 @@ export default {
       const key = `bookmarkedJobs_${this.user.applicant_id}`;
       const saved = JSON.parse(localStorage.getItem(key)) || [];
       this.bookmarkedIds = saved.map(j => j.job_id);
-      await this.loadAppliedJobs();
     }
 
     try {
@@ -303,19 +308,9 @@ export default {
   },
 
   methods: {
-    async loadAppliedJobs() {
-      if (!this.user) return;
-      try {
-        const res = await axios.get(`http://localhost:3001/api/applications/${this.user.applicant_id}`);
-        this.appliedJobIds = new Set((res.data || []).map(a => a.job_id));
-      } catch (e) {
-        console.warn('loadAppliedJobs failed:', e);
-      }
-    },
-
     openJob(id) { this.$router.push(this.isLoggedIn ? `/applicant/jobs/${id}` : `/jobs/${id}`); },
 
-    // UI
+    // ===== UI ฟิลเตอร์ =====
     toggleWorkType(val){ this.filter.workType = this.filter.workType === val ? '' : val; this.searchJobs(); },
     selectDayPreset(val){ this.filter.dayPreset = val; if (val !== 'custom') this.filter.workDaysCustom = []; this.searchJobs(); },
     resetForm(){
@@ -323,7 +318,7 @@ export default {
       this.searchJobs();
     },
 
-    // helpers
+    // ===== helpers =====
     _norm(s){ return (s || '').toString().trim().toLowerCase(); },
     _mapWorkType(str){
       const s=this._norm(str); if(!s) return '';
@@ -335,26 +330,11 @@ export default {
     },
     _getCategory(job){
       return (
-        job.category ||
-        job.j_category ||
-        job.j_type ||
-        job.type ||
-        job.job_type ||
-        ''
+        job.category || job.j_category || job.j_type || job.type || job.job_type || ''
       ).toString().trim();
     },
 
-    // === ใช้ใน template เพื่อกัน error (_ctx.displayCategory is not a function) ===
-    displayCategory(job){ return this._getCategory(job); },
-    displayWorkType(job){
-      const raw = (job.j_work_type || job.work_type || job.job_kind || '').toString().trim();
-      const mapped = this._mapWorkType(raw);
-      if (!mapped) return raw;
-      const opt = this.workTypeOptions.find(o => o.value === mapped);
-      return opt ? opt.label : raw;
-    },
-
-    // เงินเดือน
+    // ===== เงินเดือน (เหมือนหน้า Applicant) =====
     _toNum(v){
       if (v === null || v === undefined) return null;
       const s = String(v).replace(/[^\d.]/g,'').trim();
@@ -363,27 +343,27 @@ export default {
       return Number.isFinite(n) ? n : null;
     },
     _fmt(n){ return Number(n).toLocaleString('th-TH', { maximumFractionDigits: 0 }); },
-    salaryDisplay(job) {
-      const rawMin = job.j_salary_min ?? job.salary_min ?? job.min_salary ?? null;
-      const rawMax = job.j_salary_max ?? job.salary_max ?? job.max_salary ?? null;
-      const rawOne = job.j_salary ?? job.salary ?? null;
+    renderSalary(job){
+      const rawMin = job.j_salary_min ?? job.salary_min ?? job.min_salary ?? job.j_pay_min ?? job.pay_min ?? null;
+      const rawMax = job.j_salary_max ?? job.salary_max ?? job.max_salary ?? job.j_pay_max ?? job.pay_max ?? null;
+      const rawOne = job.j_salary     ?? job.salary     ?? job.j_pay     ?? job.pay     ?? null;
 
       const nMin = this._toNum(rawMin);
       const nMax = this._toNum(rawMax);
       const nOne = this._toNum(rawOne);
 
       const unit =
-        job.j_salary_unit ?? job.salary_unit ??
+        job.j_salary_unit ?? job.j_unit ??
         (String(job.j_work_type||'').includes('ชั่วโมง') ? 'บาท/ชั่วโมง' : 'บาท/เดือน');
 
       if (nMin!=null && nMax!=null) return `${this._fmt(nMin)}–${this._fmt(nMax)} ${unit}`;
       if (nOne!=null)               return `${this._fmt(nOne)} ${unit}`;
 
-      const txt = (job.j_salary_text ?? job.salary_text ?? '').toString().trim();
+      const txt = (job.j_salary_text ?? job.salary_text ?? job.j_pay_text ?? '').toString().trim();
       return txt || 'ตามตกลง';
     },
 
-    // ค้นหา + เรียงล่าสุดเสมอ
+    // ===== ค้นหา + เรียงล่าสุดเสมอ =====
     searchJobs() {
       const keyword=this._norm(this.filter.keyword);
       const skillKeyword=this._norm(this.filter.skills);
@@ -420,6 +400,7 @@ export default {
       this.filtered = result.sort((a,b)=> safe(b.j_posted_at || b.posted_at) - safe(a.j_posted_at || a.posted_at));
     },
 
+    // ===== Bookmark =====
     isBookmarked(id){ return this.bookmarkedIds.includes(id); },
     bookmarkJob(job){
       if (!this.isLoggedIn || !this.user) {
@@ -450,6 +431,7 @@ export default {
       localStorage.setItem(key, JSON.stringify(arr));
     },
 
+    // ===== Time ago =====
     timeAgo(input){
       if(!input) return '';
       const d=new Date(input); if(isNaN(d)) return '';
@@ -461,7 +443,6 @@ export default {
   }
 };
 </script>
-
 
 <style scoped>
 *,
@@ -480,12 +461,8 @@ export default {
 
 /* ช่องไฟแนวตั้งให้คงที่ */
 .stack{ --gap:14px; display:flex; flex-direction:column; gap:var(--gap); }
-.field{ display:flex; flex-direction:column; gap:8px; padding:0 8px; } /* ซ้าย=ขวา */
-.divider{
-  height:1px; background:rgba(0,0,0,.06);
-  margin: calc(-1 * var(--gap)) 8px 0 8px; /* ระยะก่อน-หลังเท่ากันพอดี */
-  border:0;
-}
+.field{ display:flex; flex-direction:column; gap:8px; padding:0 8px; }
+.divider{ height:1px; background:rgba(0,0,0,.06); margin: calc(-1 * var(--gap)) 8px 0 8px; border:0; }
 
 /* Inputs */
 .label{ font-weight:600; color:#222; font-size:12.5px; }
@@ -502,10 +479,7 @@ select, input[type="text"]{
   position:absolute; left:14px; top:50%; transform:translateY(-50%);
   color:#9aa0a6; font-size:16px; pointer-events:none;
 }
-.input-icon input{
-  height:36px; line-height:36px; width:100%;
-  padding:0 12px 0 48px; border:1px solid #e3e3e3; border-radius:10px; background:#fcfcfc; font-size:13px;
-}
+.input-icon input{ height:36px; width:100%; padding:0 12px 0 48px; border:1px solid #e3e3e3; border-radius:10px; background:#fcfcfc; font-size:13px; }
 
 /* Chips */
 .chips{ display:grid; gap:8px; padding:0 2px; }
@@ -545,40 +519,32 @@ select, input[type="text"]{
 /* Results */
 .job-results{ flex:1; }
 .results-header{ display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; }
-.sort-row{ display:flex; align-items:center; gap:8px; }
-.sort-pill{ width:180px; height:34px; padding:0 12px; border-radius:999px; border:1px solid #e3e3e3; background:#fff; font-size:13px; }
+
+/* Grid */
 .job-grid{ display:grid; grid-template-columns:repeat(3, 1fr); gap:20px; }
 @media (max-width:1200px){ .job-grid{ grid-template-columns:repeat(2, 1fr);} }
 @media (max-width:768px){
   .main-layout{ flex-direction:column; gap:16px; }
   .vertical-divider{ display:none; }
   .filter-panel{ width:100%; }
-  .job-grid{ grid-template-columns:1fr; }
+  .job-grid{ grid-template-columns:1fr; gap:16px; }
 }
 
-/* Cards */
-.job-card{ position:relative; padding:16px; border-radius:12px; background:#fff; box-shadow:0 6px 16px rgba(0,0,0,.06); transition:.2s ease; cursor:pointer; }
+/* Card */
+.job-card{ border-radius:12px; background:#fff; transition:.2s ease; box-shadow:0 6px 16px rgba(0,0,0,.06); cursor:pointer; }
 .job-card:hover{ transform:translateY(-2px); box-shadow:0 10px 20px rgba(0,0,0,.08); }
-.card-meta{ position:absolute; top:10px; right:10px; }
-.icon-btn{ width:34px; height:34px; border-radius:999px; border:1px solid #e5e5e5; background:#fff; display:inline-flex; align-items:center; justify-content:center; }
+
+/* Bookmark */
+.card-meta{ position:absolute; top:12px; right:12px; display:flex; align-items:center; gap:10px; }
+.icon-btn{ width:36px; height:36px; border-radius:999px; border:1px solid #e5e5e5; background:#fff; display:inline-flex; align-items:center; justify-content:center; transition:.15s; }
 .icon-btn.saved{ border-color:#ffc107; background:#fff9e6; }
 .icon-btn.saved i{ color:#ff9900; }
 
-.co{ display:flex; align-items:center; gap:10px; margin-bottom:8px; }
-.co img{ width:40px; height:40px; border-radius:50%; object-fit:cover; box-shadow:0 1px 3px rgba(0,0,0,.08); }
-.co-name{ font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+/* Tags & badges */
+.badge-category{ background:#fff5e6; color:#ff6600; border:1px solid #ff6600; border-radius:999px; font-weight:500; padding:.15rem .6rem; font-size:14px; }
 
-.title-row{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:6px; }
-.title{ margin:0; font-weight:700; font-size:16px; }
-.chip-saved{ font-size:12px; padding:2px 8px; border-radius:999px; border:1px solid #ffc107; color:#b26b00; background:#fff9e6; }
+/* Time ago */
+.ago-badge{ position:absolute; right:12px; bottom:10px; font-size:12px; color:#6b7280; background:#f3f4f6; padding:4px 10px; border-radius:999px; }
 
-.badge-category{ display:inline-block; padding:.1rem .55rem; font-size:12.5px; border-radius:999px; border:1px solid #ff6600; color:#ff6600; background:#fff5e6; margin-bottom:4px; }
-.muted{ color:#6b7280; font-size:12.5px; }
-
-/* แถววัน/เวลาในการ์ด */
-.row-inline{ display:flex; align-items:center; gap:8px; margin-top:4px; }
-.row-inline .bar{ opacity:.5; margin:0 2px; }
-
-.ago{ position:absolute; right:12px; bottom:10px; font-size:12px; color:#6b7280; }
 .text-orange{ color:#ff6600; }
 </style>

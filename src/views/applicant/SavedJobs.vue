@@ -50,7 +50,6 @@
             >
              
               <option value="all">ทั้งหมด</option>
-              <option value="savedLatest">บันทึกล่าสุด</option>
               <option value="applied">สมัครแล้ว</option>
               <option value="not_applied">ยังไม่ได้สมัคร</option>
               <option value="salaryHigh">ค่าจ้าง: มาก→น้อย</option>
@@ -108,9 +107,10 @@
             <i class="bi bi-people-fill me-1"></i> รับจำนวน: {{ job.j_amount || '-' }} คน
           </p>
           <p class="mb-0 text-muted">
-            <i class="bi bi-cash-coin me-1"></i>
-            ค่าจ้าง: {{ formatMoney(job.j_salary) }} บาท
-          </p>
+  <i class="bi bi-cash-coin me-1"></i>
+  ค่าจ้าง: <span v-html="renderSalary(job)"></span>
+</p>
+
 
           <div class="ago-badge">
             {{ timeAgo(job.j_posted_at) }}
@@ -120,7 +120,6 @@
     </div>
   </div>
 </template>
-
 <script>
 import axios from "axios";
 import NavbarApplicant from "@/components/NavbarApplicant.vue";
@@ -131,13 +130,12 @@ export default {
   data() {
     return {
       base: "http://localhost:3001",
-      savedJobs: [],        // จะถูกจัดลำดับเป็น "บันทึกล่าสุด" ตั้งแต่ mounted()
+      savedJobs: [],
       filteredJobs: [],
       appliedJobIds: [],
       user: JSON.parse(localStorage.getItem("user")),
-      // ดรอปดาวแสดง "ทั้งหมด" แต่ลิสต์ฐานจะเรียง "บันทึกล่าสุด" อยู่แล้ว
       filter: { title: "", sort: "all" },
-      searchTimer: null, // debounce
+      searchTimer: null,
     };
   },
   mounted() {
@@ -153,6 +151,61 @@ export default {
     }
   },
   methods: {
+    /* ====== ค่าจ้าง ====== */
+    _num(v) {
+      if (v === null || v === undefined) return null;
+      const s = String(v).replace(/[^\d.]/g, "").trim();
+      if (!s) return null;
+      const n = Number(s);
+      return Number.isFinite(n) ? n : null;
+    },
+    _fmt(n) { return Number(n).toLocaleString("th-TH", { maximumFractionDigits: 0 }); },
+    _unit(job) {
+      const guessByWorkType = String(job.j_work_type || job.j_employment_type || "").includes("ชั่วโมง")
+        ? "บาท/ชั่วโมง" : "บาท/เดือน";
+      const raw =
+        job.j_salary_unit ?? job.j_unit ?? job.j_salary_type ??
+        job.j_pay_unit   ?? job.j_pay_type ?? job.compensation_unit ?? "";
+      const t = String(raw).toLowerCase();
+      if (!t) return guessByWorkType;
+      if (/(เดือน|month|monthly)/i.test(t))   return "บาท/เดือน";
+      if (/(ชั่วโมง|hour|hourly)/i.test(t))   return "บาท/ชั่วโมง";
+      if (/(วัน|day|daily)/i.test(t))          return "บาท/วัน";
+      if (/(สัปดาห์|week|weekly)/i.test(t))   return "บาท/สัปดาห์";
+      return "บาท";
+    },
+    /** ข้อความค่าจ้างสำหรับแสดงผล */
+    renderSalary(job) {
+      const nego = job.j_salary_negotiable ?? job.j_is_negotiable ?? job.negotiable;
+      if (nego === true || String(nego).toLowerCase() === "true") return "ตามตกลง";
+
+      const min = this._num(job.j_salary_min ?? job.salary_min ?? job.min_salary ?? job.j_pay_min ?? job.pay_min);
+      const max = this._num(job.j_salary_max ?? job.salary_max ?? job.max_salary ?? job.j_pay_max ?? job.pay_max);
+      const one = this._num(job.j_salary ?? job.salary ?? job.j_pay ?? job.pay ?? job.compensation);
+
+      const unit = this._unit(job);
+
+      if (min != null && max != null) return `${this._fmt(min)}–${this._fmt(max)} ${unit}`;
+      if (one != null)                return `${this._fmt(one)} ${unit}`;
+
+      const txt = (job.j_salary_text ?? job.salary_text ?? job.j_pay_text ?? "").toString().trim();
+      return txt || "ตามตกลง";
+    },
+    /** ตัวเลขสำหรับใช้ sort (เลือก max ถ้ามีช่วง, เลือก one ถ้ามีตัวเดียว, ถ้าไม่มีให้ 0) */
+    _salaryValue(job) {
+      const min = this._num(job.j_salary_min ?? job.salary_min ?? job.min_salary ?? job.j_pay_min ?? job.pay_min);
+      const max = this._num(job.j_salary_max ?? job.salary_max ?? job.max_salary ?? job.j_pay_max ?? job.pay_max);
+      const one = this._num(job.j_salary ?? job.salary ?? job.j_pay ?? job.pay ?? job.compensation);
+      if (max != null) return max;
+      if (one != null) return one;
+      if (min != null) return min;
+      // ลองเดาจากข้อความ เช่น "12,000"
+      const t = (job.j_salary_text ?? job.salary_text ?? job.j_pay_text ?? "").toString();
+      const m = t.match(/(\d[\d,.]*)/);
+      return m ? this._num(m[1]) ?? 0 : 0;
+    },
+
+    /* ====== สมัครแล้ว ====== */
     async fetchApplied() {
       try {
         const res = await axios.get(
@@ -168,22 +221,21 @@ export default {
     },
     isApplied(jobId) { return this.appliedJobIds.includes(Number(jobId)); },
 
+    /* ====== ค้นหา/เรียง ====== */
     onSearchInput() {
       clearTimeout(this.searchTimer);
       this.searchTimer = setTimeout(this.applyFilter, 250);
     },
     clearSearch() { this.filter.title = ""; this.applyFilter(); },
-
     sortSavedLatest(mutateBase = false) {
       const cmp = (a, b) => {
         const ta = a.bookmarked_at ? new Date(a.bookmarked_at).getTime() : a.__savedIndex ?? 0;
         const tb = b.bookmarked_at ? new Date(b.bookmarked_at).getTime() : b.__savedIndex ?? 0;
-        return tb - ta; // ใหม่ก่อน
+        return tb - ta;
       };
       if (mutateBase) this.savedJobs.sort(cmp);
       else this.filteredJobs.sort(cmp);
     },
-
     applyFilter() {
       const kw = this.filter.title.trim().toLowerCase();
 
@@ -217,17 +269,18 @@ export default {
           list.sort((a, b) => new Date(b.j_posted_at) - new Date(a.j_posted_at));
           break;
         case "salaryHigh":
-          list.sort((a, b) => Number(b.j_salary) - Number(a.j_salary));
+          list.sort((a, b) => this._salaryValue(b) - this._salaryValue(a));
           break;
         case "salaryLow":
-          list.sort((a, b) => Number(a.j_salary) - Number(b.j_salary));
+          list.sort((a, b) => this._salaryValue(a) - this._salaryValue(b));
           break;
-        // case "all": คงลำดับฐาน (บันทึกล่าสุด)
+        // "all": คงลำดับฐาน (บันทึกล่าสุด)
       }
 
       this.filteredJobs = list;
     },
 
+    /* ====== จัดการรายการบันทึก ====== */
     removeJob(jobId) {
       const key = `bookmarkedJobs_${this.user.applicant_id}`;
       this.savedJobs = this.savedJobs.filter((j) => j.job_id !== jobId);
@@ -236,6 +289,7 @@ export default {
       this.applyFilter();
     },
 
+    /* ====== utils อื่น ๆ ====== */
     formatMoney(n) {
       if (n == null || isNaN(n)) return "-";
       return Number(n).toLocaleString("th-TH", { maximumFractionDigits: 0 });

@@ -130,13 +130,8 @@
           <div class="results-header">
             <h5 class="mb-1 text-orange">พบ {{ filteredJobs.length }} งาน</h5>
             <div class="sort-row">
-              <label class="me-2 mb-0 text-muted small">เรียงตาม</label>
-              <select v-model="viewFilter" @change="searchJobs" class="sort-pill">
-                <option value="all">ทั้งหมด</option>
-                <option value="latest">ล่าสุด</option>
-                <option value="applied">สมัครแล้ว</option>
-                <option value="not_applied">ยังไม่ได้สมัคร</option>
-              </select>
+              
+            
             </div>
           </div>
 
@@ -200,8 +195,8 @@
     </div>
   </div>
 </template>
-
 <script>
+/* eslint-disable */
 import NavbarHome from '@/components/NavbarHome.vue';
 import axios from 'axios';
 import Swal from 'sweetalert2';
@@ -213,6 +208,7 @@ export default {
     return {
       isLoggedIn: localStorage.getItem('authToken') !== null,
       viewFilter: 'all',
+
       filter: {
         keyword: '',
         type: '',
@@ -220,8 +216,9 @@ export default {
         workType: '',
         dayPreset: 'any',
         workDaysCustom: [],
-        timeSlot: '' // ใช้ dropdown เลือกช่วงเวลา
+        timeSlot: ''
       },
+
       jobs: [],
       filtered: [],
       bookmarkedIds: [],
@@ -252,9 +249,9 @@ export default {
       ],
     };
   },
+
   computed: {
     filteredJobs() { return this.filtered; },
-    // แถบ "ผลการค้นหา"
     searchSummaryParts() {
       const parts = [];
       if (this.filter.keyword) parts.push(`คำค้น: ${this.filter.keyword}`);
@@ -286,24 +283,31 @@ export default {
       return parts;
     }
   },
-  mounted() {
-    this.user = JSON.parse(localStorage.getItem("user"));
+
+  async mounted() {
+    this.user = JSON.parse(localStorage.getItem('user'));
     if (this.user) {
       const key = `bookmarkedJobs_${this.user.applicant_id}`;
       const saved = JSON.parse(localStorage.getItem(key)) || [];
       this.bookmarkedIds = saved.map(j => j.job_id);
-      this.loadAppliedJobs();
+      await this.loadAppliedJobs();
     }
-    axios.get('http://localhost:3001/api/jobs')
-      .then(res => { this.jobs = res.data; this.searchJobs(); })
-      .catch(err => console.error('❌ ดึงข้อมูลงานล้มเหลว:', err));
+
+    try {
+      const res = await axios.get('http://localhost:3001/api/jobs');
+      this.jobs = res.data || [];
+      this.searchJobs(); // เรียงล่าสุดเสมอ
+    } catch (err) {
+      console.error('❌ ดึงข้อมูลงานล้มเหลว:', err);
+    }
   },
+
   methods: {
     async loadAppliedJobs() {
       if (!this.user) return;
       try {
         const res = await axios.get(`http://localhost:3001/api/applications/${this.user.applicant_id}`);
-        this.appliedJobIds = new Set(res.data.map(a => a.job_id));
+        this.appliedJobIds = new Set((res.data || []).map(a => a.job_id));
       } catch (e) {
         console.warn('loadAppliedJobs failed:', e);
       }
@@ -311,162 +315,124 @@ export default {
 
     openJob(id) { this.$router.push(this.isLoggedIn ? `/applicant/jobs/${id}` : `/jobs/${id}`); },
 
-    // --- UI handlers ---
-    toggleWorkType(val) { this.filter.workType = this.filter.workType === val ? '' : val; this.searchJobs(); },
-    selectDayPreset(val) { this.filter.dayPreset = val; if (val !== 'custom') this.filter.workDaysCustom = []; this.searchJobs(); },
-    resetForm() {
+    // UI
+    toggleWorkType(val){ this.filter.workType = this.filter.workType === val ? '' : val; this.searchJobs(); },
+    selectDayPreset(val){ this.filter.dayPreset = val; if (val !== 'custom') this.filter.workDaysCustom = []; this.searchJobs(); },
+    resetForm(){
       this.filter = { keyword:'', type:'', skills:'', workType:'', dayPreset:'any', workDaysCustom:[], timeSlot:'' };
       this.searchJobs();
     },
 
-    // --- helpers ---
+    // helpers
     _norm(s){ return (s || '').toString().trim().toLowerCase(); },
     _mapWorkType(str){
       const s=this._norm(str); if(!s) return '';
       if (s.includes('ชิ้น')) return 'one-shot';
       if (s.includes('รายชั่วโมง') || s.includes('ชั่วโมง')) return 'hourly';
-      if (s.includes('พาร์ท') || s.includes('รายวัน') || s.includes('part')) return 'parttime';
-      if (s.includes('ฟูล') || s.includes('รายเดือน') || s.includes('full')) return 'fulltime';
+      if (s.includes('พาร์ท') || s.includes('part')) return 'parttime';
+      if (s.includes('ฟูล') || s.includes('full')) return 'fulltime';
       return '';
     },
-    _getCategory(job){ return (job.category || job.j_category || job.j_type || '').toString().trim(); },
-    _extractWorkDays(job){
-      const val = job.j_work_days || job.j_days || job.work_days;
-      if (!val) return [];
-      const map = {'จันทร์':'mon','อังคาร':'tue','พุธ':'wed','พฤหัสบดี':'thu','พฤหัสฯ':'thu','ศุกร์':'fri','เสาร์':'sat','อาทิตย์':'sun','จ.':'mon','อ.':'tue','พ.':'wed','พฤ.':'thu','ศ.':'fri','ส.':'sat','อา.':'sun','mon':'mon','tue':'tue','wed':'wed','thu':'thu','fri':'fri','sat':'sat','sun':'sun'};
-      const out=[]; const push=(k)=>{ const m=map[k]; if(m && !out.includes(m)) out.push(m); };
-      if(Array.isArray(val)){ val.forEach(v=>push(this._norm(v))); }
-      else {
-        const txt=this._norm(val);
-        Object.keys(map).forEach(k=>{ if (txt.includes(k)) push(k); });
-        if (txt.includes('จันทร์') && txt.includes('ศุกร์')) ['mon','tue','wed','thu','fri'].forEach(d=>!out.includes(d)&&out.push(d));
-      }
-      return out;
-    },
-    _extractTimeRange(job){
-      let s = job.j_work_time || job.work_time || '';
-      let start = job.j_work_time_start || job.work_time_start || '';
-      let end   = job.j_work_time_end   || job.work_time_end   || '';
-      const toMin = (t)=>{ const m=(t||'').toString().match(/(\d{1,2}):?(\d{2})?/); if(!m) return null; const hh=+m[1], mm=m[2]?+m[2]:0; return isNaN(hh)||isNaN(mm)?null:hh*60+mm; };
-      if ((!start || !end) && s) {
-        const m = s.match(/(\d{1,2}:\d{2}).*?(\d{1,2}:\d{2})/); if (m) { start=m[1]; end=m[2]; }
-      }
-      const a=toMin(start), b=toMin(end); if(a==null||b==null) return null; return {from:a,to:b};
+    _getCategory(job){
+      return (
+        job.category ||
+        job.j_category ||
+        job.j_type ||
+        job.type ||
+        job.job_type ||
+        ''
+      ).toString().trim();
     },
 
+    // === ใช้ใน template เพื่อกัน error (_ctx.displayCategory is not a function) ===
     displayCategory(job){ return this._getCategory(job); },
-    displayWorkType(job) {
-      const raw = (job.j_work_type || job.j_kind || job.j_employment_type || '').toString().trim();
+    displayWorkType(job){
+      const raw = (job.j_work_type || job.work_type || job.job_kind || '').toString().trim();
       const mapped = this._mapWorkType(raw);
-      if (mapped) {
-        const opt = this.workTypeOptions.find(o => o.value === mapped);
-        return opt ? opt.label : raw;
-      }
-      return raw || '';
-    },
-    workingDaysDisplay(job) {
-      const days = this._extractWorkDays(job);
-      if (!days.length) return 'ไม่ระบุ';
-      const order = ['mon','tue','wed','thu','fri','sat','sun'];
-      const th = {mon:'จ.',tue:'อ.',wed:'พ.',thu:'พฤ.',fri:'ศ.',sat:'ส.',sun:'อา.'};
-      const sorted = order.filter(d => days.includes(d));
-      const isWeekday = JSON.stringify(sorted) === JSON.stringify(order.slice(0,5));
-      const isAll     = JSON.stringify(sorted) === JSON.stringify(order);
-      const isWeekend = JSON.stringify(sorted) === JSON.stringify(['sat','sun']);
-      if (isAll) return 'ทุกวัน';
-      if (isWeekday) return 'จ.-ศ.';
-      if (isWeekend) return 'ส.-อา.';
-      return sorted.map(d => th[d]).join(', ');
-    },
-    workingTimeDisplay(job) {
-      const t = this._extractTimeRange(job);
-      if (!t) return 'ไม่ระบุ';
-      const pad = n => String(n).padStart(2,'0');
-      const hhmm = m => `${pad(Math.floor(m/60))}:${pad(m%60)}`;
-      return `${hhmm(t.from)}–${hhmm(t.to)}`;
-    },
-    salaryDisplay(job) {
-      const s = job?.j_salary; if (s===null || s===undefined || s==='') return 'ไม่ระบุ';
-      const n = Number(s); return isNaN(n) ? String(s) : n.toLocaleString()+' บาท';
+      if (!mapped) return raw;
+      const opt = this.workTypeOptions.find(o => o.value === mapped);
+      return opt ? opt.label : raw;
     },
 
-    // --- filtering ---
+    // เงินเดือน
+    _toNum(v){
+      if (v === null || v === undefined) return null;
+      const s = String(v).replace(/[^\d.]/g,'').trim();
+      if (!s) return null;
+      const n = Number(s);
+      return Number.isFinite(n) ? n : null;
+    },
+    _fmt(n){ return Number(n).toLocaleString('th-TH', { maximumFractionDigits: 0 }); },
+    salaryDisplay(job) {
+      const rawMin = job.j_salary_min ?? job.salary_min ?? job.min_salary ?? null;
+      const rawMax = job.j_salary_max ?? job.salary_max ?? job.max_salary ?? null;
+      const rawOne = job.j_salary ?? job.salary ?? null;
+
+      const nMin = this._toNum(rawMin);
+      const nMax = this._toNum(rawMax);
+      const nOne = this._toNum(rawOne);
+
+      const unit =
+        job.j_salary_unit ?? job.salary_unit ??
+        (String(job.j_work_type||'').includes('ชั่วโมง') ? 'บาท/ชั่วโมง' : 'บาท/เดือน');
+
+      if (nMin!=null && nMax!=null) return `${this._fmt(nMin)}–${this._fmt(nMax)} ${unit}`;
+      if (nOne!=null)               return `${this._fmt(nOne)} ${unit}`;
+
+      const txt = (job.j_salary_text ?? job.salary_text ?? '').toString().trim();
+      return txt || 'ตามตกลง';
+    },
+
+    // ค้นหา + เรียงล่าสุดเสมอ
     searchJobs() {
       const keyword=this._norm(this.filter.keyword);
       const skillKeyword=this._norm(this.filter.skills);
       const wantWorkType=this.filter.workType;
 
-      // preset → days
-      let wantDays=[];
-      if(this.filter.dayPreset==='alldays')      wantDays=['mon','tue','wed','thu','fri','sat','sun'];
-      else if(this.filter.dayPreset==='weekday') wantDays=['mon','tue','wed','thu','fri'];
-      else if(this.filter.dayPreset==='weekend') wantDays=['sat','sun'];
-      else if(this.filter.dayPreset==='custom')  wantDays=[...this.filter.workDaysCustom];
+      let result=(this.jobs || []).filter(job=>{
+        const title = job.j_title || job.title || '';
+        const desc  = job.j_description || job.description || '';
+        const comp  = job.e_company_name || job.company_name || '';
+        const cat   = this._getCategory(job);
 
-      // ช่วงเวลาแบบตายตัว (นาที)
-      const slotMap = {
-        morning:  {from:  8*60, to: 12*60},
-        afternoon:{from: 13*60, to: 17*60},
-        evening:  {from: 17*60, to: 21*60},
-        night:    {from: 21*60, to: 24*60},
-        fullday:  {from:  9*60, to: 18*60},
-      };
-      const wantSlot = this.filter.timeSlot ? slotMap[this.filter.timeSlot] : null;
-
-      let result=this.jobs.filter(job=>{
-        const cat = this._getCategory(job);
-
-        const matchesKeyword = !keyword ||
-          this._norm(job.j_title).includes(keyword) ||
-          this._norm(job.j_description).includes(keyword) ||
+        const matchesKeyword=!keyword ||
+          this._norm(title).includes(keyword) ||
+          this._norm(desc).includes(keyword) ||
           this._norm(cat).includes(keyword) ||
-          this._norm(job.e_company_name).includes(keyword);
+          this._norm(comp).includes(keyword);
 
-        const matchesSkills = !skillKeyword || this._norm(job.j_qualification).includes(skillKeyword);
-        const matchesType   = !this.filter.type || cat === this.filter.type;
+        const matchesSkills=!skillKeyword || this._norm(job.j_qualification || job.skills || '').includes(skillKeyword);
+        const matchesType  = !this.filter.type || cat === this.filter.type;
 
-        let matchesWorkType = true;
+        let matchesWorkType=true;
         if (wantWorkType) {
-          const mapped = this._mapWorkType(job.j_work_type || job.j_kind || job.j_employment_type || '');
+          const mapped=this._mapWorkType(job.j_work_type || job.work_type || job.job_kind || '');
           matchesWorkType = mapped === wantWorkType;
         }
 
-        let matchesDays = true;
-        if (wantDays.length) {
-          const jobDays = this._extractWorkDays(job);
-          matchesDays = jobDays.some(d => wantDays.includes(d));
-        }
+        const status = job.j_status || job.status || 'open';
+        const isOpen = !status || status.toLowerCase()==='open' || status.toLowerCase()==='active';
 
-        // ถ้าเลือกช่วงเวลา → กรองเฉพาะงานที่ทับ slot; ถ้าไม่ระบุเวลา ให้ผ่าน
-        let matchesTime = true;
-        if (wantSlot) {
-          const jt=this._extractTimeRange(job);
-          matchesTime = jt ? (Math.max(wantSlot.from, jt.from) < Math.min(wantSlot.to, jt.to)) : true;
-        }
-
-        const isOpen = !job.j_status || job.j_status==='open';
-        return matchesKeyword && matchesSkills && matchesType &&
-               matchesWorkType && matchesDays && matchesTime && isOpen;
+        return matchesKeyword && matchesSkills && matchesType && matchesWorkType && isOpen;
       });
 
-      if (this.viewFilter==='latest') {
-        const safe = x => (x ? new Date(x) : new Date(0));
-        result = result.sort((a,b)=> safe(b.j_posted_at)-safe(a.j_posted_at));
-      } else if (this.viewFilter==='applied') {
-        result = result.filter(j=> this.appliedJobIds.has(j.job_id));
-      } else if (this.viewFilter==='not_applied') {
-        result = result.filter(j=> !this.appliedJobIds.has(j.job_id));
-      }
-
-      this.filtered=result;
+      const safe = x => (x ? new Date(x) : new Date(0));
+      this.filtered = result.sort((a,b)=> safe(b.j_posted_at || b.posted_at) - safe(a.j_posted_at || a.posted_at));
     },
 
     isBookmarked(id){ return this.bookmarkedIds.includes(id); },
     bookmarkJob(job){
       if (!this.isLoggedIn || !this.user) {
-        Swal.fire({ icon:'warning', title:'กรุณาเข้าสู่ระบบก่อน', text:'คุณต้องเข้าสู่ระบบเพื่อบันทึกงาน',
-          showCancelButton:true, confirmButtonText:'เข้าสู่ระบบ', cancelButtonText:'ยกเลิก',
-          confirmButtonColor:'#6a5acd', cancelButtonColor:'#aaa' }).then(r=>{ if(r.isConfirmed) this.$router.push('/login'); });
+        Swal.fire({
+          icon:'warning',
+          title:'กรุณาเข้าสู่ระบบก่อน',
+          text:'คุณต้องเข้าสู่ระบบเพื่อบันทึกงาน',
+          showCancelButton:true,
+          confirmButtonText:'เข้าสู่ระบบ',
+          cancelButtonText:'ยกเลิก',
+          confirmButtonColor:'#6a5acd',
+          cancelButtonColor:'#aaa'
+        }).then(r=>{ if(r.isConfirmed) this.$router.push('/login'); });
         return;
       }
       const key=`bookmarkedJobs_${this.user.applicant_id}`;
@@ -495,6 +461,7 @@ export default {
   }
 };
 </script>
+
 
 <style scoped>
 *,

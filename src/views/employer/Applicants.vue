@@ -190,43 +190,58 @@ export default {
       }
     },
     async applyDecision(app, newStatus) {
-      if (newStatus === "rejected") {
-        const res = await Swal.fire({
-          title: "ยืนยันการปฏิเสธ",
-          text: `ต้องการปฏิเสธ ${app.applicant.a_firstname} ${app.applicant.a_lastname} ใช่หรือไม่?`,
-          icon: "warning",
-          showCancelButton: true,
-          confirmButtonText: "ปฏิเสธ",
-          cancelButtonText: "ยกเลิก",
-          reverseButtons: true,
-          confirmButtonColor: "#ef4444",
-          cancelButtonColor: "#9ca3af",
-        });
-        if (!res.isConfirmed) return;
-      }
+  // ✅ Pop-up ยืนยันทั้งอนุมัติ และปฏิเสธ
+  let title = "";
+  let confirmText = "";
+  let confirmColor = "";
 
-      try {
-        await axios.put(
-          `http://localhost:3001/api/employer/applications/${app.application_id}/status`,
-          { app_status: newStatus },
-          { headers: { "Content-Type": "application/json" } }
-        );
-        app.status = newStatus;
+  if (newStatus === "approved") {
+    title = `ยืนยันการอนุมัติ ${app.applicant.a_firstname} ${app.applicant.a_lastname}?`;
+    confirmText = "อนุมัติ";
+    confirmColor = "#22c55e"; // เขียว
+  } else if (newStatus === "rejected") {
+    title = `ยืนยันการปฏิเสธ ${app.applicant.a_firstname} ${app.applicant.a_lastname}?`;
+    confirmText = "ปฏิเสธ";
+    confirmColor = "#ef4444"; // แดง
+  }
 
-        Swal.fire({
-          toast: true,
-          position: "bottom-end",
-          icon: "success",
-          title: "อัปเดตสถานะสำเร็จ",
-          showConfirmButton: false,
-          timer: 1700,
-          timerProgressBar: true,
-        });
-      } catch (err) {
-        console.error("❌ เปลี่ยนสถานะล้มเหลว:", err.response?.data || err.message);
-        Swal.fire({ icon: "error", title: "อัปเดตไม่สำเร็จ", text: "กรุณาลองใหม่อีกครั้ง" });
-      }
-    },
+  const res = await Swal.fire({
+    title,
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonText: confirmText,
+    cancelButtonText: "ยกเลิก",
+    reverseButtons: true,
+    confirmButtonColor: confirmColor,
+    cancelButtonColor: "#9ca3af",
+  });
+
+  if (!res.isConfirmed) return; // ❌ กดยกเลิก → ไม่ทำอะไร
+
+  // ✅ ถ้ากดยืนยัน → call API อัปเดตสถานะ
+  try {
+    await axios.put(
+      `http://localhost:3001/api/employer/applications/${app.application_id}/status`,
+      { app_status: newStatus },
+      { headers: { "Content-Type": "application/json" } }
+    );
+    app.status = newStatus;
+
+    Swal.fire({
+      toast: true,
+      position: "bottom-end",
+      icon: "success",
+      title: "อัปเดตสถานะสำเร็จ",
+      showConfirmButton: false,
+      timer: 1700,
+      timerProgressBar: true,
+    });
+  } catch (err) {
+    console.error("❌ เปลี่ยนสถานะล้มเหลว:", err.response?.data || err.message);
+    Swal.fire({ icon: "error", title: "อัปเดตไม่สำเร็จ", text: "กรุณาลองใหม่อีกครั้ง" });
+  }
+}
+,
     async deleteApplicant(applicationId) {
       const res = await Swal.fire({
         title: "ลบผู้สมัคร?",

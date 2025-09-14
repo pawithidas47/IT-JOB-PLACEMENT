@@ -50,7 +50,7 @@
                 </div>
                 <div class="divider"></div>
                 <div class="quick-box">
-                  <div class="q-label">ค่าตอบแทน</div>
+                  <div class="q-label">ค่าจ้าง</div>
                   <div class="q-value">{{ salaryDisplay }}</div>
                 </div>
                 <div class="divider"></div>

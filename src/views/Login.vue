@@ -87,12 +87,12 @@ export default {
           localStorage.setItem("user_role", this.role);
 
           Swal.fire({
-            title: "✅ เข้าสู่ระบบสำเร็จ!",
+            title: "เข้าสู่ระบบสำเร็จ!",
             text: "ยินดีต้อนรับเข้าสู่ระบบ",
             icon: "success",
             iconColor: "#10b981",
             showConfirmButton: false,
-            timer: 2000,
+            timer: 1000,
             timerProgressBar: true,
             background: "#ffffff",
             color: "#333",
@@ -111,7 +111,7 @@ export default {
           });
         })
         .catch((err) => {
-          console.error("❌ Login failed:", err);
+          console.error("Login failed:", err);
           Swal.fire({
             icon: "error",
             title: "เข้าสู่ระบบไม่สำเร็จ",

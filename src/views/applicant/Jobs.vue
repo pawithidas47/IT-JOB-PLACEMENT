@@ -1,4 +1,4 @@
-<template>
+<template> 
   <div>
     <NavbarApplicant />
     <div class="container-fluid px-4 py-4">
@@ -196,7 +196,7 @@
               </p>
               <p class="mb-0 text-muted">
                 <i class="bi bi-cash-coin me-1"></i> ค่าจ้าง:
-                {{ Number(job.j_salary).toLocaleString('th-TH',{maximumFractionDigits:0}) }} บาท
+                <span v-html="renderSalary(job)"></span>
               </p>
 
               <div class="ago-badge">
@@ -211,6 +211,7 @@
 </template>
 
 <script>
+/* eslint-disable */
 import NavbarApplicant from '@/components/NavbarApplicant.vue';
 import axios from 'axios';
 import Swal from 'sweetalert2';
@@ -221,15 +222,15 @@ export default {
   data() {
     return {
       isLoggedIn: localStorage.getItem('authToken') !== null,
-      viewFilter: 'all',
+      viewFilter: 'latest',   // ✅ ค่าเริ่มต้นเป็น "ล่าสุด"
       filter: {
         keyword: '',
         type: '',
         skills: '',
         workType: '',
-        dayPreset: 'any',       // any | alldays | weekday | weekend | custom
+        dayPreset: 'any',
         workDaysCustom: [],
-        timeSlot: ''            // '', morning, afternoon, evening, night, fullday
+        timeSlot: ''
       },
       jobs: [],
       filtered: [],
@@ -237,7 +238,6 @@ export default {
       appliedJobIds: [],
       user: null,
 
-      // ⬇️ ปรับ label: ตัดคำว่า (รายวัน) และ (รายเดือน) ออก
       workTypeOptions: [
         { value: 'one-shot', label: 'งานชิ้นเดียว' },
         { value: 'hourly',   label: 'รายชั่วโมง' },
@@ -262,9 +262,9 @@ export default {
       ],
     };
   },
+
   computed: {
     filteredJobs() { return this.filtered; },
-    // แถบ “ผลการค้นหา”
     searchSummaryParts() {
       const parts = [];
       if (this.filter.keyword) parts.push(`คำค้น: ${this.filter.keyword}`);
@@ -296,6 +296,7 @@ export default {
       return parts;
     }
   },
+
   async mounted() {
     this.user = JSON.parse(localStorage.getItem('user'));
     const key = `bookmarkedJobs_${this.user?.applicant_id}`;
@@ -311,13 +312,15 @@ export default {
       ]);
       this.jobs = jobsRes.data;
       this.appliedJobIds = (appsRes.data || []).map(a => a.job_id);
+
+      this.viewFilter = 'latest';   // ✅ บังคับ sort ล่าสุด
       this.searchJobs();
     } catch (e) {
       console.error('❌ ดึงข้อมูลล้มเหลว:', e);
     }
   },
+
   methods: {
-    // UI
     toggleWorkType(val){ this.filter.workType = this.filter.workType === val ? '' : val; this.searchJobs(); },
     selectDayPreset(val){ this.filter.dayPreset = val; if (val !== 'custom') this.filter.workDaysCustom = []; this.searchJobs(); },
     resetForm(){
@@ -325,12 +328,11 @@ export default {
       this.searchJobs();
     },
 
-    // helpers
     _norm(s){ return (s || '').toString().trim().toLowerCase(); },
     _mapWorkType(str){
       const s=this._norm(str); if(!s) return '';
       if (s.includes('ชิ้น')) return 'one-shot';
-      if (s.includes('รายชั่วโมง') || s.includes('ชั่วโมง')) return 'hourly';
+      if (s.includes('ชั่วโมง')) return 'hourly';
       if (s.includes('พาร์ท') || s.includes('part')) return 'parttime';
       if (s.includes('ฟูล') || s.includes('full')) return 'fulltime';
       return '';
@@ -351,84 +353,64 @@ export default {
       else {
         const txt=this._norm(val);
         Object.keys(map).forEach(k=>{ if (txt.includes(k)) push(k); });
-        // รองรับ จ.-ศ.
-        if (/(จ\.?|จันทร์)\s*(?:-|–)\s*(ศ\.?|ศุกร์)/.test(txt))
+        if (/(จ[.]?|จันทร์)\s*(?:-|–)\s*(ศ[.]?|ศุกร์)/.test(txt)) {
           ['mon','tue','wed','thu','fri'].forEach(d=>!out.includes(d)&&out.push(d));
+        }
       }
       return out;
     },
 
-    _extractTimeRange(job){
-      let s = job.j_work_time || job.work_time || '';
-      let start = job.j_work_time_start || job.work_time_start || '';
-      let end   = job.j_work_time_end   || job.work_time_end   || '';
-      const toMin = (t)=>{ const m=(t||'').toString().match(/(\d{1,2}):?(\d{2})?/); if(!m) return null; const hh=+m[1], mm=m[2]?+m[2]:0; return isNaN(hh)||isNaN(mm)?null:hh*60+mm; };
-      if ((!start || !end) && s) {
-        const m = s.match(/(\d{1,2}:\d{2}).*?(\d{1,2}:\d{2})/); if (m) { start=m[1]; end=m[2]; }
-        else {
-          const r = s.match(/(\d{1,2})\s*(?:-|–|—|~|ถึง|to)\s*(\d{1,2})/i);
-          if (r) { start=`${r[1]}:00`; end=`${r[2]}:00`; }
-        }
-      }
-      const a=toMin(start), b=toMin(end); if(a==null||b==null) return null; return {from:a,to:b};
+    _toNum(v) {
+      if (v === null || v === undefined) return null;
+      const s = String(v).replace(/[^\d.]/g, '').trim();
+      if (!s) return null;
+      const n = Number(s);
+      return Number.isFinite(n) ? n : null;
+    },
+    _fmt(n){ return Number(n).toLocaleString('th-TH', { maximumFractionDigits: 0 }); },
+    renderSalary(job){
+      const rawMin = job.j_salary_min ?? job.salary_min ?? job.min_salary ?? job.j_pay_min ?? job.pay_min ?? null;
+      const rawMax = job.j_salary_max ?? job.salary_max ?? job.max_salary ?? job.j_pay_max ?? job.pay_max ?? null;
+      const rawOne = job.j_salary     ?? job.salary     ?? job.j_pay     ?? job.pay     ?? null;
+
+      const nMin = this._toNum(rawMin);
+      const nMax = this._toNum(rawMax);
+      const nOne = this._toNum(rawOne);
+
+      const unit =
+        job.j_salary_unit ?? job.j_unit ??
+        (String(job.j_work_type||'').includes('ชั่วโมง') ? 'บาท/ชั่วโมง' : 'บาท/เดือน');
+
+      if (nMin!=null && nMax!=null) return `${this._fmt(nMin)}–${this._fmt(nMax)} ${unit}`;
+      if (nOne!=null) return `${this._fmt(nOne)} ${unit}`;
+
+      const txt = (job.j_salary_text ?? job.salary_text ?? job.j_pay_text ?? '').toString().trim();
+      return txt || 'ตามตกลง';
     },
 
-    searchJobs() {
+    searchJobs(){
       const keyword=this._norm(this.filter.keyword);
       const skillKeyword=this._norm(this.filter.skills);
       const wantWorkType=this.filter.workType;
 
-      // day presets
-      let wantDays=[];
-      if(this.filter.dayPreset==='alldays')      wantDays=['mon','tue','wed','thu','fri','sat','sun'];
-      else if(this.filter.dayPreset==='weekday') wantDays=['mon','tue','wed','thu','fri'];
-      else if(this.filter.dayPreset==='weekend') wantDays=['sat','sun'];
-      else if(this.filter.dayPreset==='custom')  wantDays=[...this.filter.workDaysCustom];
-
-      // time slot
-      const slotMap = {
-        morning:  {from:  8*60, to: 12*60},
-        afternoon:{from: 13*60, to: 17*60},
-        evening:  {from: 17*60, to: 21*60},
-        night:    {from: 21*60, to: 24*60},
-        fullday:  {from:  9*60, to: 18*60},
-      };
-      const wantSlot = this.filter.timeSlot ? slotMap[this.filter.timeSlot] : null;
-
       let result=this.jobs.filter(job=>{
-        const cat = this._getCategory(job);
+        const cat=this._getCategory(job);
 
-        const matchesKeyword = !keyword ||
+        const matchesKeyword=!keyword ||
           this._norm(job.j_title).includes(keyword) ||
           this._norm(job.j_description).includes(keyword) ||
           this._norm(cat).includes(keyword) ||
           this._norm(job.e_company_name).includes(keyword);
 
-        const matchesSkills = !skillKeyword || this._norm(job.j_qualification).includes(skillKeyword);
-        const matchesType   = !this.filter.type || cat === this.filter.type;
+        const matchesSkills=!skillKeyword || this._norm(job.j_qualification).includes(skillKeyword);
 
-        let matchesWorkType = true;
+        let matchesWorkType=true;
         if (wantWorkType) {
-          const mapped = this._mapWorkType(job.j_work_type || job.j_kind || job.j_employment_type || '');
+          const mapped=this._mapWorkType(job.j_work_type || job.j_kind || job.j_employment_type || '');
           matchesWorkType = mapped === wantWorkType;
         }
 
-        let matchesDays = true;
-        if (wantDays.length) {
-          const jobDays = this._extractWorkDays(job);
-          matchesDays = jobDays.some(d => wantDays.includes(d));
-        }
-
-        // เวลา: ถ้าเลือก slot ให้ทับ; ถ้าไม่ระบุในงาน ให้ผ่าน
-        let matchesTime = true;
-        if (wantSlot) {
-          const jt=this._extractTimeRange(job);
-          matchesTime = jt ? (Math.max(wantSlot.from, jt.from) < Math.min(wantSlot.to, jt.to)) : true;
-        }
-
-        const isOpen = !job.j_status || job.j_status==='open';
-        return matchesKeyword && matchesSkills && matchesType &&
-               matchesWorkType && matchesDays && matchesTime && isOpen;
+        return matchesKeyword && matchesSkills && matchesWorkType;
       });
 
       if (this.viewFilter==='latest') {
@@ -470,7 +452,9 @@ export default {
     }
   }
 };
+
 </script>
+
 
 <style scoped>
 *,
@@ -493,17 +477,8 @@ export default {
   display:flex;
   flex-direction:column;
 }
-/* ให้ทุก section ห่างกันตาม --gap (ยกเว้นเส้นคั่น) */
-.stack > *:not(:first-child):not(.divider){
-  margin-top: var(--gap);
-}
-/* เส้นคั่นไม่เพิ่มช่องไฟรวม */
-.divider{
-  height:1px;
-  background:rgba(0,0,0,.06);
-  margin: calc(var(--gap) - 1px) 8px 0;
-  border:0;
-}
+.stack > *:not(:first-child):not(.divider){ margin-top: var(--gap); }
+.divider{ height:1px; background:rgba(0,0,0,.06); margin: calc(var(--gap) - 1px) 8px 0; border:0; }
 .divider + *{ margin-top:0 !important; }
 
 /* Fields */

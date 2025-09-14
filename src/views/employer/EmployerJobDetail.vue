@@ -92,7 +92,6 @@
     </div>
   </div>
 </template>
-
 <script>
 import axios from "axios";
 import NavbarEmployer from "@/components/NavbarEmployer.vue";
@@ -118,12 +117,11 @@ export default {
       .get(`http://localhost:3001/api/jobs/${jobId}`)
       .then((res) => {
         const j = res.data || {};
-        // normalize salary fields
         let type = j.j_salary_type ?? j.salary_type ?? j.j_type_salary ?? "";
         let min = this._toNum(j.j_salary_min ?? j.salary_min);
         let max = this._toNum(j.j_salary_max ?? j.salary_max);
 
-        // fallback parse from legacy string
+        // ถ้าเป็น legacy string
         if ((!type || (!min && !max)) && j.j_salary) {
           const lg = this._parseLegacySalary(j.j_salary);
           type ||= lg.type || "";
@@ -131,7 +129,15 @@ export default {
           if (max == null) max = lg.max;
         }
 
-        this.job = { ...j, j_salary_type: type, j_salary_min: min, j_salary_max: max };
+        const unit = j.j_salary_unit ?? j.salary_unit ?? null;
+
+        this.job = {
+          ...j,
+          j_salary_type: type,
+          j_salary_min: min,
+          j_salary_max: max,
+          j_salary_unit: unit,
+        };
       })
       .catch((err) => console.error("❌ โหลดงานไม่สำเร็จ:", err));
 
@@ -145,7 +151,6 @@ export default {
     if (this.resizeHandler) window.removeEventListener("resize", this.resizeHandler);
   },
   methods: {
-    // แปลงข้อความหลายบรรทัด -> array พร้อมล้างนำหน้าด้วย •, -, * (ถ้ามี)
     normalizeLines(text) {
       return (text || "")
         .split(/\r?\n/)
@@ -168,18 +173,40 @@ export default {
         : { type: m[1] || "", min: this._toNum(m[2]), max: this._toNum(m[3]) };
     },
     _formatSalary(job) {
-      const type = (job.j_salary_type || "").trim();
-      const min = this._toNum(job.j_salary_min);
-      const max = this._toNum(job.j_salary_max);
+      const toNum = (v) => {
+        if (v == null || v === "") return null;
+        const s = String(v).replace(/[^\d.]/g, "").trim();
+        if (!s) return null;
+        const n = Number(s);
+        return Number.isFinite(n) ? n : null;
+      };
+      const fmt = (n) =>
+        Number(n).toLocaleString("th-TH", { maximumFractionDigits: 0 });
 
+      const rawMin = job.j_salary_min ?? job.salary_min ?? null;
+      const rawMax = job.j_salary_max ?? job.salary_max ?? null;
+      const rawOne = job.j_salary ?? job.salary ?? null;
+
+      const nMin = toNum(rawMin);
+      const nMax = toNum(rawMax);
+      const nOne = toNum(rawOne);
+
+      const unit =
+        job.j_salary_unit ??
+        job.salary_unit ??
+        (String(job.j_work_type || "").includes("ชั่วโมง")
+          ? "บาท/ชั่วโมง"
+          : "บาท/เดือน");
+
+      const type =
+        (job.j_salary_type || job.salary_type || job.j_type_salary || "").trim();
       if (type === "ตามตกลง") return "ตามตกลง";
-      if (type && (min != null || max != null)) {
-        if (min != null && max != null)
-          return `${min.toLocaleString()} – ${max.toLocaleString()} บาท (${type})`;
-        if (min != null) return `${min.toLocaleString()} บาทขึ้นไป (${type})`;
-        if (max != null) return `สูงสุด ${max.toLocaleString()} บาท (${type})`;
-      }
-      return job.j_salary || "ไม่ระบุ";
+
+      if (nMin != null && nMax != null) return `${fmt(nMin)}–${fmt(nMax)} ${unit}`;
+      if (nOne != null) return `${fmt(nOne)} ${unit}`;
+
+      const txt = (job.j_salary_text ?? job.salary_text ?? "").toString().trim();
+      return txt || "ตามตกลง";
     },
 
     formatDate(dateStr) {
@@ -226,6 +253,7 @@ export default {
   },
 };
 </script>
+
 
 <style scoped>
 .hero-tags{display:flex;gap:8px;margin:6px 0 4px}

@@ -304,19 +304,36 @@ export default {
     },
 
     // ---------- เงินเดือน UI ----------
-    formatSalary(job) {
-      const type = (job.j_salary_type || "").trim();
-      const min = this._toNum(job.j_salary_min);
-      const max = this._toNum(job.j_salary_max);
+   // ---------- เงินเดือน UI ----------
+formatSalary(job) {
+  const toNum = (v) => {
+    if (v === null || v === undefined) return null;
+    const s = String(v).replace(/[^\d.]/g,'').trim();
+    if (!s) return null;
+    const n = Number(s);
+    return Number.isFinite(n) ? n : null;
+  };
+  const fmt = (n) => Number(n).toLocaleString('th-TH', { maximumFractionDigits: 0 });
 
-      if (type === "ตามตกลง") return "ตามตกลง";
-      if (min != null && max != null)
-        return `${min.toLocaleString()} – ${max.toLocaleString()} บาท${type ? ` (${type})` : ""}`;
-      if (min != null) return `${min.toLocaleString()} บาทขึ้นไป${type ? ` (${type})` : ""}`;
-      if (max != null) return `สูงสุด ${max.toLocaleString()} บาท${type ? ` (${type})` : ""}`;
-      if (job.j_salary) return String(job.j_salary);
-      return "ยังไม่ระบุ";
-    },
+  const rawMin = job.j_salary_min ?? job.salary_min ?? null;
+  const rawMax = job.j_salary_max ?? job.salary_max ?? null;
+  const rawOne = job.j_salary ?? job.salary ?? null;
+
+  const nMin = toNum(rawMin);
+  const nMax = toNum(rawMax);
+  const nOne = toNum(rawOne);
+
+  const unit =
+    job.j_salary_unit ?? job.salary_unit ??
+    (String(job.j_work_type||'').includes('ชั่วโมง') ? 'บาท/ชั่วโมง' : 'บาท/เดือน');
+
+  if (nMin!=null && nMax!=null) return `${fmt(nMin)}–${fmt(nMax)} ${unit}`;
+  if (nOne!=null)               return `${fmt(nOne)} ${unit}`;
+
+  const txt = (job.j_salary_text ?? job.salary_text ?? '').toString().trim();
+  return txt || 'ตามตกลง';
+},
+
 
     // ---------- Edit flow ----------
     startEdit() {

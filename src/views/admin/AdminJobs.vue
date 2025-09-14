@@ -39,7 +39,7 @@
             <tr v-for="(job, index) in filteredJobs" :key="job.id">
               <td>{{ index + 1 }}</td>
               <td class="fw-semibold">{{ job.j_title }}</td>
-              <td><span class="chip chip-slate">{{ job.j_type || "-" }}</span></td>
+              <td class="text-slate">{{ job.j_type || "-" }}</td>
               <td>{{ displaySalary(job) }}</td>
               <td>{{ job.employer_name || "-" }}</td>
               <td class="text-nowrap">
@@ -291,33 +291,58 @@ export default {
 .flex-1 { flex: 1; }
 .text-orange { color: #ff6600; }
 
-/* Filter bar */
-.filter-row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
-.filter-row .search{flex:1 1 360px}
-.form-select.compact{height:36px;padding:.25rem .75rem;font-size:.9rem}
-.select-fit{width:auto;min-width:160px;max-width:240px}
-
-/* Table */
-.user-table thead tr{background:#fafafa}
-.user-table th{font-weight:700;color:#333;border-bottom:1px solid #eee}
-.user-table td{border-bottom:1px solid #f1f1f1}
-
-/* Chip */
-.chip{display:inline-block;padding:4px 10px;border-radius:999px;font-size:12.5px;line-height:1;border:1px solid currentColor;background:transparent}
-.chip-slate{color:#475569}
-
-/* Buttons */
-.btn-pill{
-  border:none;padding:8px 14px;border-radius:999px;font-weight:600;font-size:13.5px;
-  box-shadow:0 2px 8px rgba(0,0,0,.08);transition:transform .05s ease, filter .2s ease
+/* Filter bar – ให้หน้าตาเท่ากับหน้า user */
+.filter-row{
+  display:flex; gap:12px; align-items:center; flex-wrap:wrap;
 }
-.btn-pill:active{transform:translateY(1px)}
-.btn-sky{background:#0ea5e9;color:#fff}
-.btn-violet{background:#7c3aed;color:#fff}
-.btn-rose{background:#e11d48;color:#fff}
-.btn-emerald{background:#10b981;color:#fff}
-.btn-slate{background:#64748b;color:#fff}
-.btn-sky:hover,.btn-violet:hover,.btn-rose:hover,.btn-emerald:hover,.btn-slate:hover{filter:brightness(.95)}
+.filter-row .search{
+  flex:1 1 300px; max-width:360px;
+}
+.form-select.compact{
+  height:36px; padding:.25rem .75rem; font-size:.9rem;
+  border-radius:999px; /* ดรอปดาวมนๆ เหมือนหน้า user */
+}
+.select-fit{ width:auto; min-width:160px; max-width:240px; }
 
-.modal .form-label{font-weight:600}
+/* Table – เหมือนหน้า user */
+.user-table{ width:100%; }
+.user-table thead tr{ background:#fafafa; }
+.user-table th{
+  font-weight:700; color:#333; border-bottom:1px solid #eee;
+}
+.user-table td{ border-bottom:1px solid #f1f1f1; }
+
+/* หมวดหมู่ (แสดงเป็นข้อความธรรมดา ไม่เป็นชิป) */
+.text-slate{ color:#475569; font-weight:500; }
+
+/* ปุ่ม – เส้นขอบมนๆ แบบ outline และค่อยเติมสีตอน hover */
+.btn-pill{
+  border-radius:999px; font-weight:600; font-size:13.5px;
+  padding:8px 14px; background:transparent; transition:.2s ease;
+  display:inline-flex; align-items:center; gap:4px;
+}
+
+/* ดูงาน */
+.btn-violet{ border:2px solid #7c3aed; color:#7c3aed; }
+.btn-violet:hover{ background:#7c3aed; color:#fff; }
+
+/* แก้ไข */
+.btn-sky{ border:2px solid #0ea5e9; color:#0ea5e9; }
+.btn-sky:hover{ background:#0ea5e9; color:#fff; }
+
+/* ลบ */
+.btn-rose{ border:2px solid #e11d48; color:#e11d48; }
+.btn-rose:hover{ background:#e11d48; color:#fff; }
+
+/* เพิ่มงาน / บันทึก */
+.btn-emerald{ border:2px solid #10b981; color:#10b981; }
+.btn-emerald:hover{ background:#10b981; color:#fff; }
+
+/* ยกเลิก */
+.btn-slate{ border:2px solid #64748b; color:#64748b; }
+.btn-slate:hover{ background:#64748b; color:#fff; }
+
+/* โมดัล */
+.modal .form-label{ font-weight:600; }
 </style>
+

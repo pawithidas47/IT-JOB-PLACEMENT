@@ -26,7 +26,7 @@
       <div class="grid">
         <!-- LEFT: Company info -->
         <section class="card co-card">
-          <h3 class="block-title"><i class="bi bi-info-circle me-2"></i>เกี่ยวกับบริษัท</h3>
+          <h3 class="block-title"><i class="bi bi-info-circle me-2"></i>เกี่ยวกับ</h3>
           <p class="para" v-if="company.e_description">{{ company.e_description }}</p>
           <p class="muted" v-else>ยังไม่มีคำอธิบายบริษัท</p>
 

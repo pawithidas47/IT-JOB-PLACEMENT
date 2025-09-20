@@ -47,7 +47,7 @@
                 </div>
                 <div class="divider"></div>
                 <div class="quick-box">
-                  <div class="q-label">ค่าตอบแทน</div>
+                  <div class="q-label">ค่าจ้าง</div>
                   <div class="q-value">{{ salaryDisplay }}</div>
                 </div>
                 <div class="divider"></div>
@@ -57,7 +57,7 @@
                 </div>
               </div>
 
-              <!-- ลักษณะงาน (แปลงบรรทัด -> bullet อัตโนมัติ) -->
+              <!-- ลักษณะงาน -->
               <section class="section card-section">
                 <h3 class="section-title"><i class="bi bi-briefcase me-2"></i>ลักษณะงาน</h3>
                 <ul class="bullet-list" v-if="job?.j_description">
@@ -68,7 +68,7 @@
                 <div v-else class="muted">ไม่ระบุ</div>
               </section>
 
-              <!-- คุณสมบัติผู้สมัคร (แปลงบรรทัด -> bullet อัตโนมัติ) -->
+              <!-- คุณสมบัติผู้สมัคร -->
               <section class="section card-section">
                 <h3 class="section-title"><i class="bi bi-check2-circle me-2"></i>คุณสมบัติผู้สมัคร</h3>
                 <ul class="bullet-list" v-if="job?.j_qualification">
@@ -107,7 +107,10 @@
 
               <div class="snap-block">
                 <div class="snap-label">สถานที่ปฏิบัติงาน</div>
-                <p class="snap-text">{{ job?.j_location || 'ไม่ระบุ' }}</p>
+                <!-- ใช้ computed ที่รวม/ทำความสะอาดค่าแล้ว -->
+                <p class="snap-text">{{ locationDisplay }}</p>
+
+                <!-- แผนที่ (ถ้ามี) -->
                 <iframe
                   v-if="job?.e_map_iframe"
                   :src="job.e_map_iframe"
@@ -135,7 +138,7 @@
                   :to="{ name: 'CompanyPublic', params: { id: job.employer_id } }"
                   class="btn-pill ghost same-size"
                 >
-                  ดูข้อมูลบริษัท
+                  ดูข้อมูลผู้ว่าจ้าง
                 </router-link>
               </div>
             </div>
@@ -179,6 +182,29 @@ export default {
         return isNaN(n) ? String(s) : `${n.toLocaleString("th-TH")} บาท`;
       }
       return String(s);
+    },
+    // ✅ รวม/ทำความสะอาด “สถานที่ปฏิบัติงาน” พร้อม fallback
+    locationDisplay() {
+      const clean = v =>
+        (v == null ? '' : String(v))
+          .replace(/\s+/g, ' ')
+          .trim()
+          .replace(/^(null|undefined|ไม่ระบุ)$/i, '');
+
+      // 1) ใช้ j_location ถ้ามี
+      const loc = clean(this.job?.j_location);
+      if (loc) return loc;
+
+      // 2) fallback ไป e_address
+      const addr = clean(this.job?.e_address);
+      if (addr) return addr;
+
+      // 3) ประกอบจาก ตำบล/อำเภอ/จังหวัด (ถ้ามี)
+      const parts = [clean(this.job?.e_subdistrict), clean(this.job?.e_district), clean(this.job?.e_province)]
+        .filter(Boolean);
+      if (parts.length) return parts.join(' ');
+
+      return 'ไม่ระบุ';
     },
   },
   async mounted() {
@@ -269,7 +295,6 @@ export default {
         return "-";
       }
     },
-    // ✅ แปลงข้อความหลายบรรทัด -> bullet อัตโนมัติ และล้างสัญลักษณ์นำหน้า (•, -, *)
     normalizeLines(text) {
       return (text || "")
         .split(/\r?\n/)

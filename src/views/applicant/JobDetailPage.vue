@@ -1,4 +1,4 @@
-<template> 
+<template>
   <div>
     <NavbarApplicant />
 
@@ -7,7 +7,6 @@
       <header class="hero">
         <div class="hero-top">
           <div class="co-inline">
-            <!-- ใช้ companyLogoSrc + key เพื่อบังคับ re-render -->
             <img :src="companyLogoSrc" :key="companyLogoSrc" class="co-logo" alt="company" />
             <div class="co-text">
               <div class="co-name">{{ job?.e_company_name || '-' }}</div>
@@ -37,7 +36,7 @@
         </button>
       </header>
 
-      <!-- การ์ดซ้าย + การ์ดขวา -->
+      <!-- เนื้อหา 2 คอลัมน์ -->
       <main class="main-grid">
         <div class="grid">
           <!-- ซ้าย -->
@@ -60,7 +59,7 @@
                 </div>
               </div>
 
-              <!-- ลักษณะงาน: บูลเล็ตอัตโนมัติ -->
+              <!-- ลักษณะงาน -->
               <section class="section card-section">
                 <h3 class="section-title"><i class="bi bi-briefcase me-2"></i>ลักษณะงาน</h3>
                 <ul class="bullet-list" v-if="job?.j_description">
@@ -69,7 +68,7 @@
                 <div v-else class="muted">ไม่ระบุ</div>
               </section>
 
-              <!-- คุณสมบัติผู้สมัคร: บูลเล็ตอัตโนมัติ -->
+              <!-- คุณสมบัติผู้สมัคร -->
               <section class="section card-section">
                 <h3 class="section-title"><i class="bi bi-check2-circle me-2"></i>คุณสมบัติผู้สมัคร</h3>
                 <ul class="bullet-list" v-if="job?.j_qualification">
@@ -87,7 +86,7 @@
           <!-- ขวา -->
           <aside class="col-right">
             <div class="company-card right-card">
-              <h4 class="snap-title">เกี่ยวกับบริษัท</h4>
+              <h4 class="snap-title">เกี่ยวกับ</h4>
               <p class="snap-text">{{ job?.e_description || 'ไม่ระบุ' }}</p>
 
               <div v-if="galleryArray.length" class="snap-block">
@@ -106,10 +105,10 @@
 
               <div class="snap-block">
                 <div class="snap-label">สถานที่ปฏิบัติงาน</div>
-                <p class="snap-text">{{ job?.j_location || 'ไม่ระบุ' }}</p>
+                <p class="snap-text">{{ locationDisplay }}</p>
                 <iframe
-                  v-if="job?.e_map_iframe"
-                  :src="job.e_map_iframe"
+                  v-if="mapIframe"
+                  :src="mapIframe"
                   width="100%" height="220"
                   style="border:0; border-radius:10px"
                   allowfullscreen loading="lazy"
@@ -131,7 +130,7 @@
 
               <div class="company-actions">
                 <router-link :to="`/applicant/company/${job.employer_id}`" class="btn-pill ghost same-size">
-                  ดูข้อมูลบริษัท
+                  ดูข้อมูลผู้ว่าจ้าง
                 </router-link>
               </div>
             </div>
@@ -139,7 +138,7 @@
         </div>
       </main>
 
-      <!-- Modal preview -->
+      <!-- Modal รูป -->
       <div v-if="selectedImage" class="modal-backdrop" @click.self="selectedImage = null">
         <div class="modal-image-wrapper">
           <button class="close-btn" @click="selectedImage = null">✕</button>
@@ -173,7 +172,7 @@ export default {
     };
   },
   computed: {
-    /* โลโก้แบบกันแคช + รองรับหลายฟิลด์ */
+    /* โลโก้บริษัท (กันแคช + รองรับหลายชื่อฟิลด์) */
     companyLogoSrc() {
       const base = this.base;
       const p =
@@ -181,17 +180,17 @@ export default {
         this.job?.profile_img_url ||
         this.job?.e_profile_img ||
         this.job?.e_profile;
-
       if (!p) return "/default-profile.jpg";
-
       const url = String(p).startsWith("http") ? p : base + p;
       const v =
         this.job?.updated_at ||
         this.job?.e_updated_at ||
         this.job?.j_updated_at ||
-        Date.now(); // cache-buster
+        Date.now();
       return url + (url.includes("?") ? "&" : "?") + "v=" + encodeURIComponent(v);
     },
+
+    /* เงินเดือน */
     salaryDisplay() {
       const s = this.job?.j_salary;
       if (s == null || s === "") return "ไม่ระบุ";
@@ -200,11 +199,40 @@ export default {
       const n = Number(s);
       return isNaN(n) ? String(s) : `${n.toLocaleString("th-TH")} บาท`;
     },
+
+    /* ที่อยู่แบบ fallbacks: j_location > e_address > e_subdistrict/e_district/e_province(+zipcode) */
+    locationDisplay() {
+      const jloc = this.job?.j_location && String(this.job.j_location).trim();
+      if (jloc) return jloc;
+
+      const addr = this.job?.e_address && String(this.job.e_address).trim();
+      if (addr) return addr;
+
+      const parts = [
+        this.job?.e_subdistrict,
+        this.job?.e_district,
+        this.job?.e_province,
+        this.job?.e_postcode || this.job?.zipcode,
+      ]
+        .map(v => (v ? String(v).trim() : ""))
+        .filter(Boolean);
+
+      return parts.length ? parts.join(" ") : "ไม่ระบุ";
+    },
+
+    /* แผนที่: รองรับทั้งเก็บเป็น URL ตรง ๆ หรือเป็นแท็ก iframe เต็ม */
+    mapIframe() {
+      const raw = this.job?.e_map_iframe || this.job?.map_iframe || "";
+      if (!raw) return "";
+      return this.extractIframeSrc(raw) || raw.trim();
+    },
   },
+
   async mounted() {
     this.user = JSON.parse(localStorage.getItem("user") || "null");
     await this.loadJobData();
   },
+
   methods: {
     async loadJobData() {
       try {
@@ -212,8 +240,11 @@ export default {
         const { data } = await axios.get(`http://localhost:3001/api/jobs/${jobId}`);
         this.job = data;
 
-        try { this.galleryArray = JSON.parse(this.job.e_gallery || "[]"); }
-        catch { this.galleryArray = []; }
+        try {
+          this.galleryArray = JSON.parse(this.job.e_gallery || "[]");
+        } catch {
+          this.galleryArray = [];
+        }
 
         if (this.user?.applicant_id && this.job?.job_id) {
           await this.checkApplicationStatus();
@@ -223,6 +254,7 @@ export default {
         Swal.fire("เกิดข้อผิดพลาด", "ไม่สามารถโหลดข้อมูลงานได้", "error");
       }
     },
+
     async checkApplicationStatus() {
       try {
         const { job_id } = this.job;
@@ -236,6 +268,7 @@ export default {
         console.error("❌ ตรวจสอบสถานะใบสมัครล้มเหลว:", err);
       }
     },
+
     async confirmApply() {
       if (this.alreadyApplied) return;
       const { job_id } = this.job;
@@ -271,17 +304,25 @@ export default {
       try {
         const d = new Date(s);
         return d.toLocaleDateString("th-TH", { day: "2-digit", month: "short", year: "2-digit" });
-      } catch { return "-"; }
+      } catch {
+        return "-";
+      }
     },
 
-    /* ✅ แปลงข้อความหลายบรรทัด → บูลเล็ตอัตโนมัติ
-       - ตัดบรรทัดว่าง
-       - ล้างสัญลักษณ์นำหน้า (•, -, *) ถ้ามี */
+    /* แปลงข้อความหลายบรรทัด → bullet; ล้าง • / - / * */
     normalizeLines(text) {
       return (text || "")
         .split(/\r?\n/)
         .map(s => s.replace(/^\s*(•|-|\*)\s*/, "").trim())
         .filter(Boolean);
+    },
+
+    /* ดึง src ออกจากแท็ก iframe ถ้าส่งมาเป็นแท็กทั้งก้อน */
+    extractIframeSrc(htmlOrUrl) {
+      const s = String(htmlOrUrl || "");
+      if (/^https?:\/\//i.test(s)) return s;             // เป็น URL อยู่แล้ว
+      const m = s.match(/src\s*=\s*["']([^"']+)["']/i);  // เป็นแท็ก iframe
+      return m ? m[1] : "";
     },
 
     showImage(url) {
@@ -305,10 +346,10 @@ export default {
 </script>
 
 <style scoped>
-/* ---------- ปุ่ม ---------- */
+/* ปุ่ม */
 .btn-pill.apply {
   background: linear-gradient(135deg,#ff6600,#e55d00);
-  color: #fff;
+  color:#fff;
 }
 .btn-pill.applied {
   background:#22c55e;
@@ -328,7 +369,7 @@ export default {
   min-width:160px;
 }
 
-/* ---------- โครงหน้า ---------- */
+/* โครงหน้า */
 .detail-wrap { max-width:1100px; margin:0 auto; padding:24px 16px 60px; }
 
 /* HERO */
@@ -352,10 +393,10 @@ export default {
 .chip.closed{background:#f1f5f9;color:#0f172a;border:1px dashed #cbd5e1}
 .hero-apply{position:absolute;right:18px;bottom:14px}
 
-/* ---------- Layout 2 คอลัมน์ ---------- */
+/* Layout 2 คอลัมน์ */
 .grid{display:grid;grid-template-columns:1.6fr .95fr;gap:18px;align-items:start}
 
-/* ---------- การ์ดซ้าย ---------- */
+/* การ์ดซ้าย */
 .company-card.left-card{
   background:#ffffff !important;
   border:1px solid #eef2f7 !important;
@@ -375,7 +416,7 @@ export default {
 .muted{color:#94a3b8}
 .alert-note{margin-top:14px;background:#f6f7fb;border:1px dashed #cbd5e1;color:#0f172a;border-radius:12px;padding:10px 12px;font-weight:700}
 
-/* ---------- การ์ดขวา (ข้อมูลบริษัท) ---------- */
+/* การ์ดขวา */
 .company-card.right-card{
   background:#fdf6ec !important;
   border:1px solid #f5e6d8 !important;
@@ -384,21 +425,7 @@ export default {
   box-shadow:0 2px 8px rgba(0,0,0,.05);
   color:#0f172a !important;
 }
-.company-card.right-card h1,
-.company-card.right-card h2,
-.company-card.right-card h3,
-.company-card.right-card h4,
-.company-card.right-card h5,
-.company-card.right-card h6,
-.company-card.right-card .snap-title,
-.company-card.right-card .snap-label,
-.company-card.right-card .snap-text,
-.company-card.right-card p,
-.company-card.right-card li,
-.company-card.right-card a,
-.company-card.right-card span {
-  color:#0f172a !important;
-}
+.company-card.right-card * { color:#0f172a !important; }
 
 .snap-title{font-size:1rem;font-weight:800;margin-bottom:8px}
 .snap-block{margin-top:14px}
@@ -413,12 +440,13 @@ export default {
   border:1px solid #e5e7eb;background:#fff;cursor:pointer;
 }
 
-/* ปุ่ม */
+/* ปุ่มลิงก์ */
 .company-actions{margin-top:20px;text-align:center}
 .btn-pill.ghost{background:#fff;border:1px solid #dbe2ea;color:#0f172a}
 .btn-pill.ghost:hover{box-shadow:0 6px 18px rgba(16,24,40,.08)}
+.btn-pill.same-size{min-width:160px}
 
-/* ---------- Modal ---------- */
+/* Modal รูป */
 .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;z-index:1050}
 .modal-image-wrapper{position:relative;max-width:min(92vw,980px);max-height:90vh}
 .preview-image{max-width:100%;max-height:90vh;border-radius:12px}
@@ -427,7 +455,7 @@ export default {
 .nav-btn.left{left:-16px;top:50%;transform:translateY(-50%)}
 .nav-btn.right{right:-16px;top:50%;transform:translateY(-50%)}
 
-/* ---------- Responsive ---------- */
+/* Responsive */
 @media (max-width:991px){
   .grid{grid-template-columns:1fr}
   .hero{padding-bottom:64px}

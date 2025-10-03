@@ -9,9 +9,7 @@
           <h4 class="fw-bold text-orange mb-0">
             <i class="bi bi-people-fill me-2"></i> ผู้ใช้ทั้งหมด
           </h4>
-          <button class="btn-pill btn-emerald" @click="openCreate">
-            <i class="bi bi-plus-lg me-1"></i> เพิ่มผู้ใช้
-          </button>
+          
         </div>
 
         <!-- Filters (uniform) -->

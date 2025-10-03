@@ -39,7 +39,6 @@
     </div>
   </div>
 </template>
-
 <script>
 import axios from "axios";
 import NavbarHome from "@/components/NavbarHome.vue";
@@ -62,63 +61,74 @@ export default {
     },
   },
   methods: {
-    handleLogin() {
+    async handleLogin() {
       const url =
         this.role === "applicant"
           ? "http://localhost:3001/api/auth/login"
           : "http://localhost:3001/api/auth/employer/login";
 
-      axios
-        .post(url, {
+      try {
+        const { data } = await axios.post(url, {
           email: this.email,
           password: this.password,
-        })
-        .then((res) => {
-          const user = res.data.user;
-          const idKey = this.role === "applicant" ? "applicant_id" : "employer_id";
-
-          if (!user || !user[idKey]) {
-            console.warn("❌ Login response ไม่มีข้อมูล id:", user);
-            return;
-          }
-
-          localStorage.setItem("user_id", user[idKey]);
-          localStorage.setItem("user", JSON.stringify(user));
-          localStorage.setItem("user_role", this.role);
-
-          Swal.fire({
-            title: "เข้าสู่ระบบสำเร็จ!",
-            text: "ยินดีต้อนรับเข้าสู่ระบบ",
-            icon: "success",
-            iconColor: "#10b981",
-            showConfirmButton: false,
-            timer: 1000,
-            timerProgressBar: true,
-            background: "#ffffff",
-            color: "#333",
-            customClass: {
-              popup: "rounded-4 animated-popup shadow",
-              title: "fw-bold fs-5",
-              htmlContainer: "fs-6",
-            },
-            willClose: () => {
-              this.$router.push(
-                this.role === "applicant"
-                  ? "/applicant/jobs"
-                  : "/employer/dashboard"
-              );
-            },
-          });
-        })
-        .catch((err) => {
-          console.error("Login failed:", err);
-          Swal.fire({
-            icon: "error",
-            title: "เข้าสู่ระบบไม่สำเร็จ",
-            text: "กรุณาตรวจสอบอีเมลหรือรหัสผ่าน",
-            confirmButtonColor: "#ff6600",
-          });
         });
+
+        // คาดหวังโครงสร้างประมาณนี้จาก API:
+        // { token, user }  โดย user.applicant_id หรือ user.employer_id ต้องมี
+        const token = data.token || data?.access_token || null;
+        const user  = data.user || null;
+
+        const idKey = this.role === "applicant" ? "applicant_id" : "employer_id";
+        if (!user || !user[idKey]) {
+          console.warn("❌ Login response ไม่มีข้อมูล id:", user);
+          throw new Error("INVALID_RESPONSE");
+        }
+
+        // 🔐 เก็บค่าที่ router guard ใช้จริง
+        if (token) localStorage.setItem("user_token", token);
+        localStorage.setItem("user", JSON.stringify(user));
+        localStorage.setItem("role", this.role === "applicant" ? "jobseeker" : "employer");
+
+        // ✅ อ่าน redirect ถ้ามี
+        const redirect = this.$route.query.redirect;
+
+        await Swal.fire({
+          title: "เข้าสู่ระบบสำเร็จ!",
+          text: "ยินดีต้อนรับเข้าสู่ระบบ",
+          icon: "success",
+          iconColor: "#10b981",
+          showConfirmButton: false,
+          timer: 900,
+          timerProgressBar: true,
+          background: "#ffffff",
+          color: "#333",
+          customClass: {
+            popup: "rounded-4 animated-popup shadow",
+            title: "fw-bold fs-5",
+            htmlContainer: "fs-6",
+          },
+        });
+
+        // ⤴️ เปลี่ยนหน้า
+        if (redirect) {
+          this.$router.push(redirect);
+        } else {
+          // default ตามบทบาท
+          if (this.role === "applicant") {
+            this.$router.push("/applicant/jobs");
+          } else {
+            this.$router.push("/employer/dashboard");
+          }
+        }
+      } catch (err) {
+        console.error("Login failed:", err);
+        Swal.fire({
+          icon: "error",
+          title: "เข้าสู่ระบบไม่สำเร็จ",
+          text: "กรุณาตรวจสอบอีเมลหรือรหัสผ่าน",
+          confirmButtonColor: "#ff6600",
+        });
+      }
     },
   },
 };

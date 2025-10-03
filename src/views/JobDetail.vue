@@ -1,4 +1,4 @@
-<template>
+<template> 
   <div>
     <NavbarHome />
 
@@ -10,7 +10,6 @@
             <img :src="companyLogo" class="co-logo" alt="company" />
             <div class="co-text">
               <div class="co-name">{{ job?.e_company_name || '-' }}</div>
-              <div class="co-type">{{ job?.e_type || 'ประเภทธุรกิจ' }}</div>
             </div>
           </div>
         </div>
@@ -25,7 +24,7 @@
         <button
           v-if="job?.j_status !== 'closed'"
           class="btn-pill apply hero-apply"
-          @click="applyJob"
+          @click="handleApplyClick"
           :disabled="alreadyApplied"
           title="สมัครงาน"
         >
@@ -33,10 +32,10 @@
         </button>
       </header>
 
-      <!-- สองคอลัมน์: การ์ดซ้าย + การ์ดขวา -->
+      <!-- สองคอลัมน์ (โครงเดิม) -->
       <main class="main-grid">
         <div class="grid">
-          <!-- ซ้าย: การ์ดรายละเอียดงาน -->
+          <!-- ซ้าย -->
           <section class="col-left">
             <div class="company-card left-card">
               <!-- แถบสรุปเร็ว -->
@@ -85,7 +84,7 @@
             </div>
           </section>
 
-          <!-- ขวา: การ์ดข้อมูลบริษัท -->
+          <!-- ขวา -->
           <aside class="col-right">
             <div class="company-card right-card">
               <h4 class="snap-title">เกี่ยวกับบริษัท</h4>
@@ -107,10 +106,8 @@
 
               <div class="snap-block">
                 <div class="snap-label">สถานที่ปฏิบัติงาน</div>
-                <!-- ใช้ computed ที่รวม/ทำความสะอาดค่าแล้ว -->
                 <p class="snap-text">{{ locationDisplay }}</p>
 
-                <!-- แผนที่ (ถ้ามี) -->
                 <iframe
                   v-if="job?.e_map_iframe"
                   :src="job.e_map_iframe"
@@ -154,6 +151,8 @@ import axios from "axios";
 import Swal from "sweetalert2";
 import NavbarHome from "@/components/NavbarHome.vue";
 
+const API = "http://localhost:3001";
+
 export default {
   name: "JobDetailPage",
   components: { NavbarHome },
@@ -167,10 +166,13 @@ export default {
     };
   },
   computed: {
-    isLoggedIn() { return !!this.user?.applicant_id; },
+    // ใช้แบบเดียวกับ guard ปัจจุบัน
+    isLoggedIn() {
+      return !!this.user?.applicant_id;
+    },
     companyLogo() {
       return this.job?.e_profile_img_url
-        ? "http://localhost:3001" + this.job.e_profile_img_url
+        ? API + this.job.e_profile_img_url
         : "/default-profile.jpg";
     },
     salaryDisplay() {
@@ -183,28 +185,12 @@ export default {
       }
       return String(s);
     },
-    // ✅ รวม/ทำความสะอาด “สถานที่ปฏิบัติงาน” พร้อม fallback
     locationDisplay() {
-      const clean = v =>
-        (v == null ? '' : String(v))
-          .replace(/\s+/g, ' ')
-          .trim()
-          .replace(/^(null|undefined|ไม่ระบุ)$/i, '');
-
-      // 1) ใช้ j_location ถ้ามี
-      const loc = clean(this.job?.j_location);
-      if (loc) return loc;
-
-      // 2) fallback ไป e_address
-      const addr = clean(this.job?.e_address);
-      if (addr) return addr;
-
-      // 3) ประกอบจาก ตำบล/อำเภอ/จังหวัด (ถ้ามี)
-      const parts = [clean(this.job?.e_subdistrict), clean(this.job?.e_district), clean(this.job?.e_province)]
-        .filter(Boolean);
-      if (parts.length) return parts.join(' ');
-
-      return 'ไม่ระบุ';
+      const clean = v => (v == null ? "" : String(v)).replace(/\s+/g, " ").trim().replace(/^(null|undefined|ไม่ระบุ)$/i, "");
+      const loc = clean(this.job?.j_location); if (loc) return loc;
+      const addr = clean(this.job?.e_address); if (addr) return addr;
+      const parts = [clean(this.job?.e_subdistrict), clean(this.job?.e_district), clean(this.job?.e_province)].filter(Boolean);
+      return parts.length ? parts.join(" ") : "ไม่ระบุ";
     },
   },
   async mounted() {
@@ -215,15 +201,11 @@ export default {
     async loadJob() {
       try {
         const id = this.$route.params.id;
-        const { data } = await axios.get(`http://localhost:3001/api/jobs/${id}`);
+        const { data } = await axios.get(`${API}/api/jobs/${id}`);
         this.job = data;
 
-        try {
-          this.galleryArray = JSON.parse(this.job.e_gallery || "[]");
-        } catch (e) {
-          console.warn("parse gallery failed:", e);
-          this.galleryArray = [];
-        }
+        try { this.galleryArray = JSON.parse(this.job.e_gallery || "[]"); }
+        catch { this.galleryArray = []; }
 
         if (this.isLoggedIn && this.job?.job_id) await this.checkStatus();
       } catch (e) {
@@ -231,10 +213,11 @@ export default {
         Swal.fire("เกิดข้อผิดพลาด", "ไม่สามารถโหลดข้อมูลงานได้", "error");
       }
     },
+
     async checkStatus() {
       try {
         const { data } = await axios.get(
-          `http://localhost:3001/api/applications/check-status/${this.job.job_id}/${this.user.applicant_id}`
+          `${API}/api/applications/check-status/${this.job.job_id}/${this.user.applicant_id}`
         );
         this.applicationStatus = data.status;
         this.alreadyApplied = data.alreadyApplied;
@@ -242,20 +225,28 @@ export default {
         console.error("❌ ตรวจสอบสถานะใบสมัครล้มเหลว:", err);
       }
     },
-    async applyJob() {
+
+    async handleApplyClick() {
+      // ❌ ยังไม่ล็อกอิน → เด้งแจ้งเตือน + พาไปหน้าเข้าสู่ระบบ และ "หยุด" ไม่ให้สมัคร
       if (!this.isLoggedIn) {
         const res = await Swal.fire({
-          title: "กรุณาเข้าสู่ระบบ",
-          text: "คุณต้องเข้าสู่ระบบก่อนสมัครงาน",
+          title: "กรุณาเข้าสู่ระบบก่อน",
+          text: "คุณต้องเข้าสู่ระบบเพื่อสมัครงาน",
           icon: "warning",
           showCancelButton: true,
           confirmButtonText: "เข้าสู่ระบบ",
           cancelButtonText: "ยกเลิก",
           reverseButtons: true,
         });
-        if (res.isConfirmed) this.$router.push("/login");
-        return;
+        if (res.isConfirmed) {
+          this.$router.push({
+            path: "/login",                    // ใช้ path เพราะ route /login ของคุณไม่มี name
+            query: { redirect: this.$route.fullPath },
+          });
+        }
+        return; // ← ห้ามยิง API ต่อ
       }
+
       if (this.alreadyApplied) return;
 
       const ok = await Swal.fire({
@@ -269,32 +260,24 @@ export default {
       });
       if (!ok.isConfirmed) return;
 
+      await this.applyJob();
+    },
+
+    async applyJob() {
       try {
-        await axios.post("http://localhost:3001/api/applications", {
+        await axios.post(`${API}/api/applications`, {
           job_id: this.job.job_id,
           applicant_id: this.user.applicant_id,
-          app_portfolio_url: this.user.portfolio_url || null,
+          app_portfolio_url: this.user?.portfolio_url || null,
         });
-        Swal.fire("สมัครงานสำเร็จ!", "ระบบได้บันทึกการสมัครของคุณแล้ว", "success");
+        await Swal.fire("สมัครงานสำเร็จ!", "ระบบได้บันทึกการสมัครของคุณแล้ว", "success");
         await this.checkStatus();
       } catch (e) {
         console.error("❌ สมัครงานไม่สำเร็จ:", e);
         Swal.fire("เกิดข้อผิดพลาด", "ไม่สามารถสมัครงานได้", "error");
       }
     },
-    formatDate(s) {
-      if (!s) return "-";
-      try {
-        const date = new Date(s);
-        return date.toLocaleDateString("th-TH", {
-          day: "2-digit",
-          month: "short",
-          year: "2-digit",
-        });
-      } catch {
-        return "-";
-      }
-    },
+
     normalizeLines(text) {
       return (text || "")
         .split(/\r?\n/)
@@ -302,59 +285,20 @@ export default {
         .filter(Boolean);
     },
     openImage(path) {
-      const url = "http://localhost:3001" + path;
-      window.open(url, "_blank", "noopener");
+      window.open(API + path, "_blank", "noopener");
     },
   },
 };
 </script>
 
 <style scoped>
-.company-card{
-  background:#fff;
-  border:1px solid #eef2f7;
-  border-radius:12px;
-  padding:16px;
-  box-shadow:0 8px 20px rgba(16,24,40,.06);
-}
-
-.left-card {
-  background:#ffffff;
-  border:1px solid #e5e7eb;
-  border-radius:12px;
-  padding:16px;
-  box-shadow:0 2px 8px rgba(0,0,0,0.04);
-}
-
-/* ---------- การ์ดขวา (ข้อมูลบริษัท) ---------- */
-.company-card.right-card {
-  background:#fdf6ec;
-  border:1px solid #f5e6d8;
-  border-radius:12px;
-  padding:16px;
-  box-shadow:0 2px 8px rgba(0,0,0,0.05);
-  color:#0f172a !important;
-}
-.company-card.right-card * { color:#0f172a !important; }
-
-/* layout หลัก */
-.detail-wrap {
-  max-width:1100px;
-  margin:0 auto;
-  padding:24px 16px 60px;
-}
-
-/* HERO */
-.hero {
-  position:relative;
-  background:#fff;
-  border:1px solid #e5e7eb;
-  border-left:4px solid #ff6600;
-  border-radius:12px;
-  padding:16px 20px 56px;
-  box-shadow:0 4px 14px rgba(0,0,0,.04);
-  margin-bottom:16px;
-}
+/* สไตล์เดิม */
+.company-card{background:#fff;border:1px solid #eef2f7;border-radius:12px;padding:16px;box-shadow:0 8px 20px rgba(16,24,40,.06)}
+.left-card{background:#ffffff;border:1px solid #e5e7eb;border-radius:12px;padding:16px;box-shadow:0 2px 8px rgba(0,0,0,0.04)}
+.company-card.right-card{background:#fdf6ec;border:1px solid #f5e6d8;border-radius:12px;padding:16px;box-shadow:0 2px 8px rgba(0,0,0,0.05);color:#0f172a!important}
+.company-card.right-card *{color:#0f172a!important}
+.detail-wrap{max-width:1100px;margin:0 auto;padding:24px 16px 60px}
+.hero{position:relative;background:#fff;border:1px solid #e5e7eb;border-left:4px solid #ff6600;border-radius:12px;padding:16px 20px 56px;box-shadow:0 4px 14px rgba(0,0,0,.04);margin-bottom:16px}
 .hero-top{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
 .co-inline{display:flex;align-items:center;gap:12px}
 .co-logo{width:48px;height:48px;border-radius:50%;object-fit:cover;border:1px solid #e5e7eb}
@@ -367,82 +311,31 @@ export default {
 .chip.type{background:#fff5e6;color:#ff6600;border:1px solid #ffb380}
 .chip.closed{background:#f1f5f9;color:#0f172a;border:1px dashed #cbd5e1}
 .hero-apply{position:absolute;right:18px;bottom:14px}
-
-/* GRID */
-.grid{
-  display:grid;
-  grid-template-columns:1.6fr .95fr;
-  gap:18px;
-  align-items:start;
-}
-.col-left{min-width:0}
-.col-right{min-width:0}
-
-/* Quick summary */
-.quick-row{
-  display:grid;
-  grid-template-columns:1fr auto 1fr auto 1fr;
-  gap:14px;
-  align-items:center;
-  padding:4px 0 12px;
-}
+.grid{display:grid;grid-template-columns:1.6fr .95fr;gap:18px;align-items:start}
+.col-left{min-width:0}.col-right{min-width:0}
+.quick-row{display:grid;grid-template-columns:1fr auto 1fr auto 1fr;gap:14px;align-items:center;padding:4px 0 12px}
 .divider{width:1px;height:40px;background:#e5e7eb}
 .q-label{color:#6b7280;font-size:.86rem}
 .q-value{font-weight:700;color:#111827}
-
-/* Sections */
 .section{margin-top:14px}
-.card-section{
-  border:1px solid #eef2f7;
-  border-radius:12px;
-  padding:14px 14px 10px;
-  background:#fff;
-}
+.card-section{border:1px solid #eef2f7;border-radius:12px;padding:14px 14px 10px;background:#fff}
 .section-title{font-size:1.05rem;font-weight:800;color:#0f172a;margin-bottom:10px}
 .muted{color:#94a3b8}
 .bullet-list{padding-left:1.1rem;margin:0}
 .bullet-list li{margin:.25rem 0;color:#111827}
-
-/* การ์ดขวา */
 .snap-title{font-size:1rem;font-weight:800;margin-bottom:8px}
 .snap-block{margin-top:14px}
 .snap-label{font-weight:700;margin-bottom:4px}
 .snap-text{margin:0}
 .snap-list{list-style:none;padding-left:0;margin:0}
 .gallery{display:flex;gap:8px;overflow:auto}
-.g-thumb{
-  height:70px;
-  width:110px;
-  object-fit:cover;
-  border-radius:8px;
-  border:1px solid #e5e7eb;
-  cursor:pointer;
-}
-
-/* ปุ่ม */
+.g-thumb{height:70px;width:110px;object-fit:cover;border-radius:8px;border:1px solid #e5e7eb;cursor:pointer}
 .company-actions{margin-top:20px;text-align:center}
-.btn-pill{
-  border:none;
-  border-radius:999px;
-  padding:10px 18px;
-  font-weight:700;
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  transition:transform .08s ease,box-shadow .2s ease;
-  min-width:160px;
-  text-align:center
-}
+.btn-pill{border:none;border-radius:999px;padding:10px 18px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;transition:transform .08s ease,box-shadow .2s ease;min-width:160px;text-align:center}
 .btn-pill:hover{transform:translateY(-1px)}
 .btn-pill.apply{background:linear-gradient(135deg,#ff6600,#e55d00);color:#fff}
 .btn-pill.ghost{background:#fff;border:1px solid #dbe2ea;color:#0f172a}
 .btn-pill.ghost:hover{box-shadow:0 6px 18px rgba(16,24,40,.08)}
 .btn-pill.same-size{min-width:160px;padding:10px 18px}
-
-/* Responsive */
-@media (max-width:991px){
-  .grid{grid-template-columns:1fr}
-  .hero{padding-bottom:64px}
-  .hero-apply{right:12px;bottom:10px}
-}
+@media (max-width:991px){.grid{grid-template-columns:1fr}.hero{padding-bottom:64px}.hero-apply{right:12px;bottom:10px}}
 </style>
